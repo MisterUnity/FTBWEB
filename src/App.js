@@ -24,21 +24,7 @@ let App = () => {
     });
   }, []);
 
-  // };
-  // useEffect(async () => {
-  //   const user = await getUser().then((res) => res);
-  //   if (user === 1) {
-  //     setResult(<OverallLayout />);
-  //   } else {
-  //     setResult(<SignIn />);
-  //   }
-  // }, []);
-
   return result;
 };
-
-// const App = () => {
-//   return <SignIn />;
-// };
 
 export default App;
