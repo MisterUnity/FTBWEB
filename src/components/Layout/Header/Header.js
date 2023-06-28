@@ -1,4 +1,3 @@
-import { useState } from "react";
 import SidebarMenu from "../../UI/SidebarMenu/SidebarMenu";
 import classes from "./header.module.css";
 
