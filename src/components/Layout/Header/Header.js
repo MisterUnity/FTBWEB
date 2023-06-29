@@ -2,7 +2,6 @@ import { useState } from "react";
 import SidebarMenu from "../../UI/SidebarMenu/SidebarMenu";
 import classes from "./header.module.css";
 
-// TODO 顯示用戶名稱以及顯示左側目錄欄按鈕
 const Header = (props) => {
   return (
     <header

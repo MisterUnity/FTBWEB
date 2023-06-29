@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import SignIn from "./page/SignIn/SignIn";
 import OverallLayout from "./components/Layout/OverallLayout/OverallLayout";
-
-let App = () => {
+const App = () => {
   const wait = <div></div>;
   let [result, setResult] = useState(<SignIn />);
   useEffect(() => {

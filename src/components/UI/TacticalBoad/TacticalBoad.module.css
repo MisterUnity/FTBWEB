@@ -1,0 +1,18 @@
+.box {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(220, 198, 198);
+  cursor: pointer;
+  overflow: hidden;
+}
+.box:hover {
+  cursor: grab;
+  filter: brightness(90%);
+}
+.box:active {
+  cursor: grabbing;
+}
