@@ -1,18 +1,37 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, useContext } from "react";
 import SignInCard from "./SignInCard";
 import EnterErrCard from "./EnterErrorCard";
 import MsgCard from "./MsgCard";
 import backDrop from "../../assets/Background.jpg";
+import AuthContext from "../../store/auth-context";
 import classes from "./signIn.module.css";
 
-const SignIn = () => {
-  const [errorMsgIsShown, seterrorMsgIsShown] = useState(false);
+const SignIn = (props) => {
+  const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
+  const [isLoad, setIsLoad] = useState(false);
 
-  const showErrorMsgHandler = () => {
-    seterrorMsgIsShown(true);
+  const authCtx = useContext(AuthContext);
+  const sendUserInfoHandler = (userData) => {
+    //加密處理
+    let userName = btoa(userData.user);
+    let userPassword = btoa(userData.password);
+    // TODO 送去後端處理
+    setIsLoad(true);
+    authCtx.onSetSignInStatus(true); // 模擬後台傳回的值 true: 登入成功 || false: 登入失敗
+
+    //TODO timeout如不清除掉的話可以嗎？
+    setTimeout(() => {
+      if (authCtx.signInStatus) {
+        authCtx.onViewSwitch("ForestageHome");
+      } else {
+        setErrorMsgIsShown(true);
+      }
+      setIsLoad(false);
+    }, 500);
   };
+
   const hideErrorMsgHandler = () => {
-    seterrorMsgIsShown(false);
+    setErrorMsgIsShown(false);
   };
 
   return (
@@ -24,7 +43,7 @@ const SignIn = () => {
         {errorMsgIsShown && (
           <EnterErrCard onHideErrorMsg={hideErrorMsgHandler} />
         )}
-        <SignInCard onShowErrorMsg={showErrorMsgHandler} />
+        <SignInCard onSendUserInfo={sendUserInfoHandler} isLoad={isLoad} />
         <MsgCard />
       </div>
     </Fragment>

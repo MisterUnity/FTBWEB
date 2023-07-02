@@ -4,7 +4,7 @@ import PlayerList from "../../UI/playerList/PlayerList";
 import TacticalBoad from "../../UI/TacticalBoad/TacticalBoad";
 import Schedule from "../../UI/Schedule/Schedule";
 
-const Main = (prpos) => {
+const Main = (props) => {
   const router = (
     <Routes>
       <Route path="/" element={<Home />} />
@@ -14,6 +14,6 @@ const Main = (prpos) => {
     </Routes>
   );
 
-  return <div className={prpos.className}>{router}</div>;
+  return <div className={props.className}>{router}</div>;
 };
 export default Main;

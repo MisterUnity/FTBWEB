@@ -41,9 +41,6 @@ const SignInCard = (props) => {
     initialState
   );
 
-  // 是否送出表單狀態
-  const [isLoad, setIsLoad] = useState(false);
-
   //
   const userNameChangeHandler = (e) => {
     dispatchUserName({ type: "USER_NAME", userName: e.target.value });
@@ -55,6 +52,8 @@ const SignInCard = (props) => {
   // useEffect的依賴項
   const { isValid: userNameIsValid } = userNameState;
   const { isValid: passwordIsValid } = passwordState;
+  const { value: userName } = userNameState;
+  const { value: userPassword } = passwordState;
 
   // 確認userName和password是否有效，有效的話開放『 LogIn 』按鈕
   useEffect(() => {
@@ -68,7 +67,7 @@ const SignInCard = (props) => {
   }, [userNameIsValid, passwordIsValid]);
 
   // 依據表單狀態更改『 Button 』樣式
-  const btnValid = isLoad ? (
+  const btnValid = props.isLoad ? (
     <Button
       label={
         <FontAwesomeIcon icon={faSpinner} spin style={{ color: "#ffffff" }} />
@@ -84,14 +83,10 @@ const SignInCard = (props) => {
   // 表單送出處理
   const sendFormHandler = (e) => {
     e.preventDefault();
-    setIsLoad(true);
-
-    // TODO 找不到此使用者或是輸入錯誤時，顯示錯誤訊息『 props.onShowErrorMsg() 』
-    // TODO 資料要送至哪裡？以及資料要怎麼處理
-    const DUMMY_getUserInfoFailed = setTimeout(() => {
-      setIsLoad(false);
-      props.onShowErrorMsg();
-    }, 2000);
+    props.onSendUserInfo({
+      user: userName,
+      password: userPassword,
+    });
   };
 
   return (
