@@ -26,7 +26,7 @@ const SignInCardReducer = (state, action) => {
 };
 
 const SignInCard = (props) => {
-  // 各項目的輸入內容是否有效
+  // Check Enter Value is Valid
   const [formIsValid, setFormIsValid] = useState(false);
 
   // userName輸入內容狀態
@@ -80,12 +80,12 @@ const SignInCard = (props) => {
     <Button label="LogIn" disabled />
   );
 
-  // 表單送出處理
+  // Send Form Data Handler
   const sendFormHandler = (e) => {
     e.preventDefault();
     props.onSendUserInfo({
-      user: userName,
-      password: userPassword,
+      act: userName,
+      pwd: userPassword,
     });
   };
 

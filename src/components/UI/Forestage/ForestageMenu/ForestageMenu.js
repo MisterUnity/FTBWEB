@@ -3,8 +3,8 @@ import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import AuthContext from "../../../store/auth-context";
-const ShowMenu = () => {
+import AuthContext from "../../../../store/auth-context";
+const ForestageMenu = () => {
   const authCtx = useContext(AuthContext);
   const menuRight = useRef(null);
   const items = [
@@ -42,4 +42,4 @@ const ShowMenu = () => {
     </div>
   );
 };
-export default ShowMenu;
+export default ForestageMenu;

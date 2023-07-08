@@ -3,9 +3,9 @@ import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import UserNameBa from "../UserNameBar/UserNameBar";
-import Menu from "../Menu/Menu";
-const SidebarMenu = (props) => {
+import UserNameBa from "../../UserNameBar/UserNameBar";
+import BackstageMenu from "../BackstageMenu/BackstageMenu";
+const SideBar = (props) => {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
@@ -16,7 +16,7 @@ const SidebarMenu = (props) => {
         onHide={() => setIsVisible(false)}
       >
         <UserNameBa />
-        <Menu />
+        <BackstageMenu />
       </Sidebar>
       <Button
         className="bg-bluegray-900 border-none"
@@ -27,4 +27,4 @@ const SidebarMenu = (props) => {
   );
 };
 
-export default SidebarMenu;
+export default SideBar;

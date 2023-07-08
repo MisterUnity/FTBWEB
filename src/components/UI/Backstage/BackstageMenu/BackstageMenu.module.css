@@ -1,11 +1,11 @@
-.menu li {
+.BackstageMenu li {
   display: flex;
   align-items: center;
   height: 60px;
   list-style-type: none;
   animation: menu-appear 1s ease-out forwards;
 }
-.menu li:hover {
+.BackstageMenu li:hover {
   background-color: rgb(110, 163, 228);
   border: 2px solid white;
   /* opacity: 80%; */

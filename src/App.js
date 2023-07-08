@@ -14,7 +14,7 @@ const App = () => {
       // Task-02 Add 更改signIn狀態，以及調用全局函數切換顯示頁面。
       authCtx.onSetSignInStatus(false); // 待後端開發完成前，先更改此行true || false模擬登入成功或失敗
       authCtx.onViewSwitch("ForestageHome");
-    }, 2000);
+    }, 1500);
   }, []);
 
   return <Fragment>{authCtx.finalRoute}</Fragment>;

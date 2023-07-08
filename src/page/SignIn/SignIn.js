@@ -5,6 +5,7 @@ import MsgCard from "./MsgCard";
 import backDrop from "../../assets/Background.jpg";
 import AuthContext from "../../store/auth-context";
 import classes from "./signIn.module.css";
+import { Login } from "../../API/userInfo/userInfo";
 
 const SignIn = (props) => {
   const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
@@ -12,22 +13,22 @@ const SignIn = (props) => {
 
   const authCtx = useContext(AuthContext);
   const sendUserInfoHandler = (userData) => {
-    //加密處理
-    let userName = btoa(userData.user);
-    let userPassword = btoa(userData.password);
-    // TODO 送去後端處理
     setIsLoad(true);
-    authCtx.onSetSignInStatus(true); // 模擬後台傳回的值 true: 登入成功 || false: 登入失敗
-
-    //TODO timeout如不清除掉的話可以嗎？
-    setTimeout(() => {
-      if (authCtx.signInStatus) {
+    // 『 1 』：輸入帳密正確，『 0 』：帳密輸入錯誤 or 無此帳號
+    Login(userData).then((res) => {
+      if (
+        res.data.StatusCode === 1 &&
+        res.data.StatusMessage === "Normal end."
+      ) {
+        authCtx.onSetSignInStatus(true);
         authCtx.onViewSwitch("ForestageHome");
+        localStorage.setItem("signInInfo", "1");
       } else {
+        authCtx.onSetSignInStatus(false);
         setErrorMsgIsShown(true);
       }
       setIsLoad(false);
-    }, 500);
+    });
   };
 
   const hideErrorMsgHandler = () => {
@@ -39,7 +40,7 @@ const SignIn = (props) => {
       <div className="top-0 left-0 w-screen h-screen z-0">
         <img className="w-full h-full" src={backDrop} alt="Backdrop" />
       </div>
-      <div className={`${classes.signIn}`}>
+      <div className={classes.signIn}>
         {errorMsgIsShown && (
           <EnterErrCard onHideErrorMsg={hideErrorMsgHandler} />
         )}
