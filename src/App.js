@@ -4,7 +4,9 @@
  */
 
 import { useEffect, useContext, Fragment } from "react";
+import { RouterProvider } from "react-router-dom";
 import AuthContext from "./store/auth-context";
+import router from "./router/router";
 const App = () => {
   // Task-01 Add Start
   const authCtx = useContext(AuthContext);
@@ -13,11 +15,14 @@ const App = () => {
     setTimeout(() => {
       // Task-02 Add 更改signIn狀態，以及調用全局函數切換顯示頁面。
       authCtx.onSetSignInStatus(false); // 待後端開發完成前，先更改此行true || false模擬登入成功或失敗
-      authCtx.onViewSwitch("ForestageHome");
     }, 1500);
   }, []);
 
-  return <Fragment>{authCtx.finalRoute}</Fragment>;
+  return (
+    <Fragment>
+      <RouterProvider router={router} />
+    </Fragment>
+  );
   // Task-01 Add End
   // Task-02 Add End
 };

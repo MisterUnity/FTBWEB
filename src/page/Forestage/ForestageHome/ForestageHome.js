@@ -1,10 +1,16 @@
-import { Fragment, useContext, useEffect } from "react";
+import { Fragment, useContext } from "react";
 import { Button } from "primereact/button";
+import { Link, useNavigate } from "react-router-dom";
 import ForestageMenu from "../../../components/UI/Forestage/ForestageMenu/ForestageMenu";
 import AuthContext from "../../../store/auth-context";
 
 const ForestageHome = (props) => {
   const authCtx = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const viewSwitchHandler = () => {
+    navigate("/signIn");
+  };
 
   return (
     <Fragment>
@@ -16,7 +22,7 @@ const ForestageHome = (props) => {
           <Button
             label="Sign In"
             onClick={() => {
-              authCtx.onViewSwitch("SignIn");
+              viewSwitchHandler();
             }}
           />
         )}

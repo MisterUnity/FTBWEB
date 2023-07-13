@@ -2,10 +2,9 @@ import Header from "../../../components/Layout/Header/Header";
 import Main from "../../../components/Layout/Main/Main";
 import Footer from "../../../components/Layout/Footer/Footer";
 import SideBar from "../../../components/UI/Backstage/SideBar/SideBar";
-import BackstageRoute from "../../../components/Router/BackstageRoute/BackstageRoute";
 import BackstageHeader from "../../../components/Layout/Header/header.module.css";
 import BackstageFooter from "../../../components/Layout/Footer/Footer.module.css";
-
+import { Outlet } from "react-router-dom";
 // Main 的『 relative 』是為了給『 TacticalBoad 』組件的元素拖曳限制範圍用
 
 const BackstageHome = () => {
@@ -20,7 +19,7 @@ const BackstageHome = () => {
       </Header>
 
       <Main className="flex-grow-1 relative">
-        <BackstageRoute />
+        <Outlet />
       </Main>
 
       <Footer

@@ -1,9 +1,9 @@
 import Draggable from "react-draggable";
-import classes from "./TacticalBoad.module.css";
+import classes from "./TacticalBoard.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPerson } from "@fortawesome/free-solid-svg-icons";
 
-const TacticalBoad = (props) => {
+const TacticalBoard = (props) => {
   // TODO 重疊處理：新元素疊舊元素
   const emptyAry = new Array(13);
   for (let i = 1; i < emptyAry.length; i++) {
@@ -28,4 +28,4 @@ const TacticalBoad = (props) => {
 
   return <div className="absolute w-full h-full flex">{players}</div>;
 };
-export default TacticalBoad;
+export default TacticalBoard;

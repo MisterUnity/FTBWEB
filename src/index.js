@@ -11,10 +11,8 @@ import "primereact/resources/primereact.min.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <React.StrictMode>
-  <BrowserRouter>
-    <AuthContextProvider>
-      <App />
-    </AuthContextProvider>
-  </BrowserRouter>
+  <AuthContextProvider>
+    <App />
+  </AuthContextProvider>
   // </React.StrictMode>
 );

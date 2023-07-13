@@ -1,17 +1,20 @@
 import { useState, Fragment, useContext } from "react";
+import { Login } from "../../API/userInfo/userInfo";
+import { useNavigate } from "react-router-dom";
 import SignInCard from "./SignInCard";
 import EnterErrCard from "./EnterErrorCard";
 import MsgCard from "./MsgCard";
 import backDrop from "../../assets/Background.jpg";
 import AuthContext from "../../store/auth-context";
 import classes from "./signIn.module.css";
-import { Login } from "../../API/userInfo/userInfo";
 
 const SignIn = (props) => {
   const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
 
   const authCtx = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const sendUserInfoHandler = (userData) => {
     setIsLoad(true);
     // 『 1 』：輸入帳密正確，『 0 』：帳密輸入錯誤 or 無此帳號
@@ -21,8 +24,7 @@ const SignIn = (props) => {
         res.data.StatusMessage === "Normal end."
       ) {
         authCtx.onSetSignInStatus(true);
-        authCtx.onViewSwitch("ForestageHome");
-        localStorage.setItem("signInInfo", "1");
+        navigate("/");
       } else {
         authCtx.onSetSignInStatus(false);
         setErrorMsgIsShown(true);

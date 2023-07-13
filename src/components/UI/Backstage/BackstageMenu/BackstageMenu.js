@@ -2,7 +2,9 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faHouse,
   faRectangleList,
+  faAddressBook,
   faChessBoard,
   faCalendarDays,
   faRightFromBracket,
@@ -14,27 +16,39 @@ import classes from "./BackstageMenu.module.css";
 const menuItem = [
   {
     id: "P-1",
-    itemName: "Player List",
-    icon: faRectangleList,
-    path: "/",
+    itemName: "Backstage Home",
+    icon: faHouse,
+    path: "/backstageHome ",
   },
   {
     id: "P-2",
-    itemName: "Tactical Boad",
-    icon: faChessBoard,
-    path: "tacticalBoad",
+    itemName: "Player List",
+    icon: faRectangleList,
+    path: "playerList ",
   },
   {
     id: "P-3",
-    itemName: "Schedule",
-    icon: faCalendarDays,
-    path: "schedule",
+    itemName: "Add Players Info",
+    icon: faAddressBook,
+    path: "addPlayersInfo",
   },
   {
     id: "P-4",
+    itemName: "Tactical Board",
+    icon: faChessBoard,
+    path: "tacticalBoard",
+  },
+  {
+    id: "P-5",
+    itemName: "Edit Schedule",
+    icon: faCalendarDays,
+    path: "editSchedule",
+  },
+  {
+    id: "P-6",
     itemName: "Sign Out",
     icon: faRightFromBracket,
-    path: "signOut",
+    path: "/",
   },
 ];
 const BackstageMenu = () => {
@@ -42,7 +56,7 @@ const BackstageMenu = () => {
 
   // 登出處理
   const signOutHandler = () => {
-    authCtx.onViewSwitch("SignOut");
+    <Link to="/signIn" />;
   };
 
   // li 項目處理
