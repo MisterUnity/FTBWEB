@@ -9,7 +9,7 @@ import {
   faCalendarDays,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import AuthContext from "../../../../store/auth-context";
+import AuthContext from "../../../../store/AuthContext";
 import classes from "./BackstageMenu.module.css";
 
 // 後台選單的顯示項目

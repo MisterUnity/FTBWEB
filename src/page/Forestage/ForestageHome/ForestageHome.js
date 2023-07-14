@@ -2,7 +2,7 @@ import { Fragment, useContext } from "react";
 import { Button } from "primereact/button";
 import { Link, useNavigate } from "react-router-dom";
 import ForestageMenu from "../../../components/UI/Forestage/ForestageMenu/ForestageMenu";
-import AuthContext from "../../../store/auth-context";
+import AuthContext from "../../../store/AuthContext";
 
 const ForestageHome = (props) => {
   const authCtx = useContext(AuthContext);

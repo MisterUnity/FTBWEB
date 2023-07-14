@@ -5,7 +5,7 @@ import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
 import { CheckLogin } from "../../../API/Auth/LoginStatus/loginStatus";
-import AuthContext from "../../../store/auth-context";
+import AuthContext from "../../../store/AuthContext";
 import PlayersForm from "../../../components/UI/Backstage/PlayersForm/PlayersForm";
 import PlayerDataTable from "../../../components/UI/Backstage/PlayerDataTable/PlayerDataTable";
 const AddPlatersInfo = () => {

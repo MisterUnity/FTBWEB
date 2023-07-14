@@ -5,7 +5,7 @@ import SignInCard from "./SignInCard";
 import EnterErrCard from "./EnterErrorCard";
 import MsgCard from "./MsgCard";
 import backDrop from "../../assets/Background.jpg";
-import AuthContext from "../../store/auth-context";
+import AuthContext from "../../store/AuthContext";
 import classes from "./signIn.module.css";
 
 const SignIn = (props) => {

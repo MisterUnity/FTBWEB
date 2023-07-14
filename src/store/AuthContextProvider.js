@@ -1,6 +1,6 @@
 import { useState } from "react";
 import LoadingFullPage from "../components/Functions/LoadingFullPage/LoadingFullPage";
-import AuthContext from "./auth-context";
+import AuthContext from "./AuthContext";
 import SignIn from "../page/SignIn/SignIn";
 import ForestageHome from "../page/Forestage/ForestageHome/ForestageHome";
 import BackstageHome from "../page/Backstage/BackstageHome/BackstageHome";

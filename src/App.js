@@ -5,7 +5,7 @@
 
 import { useEffect, useContext, Fragment } from "react";
 import { RouterProvider } from "react-router-dom";
-import AuthContext from "./store/auth-context";
+import AuthContext from "./store/AuthContext";
 import router from "./router/router";
 const App = () => {
   // Task-01 Add Start
