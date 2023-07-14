@@ -11,9 +11,9 @@ export const GetPlayersInfo = () => {
     });
 };
 
-// Post all Players Info
-export const PostPlayersInfo = () => {
-  return FTBAPI.post("/Player")
+// Get all Player Info
+export const GetPlayerInfo = (id) => {
+  return FTBAPI.get(`/Player/${id}`)
     .then((res) => {
       return res;
     })
@@ -22,9 +22,9 @@ export const PostPlayersInfo = () => {
     });
 };
 
-// Post Player Info
-export const PostPlayerInfo = (id) => {
-  return FTBAPI.post(`/Player/${id}`)
+// Post all Players Info
+export const PostPlayersInfo = () => {
+  return FTBAPI.post("/Player")
     .then((res) => {
       return res;
     })

@@ -2,14 +2,14 @@ import { useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import photo from "../../../../assets/photo.svg";
+import photoInit from "../../../../assets/photo.svg";
 import useDropdownItem from "../../../../Hook/useDropdownItem/useDropdownItem";
 import classes from "./PlayersForm.module.css";
 
 const PlayersForm = (props) => {
   const nameRef = useRef();
   // ***** 各項目狀態 *****
-  const [photo, setPhoto] = useState();
+  const [photo, setPhoto] = useState(photoInit);
   const [gender, setGender] = useState();
   const [age, setAge] = useState();
   const [height, setHeight] = useState();
@@ -95,17 +95,19 @@ const PlayersForm = (props) => {
   ];
   const dropdown = rowItem.map((item) => {
     return (
-      <div key={item.id} className="w-2">
+      <div key={item.id} className="w-2 bg-yellow-300 ">
         <div className="w-full mb-3 text-center">{item.title}</div>
-        <Dropdown
-          value={item.value}
-          onChange={item.callBack}
-          options={item.options}
-          optionLabel="name"
-          placeholder={`Select a ${item.title}`}
-          className="w-full"
-          required
-        />
+        <div className={classes.borderStyle}>
+          <Dropdown
+            className="w-full"
+            value={item.value}
+            onChange={item.callBack}
+            options={item.options}
+            optionLabel="name"
+            placeholder={`Select a ${item.title}`}
+            required
+          />
+        </div>
       </div>
     );
   });
@@ -126,26 +128,36 @@ const PlayersForm = (props) => {
   // ***** 表單資料送出處理 *****
   const AddPlayerInfoHandler = (e) => {
     e.preventDefault();
-    console.log("asd");
+    // ***** 資料彙整處理 *****
     const formData = {
-      photo: photo,
+      id: new Date().toLocaleString(),
+      photo: (
+        <img className="shadow-4" width="64px" src={photo} alt="playerPhoto" />
+      ),
       name: nameRef.current.value,
-      gender: gender,
-      age: age,
-      height: height,
-      weight: weight,
-      position: position,
-      team: team,
+      gender: gender.name,
+      age: age.name,
+      height: height.name,
+      weight: weight.name,
+      position: position.name,
+      team: team.name,
     };
-    console.log(formData);
+    // ***
+
+    //TODO 重置處理
+    // ***** 重置處理 *****
     nameRef.current.value = "";
-    // props.onSendFormData(formData);
+    setPhoto(photoInit);
+
+    // ***
+
+    props.onSendFormData(formData);
   };
   // ***
 
   return (
     <form onSubmit={AddPlayerInfoHandler}>
-      <div className="flex flex-column">
+      <div className="flex flex-column flex-wrap justify-content-start overflow-x-auto">
         <div className="flex justify-content-around align-items-center">
           <div className={classes.playerPhotoContainer}>
             <label htmlFor="photo">
@@ -163,13 +175,15 @@ const PlayersForm = (props) => {
               onChange={uploadImgHandler}
             />
           </div>
-          <div className="w-2">
+          <div className="w-2 bg-yellow-300">
             <div className="w-full mb-3 text-center">Name</div>
-            <InputText className="w-full" ref={nameRef} required />
+            <div className={classes.borderStyle}>
+              <InputText className="w-full" ref={nameRef} required />
+            </div>
           </div>
           {dropdown}
         </div>
-        <div className="text-center">
+        <div className="mt-5 text-center">
           <Button label="追加" />
         </div>
       </div>

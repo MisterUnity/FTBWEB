@@ -1,8 +1,8 @@
-import FTBAPI from "../index";
+import FTBAPI from "../../index";
 
 // Creact New Account and Password
 export const Register = () => {
-  return FTBAPI.post("/Register")
+  return FTBAPI.post("/auth/Register")
     .then((res) => {
       return res;
     })
@@ -13,7 +13,7 @@ export const Register = () => {
 
 // Login Check
 export const Login = (userInfo) => {
-  return FTBAPI.post("/Login", userInfo)
+  return FTBAPI.post("/auth/Login", userInfo)
     .then((res) => {
       return res;
     })

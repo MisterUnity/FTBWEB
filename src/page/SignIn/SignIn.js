@@ -1,5 +1,5 @@
 import { useState, Fragment, useContext } from "react";
-import { Login } from "../../API/userInfo/userInfo";
+import { Login } from "../../API/Auth/userInfo/userInfo";
 import { useNavigate } from "react-router-dom";
 import SignInCard from "./SignInCard";
 import EnterErrCard from "./EnterErrorCard";
@@ -18,19 +18,23 @@ const SignIn = (props) => {
   const sendUserInfoHandler = (userData) => {
     setIsLoad(true);
     // 『 1 』：輸入帳密正確，『 0 』：帳密輸入錯誤 or 無此帳號
-    Login(userData).then((res) => {
-      if (
-        res.data.StatusCode === 1 &&
-        res.data.StatusMessage === "Normal end."
-      ) {
-        authCtx.onSetSignInStatus(true);
-        navigate("/");
-      } else {
-        authCtx.onSetSignInStatus(false);
-        setErrorMsgIsShown(true);
-      }
-      setIsLoad(false);
-    });
+    Login(userData)
+      .then((res) => {
+        if (
+          res.data.StatusCode === 1 &&
+          res.data.StatusMessage === "Normal end."
+        ) {
+          authCtx.onSetSignInStatus(true);
+          navigate("/");
+        } else {
+          authCtx.onSetSignInStatus(false);
+          setErrorMsgIsShown(true);
+        }
+        setIsLoad(false);
+      })
+      .catch((err) => {
+        alert(err);
+      });
   };
 
   const hideErrorMsgHandler = () => {
