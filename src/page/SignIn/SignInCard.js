@@ -4,7 +4,7 @@ import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faKey, faSpinner } from "@fortawesome/free-solid-svg-icons";
-import Card from "../../components/UI/Card/Card";
+import MsgSlice from "../../components/UI/MsgSlice/MsgSlice";
 import classes from "./signInCard.module.css";
 
 const initialState = { value: "", isValid: null };
@@ -90,7 +90,7 @@ const SignInCard = (props) => {
   };
 
   return (
-    <Card className={`${props.className} ${classes.SignInCard} `}>
+    <MsgSlice className={`${props.className} ${classes.SignInCard} `}>
       <form
         onSubmit={sendFormHandler}
         className="flex flex-column justify-content-center"
@@ -129,7 +129,7 @@ const SignInCard = (props) => {
         {/* sendForm Button*/}
         {btnValid}
       </form>
-    </Card>
+    </MsgSlice>
   );
 };
 export default SignInCard;

@@ -3,7 +3,7 @@ import { Login } from "../../API/Auth/userInfo/userInfo";
 import { useNavigate } from "react-router-dom";
 import SignInCard from "./SignInCard";
 import EnterErrCard from "./EnterErrorCard";
-import MsgCard from "./MsgCard";
+import MsgSlice from "@/components/UI/MsgSlice";
 import backDrop from "../../assets/Background.jpg";
 import AuthContext from "../../store/AuthContext";
 import classes from "./signIn.module.css";
@@ -51,7 +51,10 @@ const SignIn = (props) => {
           <EnterErrCard onHideErrorMsg={hideErrorMsgHandler} />
         )}
         <SignInCard onSendUserInfo={sendUserInfoHandler} isLoad={isLoad} />
-        <MsgCard />
+        <MsgSlice>
+          <p className="mr-2 text-green-50 opacity-100">New to here ?</p>
+          <p className="cursor-pointer text-yellow-400">Create an account</p>
+        </MsgSlice>
       </div>
     </Fragment>
   );

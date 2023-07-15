@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import photoInit from "../../../../assets/photo.svg";
+import photoInit from "@/assets/photo.svg";
 import useDropdownItem from "../../../../Hook/useDropdownItem/useDropdownItem";
 import classes from "./PlayersForm.module.css";
 
@@ -165,7 +165,7 @@ const PlayersForm = (props) => {
                 id="playerPhoto"
                 className={`${classes.playerPhoto} cursor-pointer`}
                 src={photo}
-                alt="Player-Photo"
+                alt="PlayerPhoto"
               />
             </label>
             <input

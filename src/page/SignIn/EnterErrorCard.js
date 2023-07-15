@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import Card from "../../components/UI/Card/Card";
+import Card from "@/components/UI/MsgSLice/MsgSLice";
 const EnterError = (props) => {
   return (
     <Card className="flex bg-red-900 opacity-90">
