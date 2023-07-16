@@ -3,21 +3,11 @@
  * JungShengLiu  2023/06/30  (Task-02)新增AuthContext,全局變數及函數，用於切換頁面
  */
 
-import { useEffect, useContext, Fragment } from "react";
+import { Fragment } from "react";
 import { RouterProvider } from "react-router-dom";
-import AuthContext from "./store/AuthContext";
 import router from "./router/router";
 const App = () => {
   // Task-01 Add Start
-  const authCtx = useContext(AuthContext);
-
-  useEffect(() => {
-    setTimeout(() => {
-      // Task-02 Add 更改signIn狀態，以及調用全局函數切換顯示頁面。
-      authCtx.onSetSignInStatus(false); // 待後端開發完成前，先更改此行true || false模擬登入成功或失敗
-    }, 1500);
-  }, []);
-
   return (
     <Fragment>
       <RouterProvider router={router} />

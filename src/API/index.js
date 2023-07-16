@@ -2,12 +2,11 @@ import axios from "axios";
 // axios.defaults.withCredentials = true;
 const FTBAPI = axios.create({
   baseURL: "https://ftb-api.azurewebsites.net/api",
-  timeout: 10000,
+  timeout: 20000,
   headers: {
-    "X-Requested-With": "XMLHttpRequest",
     "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest"
   },
-
-  //   headers: { "X-Custom-Header": "foobar" },
+  withCredentials: true
 });
 export default FTBAPI;

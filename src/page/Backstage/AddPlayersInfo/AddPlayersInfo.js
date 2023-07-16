@@ -4,10 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
-import { CheckLogin } from "../../../API/Auth/LoginStatus/loginStatus";
 import AuthContext from "../../../store/AuthContext";
 import PlayersForm from "../../../components/UI/Backstage/PlayersForm/PlayersForm";
 import PlayerDataTable from "../../../components/UI/Backstage/PlayerDataTable/PlayerDataTable";
+import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
 const AddPlatersInfo = () => {
   const authCtx = useContext(AuthContext);
   const navigate = useNavigate();

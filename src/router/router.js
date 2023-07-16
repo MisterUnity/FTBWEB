@@ -9,7 +9,7 @@ import AddPlayersInfo from "../page/Backstage/AddPlayersInfo/AddPlayersInfo";
 import TacticalBoard from "../page/Backstage/TacticalBoard/TacticalBoard";
 
 const router = createBrowserRouter([
-  { path: "/", element: <ForestageHome />/*, errorElement: <Error />*/ },
+  { path: "/", element: <ForestageHome />, errorElement: <Error /> },
   {
     path: "/signIn",
     element: <SignIn />,

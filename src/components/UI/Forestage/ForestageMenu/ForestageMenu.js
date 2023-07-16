@@ -3,20 +3,38 @@ import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthContext from "../../../../store/AuthContext";
+import { Logout } from "../../../../API/Auth/userInfo/userInfo";
 
 const ForestageMenu = () => {
+  const navigate = useNavigate();
   const authCtx = useContext(AuthContext);
   const menuRight = useRef(null);
   const items = [
     {
-      label: <Link to="/backstageHome">Go to Backstage</Link>,
+      // label: <Link to="/backstageHome">Go to Backstage</Link>,
+      label: 'Go to Backstage',
+      command(){
+        navigate('/backstageHome');
+      },
     },
     {
-      label: <Link to="/">Sign Out</Link>,
+      // label: <Link to="/">Sign Out</Link>,
+      label: 'Sign Out',
       command: () => {
-        authCtx.onSetSignInStatus(false);
+        Logout().then((res) => {
+          if (
+            res.data.StatusCode === 1 &&
+            res.data.StatusMessage === "Normal end."
+          ) {
+            authCtx.onSetSignInStatus(false);
+            navigate("/");
+          }
+        })
+        .catch((err) => {
+          alert(err);
+        });
       },
     },
   ];

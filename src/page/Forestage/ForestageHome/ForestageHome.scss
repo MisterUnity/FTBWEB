@@ -1,0 +1,16 @@
+.homepage-header {
+    position: relative;
+    height: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    & > .nav-wrapper {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        right: 2rem;
+        transform: translateY(-50%);
+        justify-content: center;
+        align-items: center;
+    }
+}
