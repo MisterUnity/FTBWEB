@@ -341,7 +341,9 @@ const AddPlayerInfo = () => {
 
   // ***** 送出表單處理 *****
   const sendDataHandler = () => {
-    PostPlayersInfo(playersInfo)
+    PostPlayersInfo(playersInfo);
+    console
+      .log(playersInfo)
       .then((res) => {
         if (
           res.data.StatusCode === 1 &&

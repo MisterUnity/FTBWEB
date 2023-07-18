@@ -1,11 +1,9 @@
-import ReactDOM from "react-dom";
-import React, { useEffect, useRef, useState, ChangeEvent } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Cropper, CropperFade, CropperRef } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
 import classes from "./CropperTool.module.css";
 
 const CropperTool = (props) => {
-  const inputRef = useRef();
   const cropperRef = useRef();
 
   const [image, setImage] = useState("");
@@ -14,7 +12,7 @@ const CropperTool = (props) => {
     const cropper = cropperRef.current;
     if (cropper) {
       const canvas = cropper.getCanvas();
-      const imageBlob = canvas.toBlob((image) => {
+      canvas.toBlob((image) => {
         props.onGetImageBlob(URL.createObjectURL(image));
         props.onSwichVisible(false);
       });
@@ -33,6 +31,7 @@ const CropperTool = (props) => {
     // Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
     return () => {
       if (props.imageURL) {
+        console.log("useEffect作用");
         URL.revokeObjectURL(props.imageURL);
       }
     };
