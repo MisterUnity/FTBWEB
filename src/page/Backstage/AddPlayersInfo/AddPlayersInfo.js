@@ -112,7 +112,8 @@ const AddPlayerInfo = () => {
             <img
               id="playerImage"
               src={options.value}
-              className="w-6rem h-5rem  border-round"
+              className="w-6rem h-5rem border-round"
+              alt="playerimage"
             />
           </div>
         );
@@ -300,8 +301,7 @@ const AddPlayerInfo = () => {
         // id: new Date().toLocaleString(),
         id: uuidv4(),
         name: "ex:陳小明",
-        image:
-          "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
+        image: "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
         gender: "ex:男",
         age: "ex:20",
         height: "ex:180cm",

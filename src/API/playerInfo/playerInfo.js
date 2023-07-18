@@ -23,8 +23,10 @@ export const GetPlayerInfo = (id) => {
 };
 
 // Post all Players Info
-export const PostPlayersInfo = () => {
-  return FTBAPI.post("/Player")
+export const PostPlayersInfo = (playersInfo) => {
+  return FTBAPI.post("/Player/AddPlayer", playersInfo, {
+    url: 'https://localhost:7284/api' //本地測試機
+  })
     .then((res) => {
       return res;
     })
