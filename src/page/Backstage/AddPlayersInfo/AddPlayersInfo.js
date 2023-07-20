@@ -100,11 +100,7 @@ const AddPlayerInfo = () => {
 
   // *****上傳的圖片做預覽處理*****
   const imagePreviewHandler = (imageData) => {
-    //匹配相對應行的『 imageElement 』
-    const img = document.querySelectorAll(".imageContainers");
-    img[rowIndex].src = imageData;
-
-    // ***** 圖片 Blob類型 url追加至相對應rowData裡 *****
+    // ***** 以裁切好的圖片追加至相對應rowData裡 *****
     rowData.image = imageData;
 
     setPlayersInfo((prevrPlayersInfo) => {
@@ -178,7 +174,7 @@ const AddPlayerInfo = () => {
             >
               編輯圖片
             </label>
-            <div className="imageContainers w-6rem h-6rem">
+            <div className="w-6rem h-6rem">
               <img
                 className="w-full h-full"
                 id="playerImage"
@@ -370,7 +366,6 @@ const AddPlayerInfo = () => {
   // ***** 送出表單處理 *****
   //TODO  待測（送出表單）
   const sendDataHandler = () => {
-    console.log(playersInfo);
     if (authCtx.signInStatus === true) {
       PostPlayersInfo(playersInfo)
         .then((res) => {
