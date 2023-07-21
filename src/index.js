@@ -1,7 +1,9 @@
+import { Provider } from "react-redux";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import AuthContextProvider from "./store/AuthContextProvider";
 import App from "./App";
+import ReduxStore from "./store/ReduxStore/index";
 import "./index.css";
 import "primeflex/primeflex.css";
 // 這些是PRIMEREACT的主題切換CSS Start
@@ -52,8 +54,10 @@ import "primereact/resources/primereact.min.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <React.StrictMode>
-  <AuthContextProvider>
-    <App />
-  </AuthContextProvider>
+  <Provider store={ReduxStore}>
+    <AuthContextProvider>
+      <App />
+    </AuthContextProvider>
+  </Provider>
   // </React.StrictMode>
 );

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import ForestageMenu from "../../../components/UI/Forestage/ForestageMenu/ForestageMenu";
 import AuthContext from "../../../store/AuthContext";
 import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
+import Counter from "../../../components/UI/Counter/Counter";
+import EditGridDataTable from "../../../components/UI/Backstage/EditGridDataTable/EditGridDataTable";
 import "./ForestageHome.scss";
 
 const ForestageHome = (props) => {
@@ -47,7 +49,11 @@ const ForestageHome = (props) => {
         <div className="nav-wrapper">{controllerResult}</div>
       </header>
       // TODO 製作賽程表頁面
-      <main className="flex-grow-1">前台首頁</main>
+      <main className="flex-grow-1">
+        前台首頁
+        {/* <Counter /> */}
+        <EditGridDataTable />
+      </main>
     </Fragment>
   );
 };
