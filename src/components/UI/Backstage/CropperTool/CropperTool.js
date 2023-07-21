@@ -12,10 +12,12 @@ const CropperTool = (props) => {
     const cropper = cropperRef.current;
     if (cropper) {
       const canvas = cropper.getCanvas();
+      
       canvas.toBlob((image) => {
-        props.onGetImageBlob(URL.createObjectURL(image));
+        // props.onGetImageBlob(URL.createObjectURL(image));
+        props.onGetImageBlob(image);
         props.onSwichVisible(false);
-      });
+      }, "image/jpeg", 0.95);
     }
   };
 

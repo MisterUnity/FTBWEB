@@ -62,15 +62,16 @@ const AddPlayerInfo = () => {
 
   // *****上傳的圖片做預覽處理*****
   const imagePreviewHandler = (imageData) => {
-    // console.log(`獲取到的${imageData}`);
+    console.log(`獲取到的${imageData}`);
     const img = document.getElementById("playerImage");
-    img.src = imageData;
-    rowData.image = imageData;
+    // img.src = imageData;
+    img.src = URL.createObjectURL(imageData)
+    rowData.photo = imageData;
 
     // *****圖片url追加至相對應rowData裡*****
     setPlayersInfo((prevrPlayersInfo) => {
       let _playersInfo = [...prevrPlayersInfo];
-      _playersInfo[rowIndex].image = imageData;
+      _playersInfo[rowIndex].photo = imageData;
       return _playersInfo;
     });
   };
@@ -92,16 +93,16 @@ const AddPlayerInfo = () => {
   const columnsData = [
     {
       id: "column1",
-      field: "image",
+      field: "photo",
       header: "Image",
       width: "10",
       editorCallBack: (options) => {
         return (
           <div>
-            <label className="cursor-pointer" htmlFor="image">
+            <label className="cursor-pointer" htmlFor={options.rowData.id}>
               選擇檔案
               <input
-                id="image"
+                id={options.rowData.id}
                 className="hidden"
                 type="file"
                 onChange={(e) => {
@@ -121,7 +122,7 @@ const AddPlayerInfo = () => {
       BodyCallBack: (rowData, context) => {
         return (
           <img
-            src={playersInfo[context.rowIndex].image}
+            src={playersInfo[context.rowIndex].photo}
             alt={rowData.name}
             className="w-6rem h-5rem  border-round"
           />
@@ -301,14 +302,14 @@ const AddPlayerInfo = () => {
         // id: new Date().toLocaleString(),
         id: uuidv4(),
         name: "ex:陳小明",
-        image: "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
+        photo: "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
         gender: "ex:男",
         age: "ex:20",
         height: "ex:180cm",
         weight: "ex:75kg",
         position: "ex:前鋒",
         team: "ex:1隊",
-        delete: "",
+        // delete: "",
       });
       return _playersInfo;
     });
@@ -341,16 +342,10 @@ const AddPlayerInfo = () => {
 
   // ***** 送出表單處理 *****
   const sendDataHandler = () => {
-    PostPlayersInfo(playersInfo);
-    console
-      .log(playersInfo)
+    PostPlayersInfo(playersInfo)
       .then((res) => {
-        if (
-          res.data.StatusCode === 1 &&
-          res.data.StatusMessage === "Normal end."
-        ) {
-          navigate("playerList");
-        }
+        // navigate("/backstageHome/playerList");
+        console.log('OK');
       })
       .catch((err) => {
         alert(err);
@@ -364,7 +359,6 @@ const AddPlayerInfo = () => {
       className="card p-fluid w-full h-full absolute overflow-auto"
     >
       <DataTable
-        key="id"
         value={playersInfo}
         editMode="row"
         dataKey="id"
