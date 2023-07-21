@@ -1,5 +1,12 @@
-.cropperTool {
-  height: 600px;
-  height: 600px;
-  background: #ddd;
+.cropperWrapper {
+  position: relative;
+}
+.cropper {
+  border: solid 1px #36393f;
+  min-height: 400px;
+  max-height: 600px;
+  object-fit: cover;
+}
+.cropperBackground {
+  background: black;
 }

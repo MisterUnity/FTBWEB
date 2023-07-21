@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -9,14 +9,14 @@ import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { v4 as uuidv4 } from "uuid";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
+import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
+import AuthContext from "../../../store/AuthContext";
 import ShowCropper from "../../../components/UI/ShowCropper/ShowCropper";
-import photo from "../../../assets/photo.svg";
-
 import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
-  const [cropperVisible, setCropperVisible] = useState(false);
+  const authCtx = useContext(AuthContext);
   // ***** 下拉式表單選項處理 *****
   const genderItem = ["男", "女", "其他"];
   const ageItem = useDropdownItem(1, 41, "歲");
@@ -41,6 +41,7 @@ const AddPlayerInfo = () => {
   // ***
 
   // ***** 各項狀態 *****
+  const [cropperVisible, setCropperVisible] = useState(false);
   const [playersInfo, setPlayersInfo] = useState([]);
   const [gender] = useState(genderItem);
   const [age] = useState(ageItem);
@@ -48,27 +49,60 @@ const AddPlayerInfo = () => {
   const [weight] = useState(weightItem);
   const [team] = useState(teamItem);
   const [position] = useState(positionItem);
-  const [imageURL, setImageURL] = useState();
-  const [rowIndex, setrowIndex] = useState();
-  const [rowData, setrowData] = useState();
+  const [rowIndex, setRowIndex] = useState();
+  const [rowData, setRowData] = useState();
   // ***
 
-  // *****scrollBar自動跳轉至底*****
+  // ***** 登入逾時確認 *****
+  useEffect(() => {
+    CheckLogin()
+      .then((res) => {
+        const { StatusCode, StatusMessage } = res.data;
+        if (StatusCode && StatusMessage.includes("Normal")) {
+          authCtx.onSetSignInStatus(true);
+        } else {
+          authCtx.onSetSignInStatus(false);
+        }
+      })
+      .catch((err) => {
+        authCtx.onSetSignInStatus(false);
+        alert(err);
+      });
+  }, []);
+  // ***
+
+  // ***** scrollBar自動跳轉至底 *****
   useEffect(() => {
     const div = document.getElementById("dataTableContainer");
     div.scrollTop = div.scrollHeight;
   }, [playersInfo]);
   // ***
 
+  // ***** 畫面跳轉處理器 *****
+  const viewSwitchHandler = (viewName) => {
+    navigate(viewName);
+  };
+  // ***
+
+  // ***** 裁切器顯示處理器 *****
+  const visibleHandler = (status) => {
+    setCropperVisible(status);
+  };
+  // ***
+
+  // ***** 裁切器顯示處理器 *****
+  const imageCropperHandler = (rowIndex, rowData) => {
+    setRowIndex(rowIndex);
+    setRowData(rowData);
+    visibleHandler(true);
+  };
+  // ***
+
   // *****上傳的圖片做預覽處理*****
   const imagePreviewHandler = (imageData) => {
-    console.log(`獲取到的${imageData}`);
-    const img = document.getElementById("playerImage");
-    // img.src = imageData;
-    img.src = URL.createObjectURL(imageData)
-    rowData.photo = imageData;
+    // ***** 以裁切好的圖片追加至相對應rowData裡 *****
+    rowData.image = imageData;
 
-    // *****圖片url追加至相對應rowData裡*****
     setPlayersInfo((prevrPlayersInfo) => {
       let _playersInfo = [...prevrPlayersInfo];
       _playersInfo[rowIndex].photo = imageData;
@@ -76,18 +110,50 @@ const AddPlayerInfo = () => {
     });
   };
   // ***
-  const visibleHandler = (status) => {
-    setCropperVisible(status);
-  };
 
-  const imageCropperHandler = (e, options) => {
-    const imageFile = e.target.files[0];
-    const imageURL = URL.createObjectURL(imageFile);
-    setImageURL(imageURL);
-    setrowIndex(options.rowIndex);
-    setrowData(options.rowData);
-    visibleHandler(true);
+  // *****列-刪除處理 *****
+  const deleteRowHandler = (context) => {
+    setPlayersInfo((prevrPlayersInfo) => {
+      let _playersInfo = [...prevrPlayersInfo];
+      _playersInfo.splice(context.rowIndex, 1);
+      return _playersInfo;
+    });
   };
+  // ***
+
+  // ***** 追加新列處理 *****
+  const addRowHandler = () => {
+    setPlayersInfo((prevrPlayersInfo) => {
+      let _playersInfo = [...prevrPlayersInfo];
+      _playersInfo.push({
+        // id: new Date().toLocaleString(),
+        id: uuidv4(),
+        name: "ex:陳小明",
+        image:
+          "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
+        gender: "ex:男",
+        age: "ex:20",
+        height: "ex:180cm",
+        weight: "ex:75kg",
+        position: "ex:前鋒",
+        team: "ex:1隊",
+        delete: "",
+      });
+      return _playersInfo;
+    });
+  };
+  // ***
+
+  // ***** 列-編輯完處理 *****
+  const onRowEditCompleteHandler = (e) => {
+    setPlayersInfo((prevrPlayersInfo) => {
+      let _playersInfo = [...prevrPlayersInfo];
+      let { newData, index } = e;
+      _playersInfo[index] = newData;
+      return _playersInfo;
+    });
+  };
+  // ***
 
   // ***** Column渲染資料準備 *****
   const columnsData = [
@@ -98,24 +164,23 @@ const AddPlayerInfo = () => {
       width: "10",
       editorCallBack: (options) => {
         return (
-          <div>
-            <label className="cursor-pointer" htmlFor={options.rowData.id}>
-              選擇檔案
-              <input
-                id={options.rowData.id}
-                className="hidden"
-                type="file"
-                onChange={(e) => {
-                  imageCropperHandler(e, options);
-                }}
-              />
+          <div className="flex flex-column justify-content-center">
+            <label
+              className="mb-1 cursor-pointer bg-bluegray-600 
+                         text-blue-50 text-center"
+              onClick={() => {
+                imageCropperHandler(options.rowIndex, options.rowData);
+              }}
+            >
+              編輯圖片
             </label>
-            <img
-              id="playerImage"
-              src={options.value}
-              className="w-6rem h-5rem border-round"
-              alt="playerimage"
-            />
+            <div className="w-6rem h-6rem">
+              <img
+                className="w-full h-full"
+                id="playerImage"
+                src={playersInfo[options.rowIndex].image}
+              />
+            </div>
           </div>
         );
       },
@@ -136,11 +201,13 @@ const AddPlayerInfo = () => {
       width: "10",
       editorCallBack: (options) => {
         return (
-          <InputText
-            type="text"
-            value={options.value}
-            onChange={(e) => options.editorCallback(e.target.value)}
-          />
+          <div className="w-6rem">
+            <InputText
+              type="text"
+              value={options.value}
+              onChange={(e) => options.editorCallback(e.target.value)}
+            />
+          </div>
         );
       },
       BodyCallBack: (rowData) => {
@@ -151,7 +218,7 @@ const AddPlayerInfo = () => {
       id: "column3",
       field: "gender",
       header: "Gender",
-      width: "10",
+      width: "5",
       editorCallBack: (options) => {
         return (
           <Dropdown
@@ -274,57 +341,13 @@ const AddPlayerInfo = () => {
           <Button
             label={<FontAwesomeIcon icon={faTrashCan} />}
             onClick={() => {
-              deleteHandler(context);
+              deleteRowHandler(context);
             }}
           />
         );
       },
     },
   ];
-  // ***
-
-  // *****列-刪除處理 *****
-  const deleteHandler = (context) => {
-    console.log(context.rowIndex);
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
-      _playersInfo.splice(context.rowIndex, 1);
-      return _playersInfo;
-    });
-  };
-  /// ***
-
-  // ***** 追加新列處理 *****
-  const addNewRowHandler = () => {
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
-      _playersInfo.push({
-        // id: new Date().toLocaleString(),
-        id: uuidv4(),
-        name: "ex:陳小明",
-        photo: "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
-        gender: "ex:男",
-        age: "ex:20",
-        height: "ex:180cm",
-        weight: "ex:75kg",
-        position: "ex:前鋒",
-        team: "ex:1隊",
-        // delete: "",
-      });
-      return _playersInfo;
-    });
-  };
-  // ***
-
-  // ***** 列-編輯處理 *****
-  const onRowEditCompleteHandler = (e) => {
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
-      let { newData, index } = e;
-      _playersInfo[index] = newData;
-      return _playersInfo;
-    });
-  };
   // ***
 
   // ***** 渲染各行處理 *****
@@ -341,15 +364,23 @@ const AddPlayerInfo = () => {
   });
 
   // ***** 送出表單處理 *****
+  //TODO  待測（送出表單）
   const sendDataHandler = () => {
-    PostPlayersInfo(playersInfo)
-      .then((res) => {
-        // navigate("/backstageHome/playerList");
-        console.log('OK');
-      })
-      .catch((err) => {
-        alert(err);
-      });
+    if (authCtx.signInStatus === true) {
+      PostPlayersInfo(playersInfo)
+        .then((res) => {
+          const { StatusCode, StatusMessage } = res.data;
+          if (StatusCode === 1 && StatusMessage === "Normal end.") {
+            viewSwitchHandler("playerList");
+          }
+        })
+        .catch((err) => {
+          alert(`ERROR：${err}`);
+        });
+    } else {
+      alert("登入逾時，將回首頁");
+      viewSwitchHandler("/");
+    }
   };
   // ***
 
@@ -381,7 +412,7 @@ const AddPlayerInfo = () => {
           className="w-2 bg-bluegray-700"
           label="＋"
           icon="pi pi-plus"
-          onClick={addNewRowHandler}
+          onClick={addRowHandler}
         />
         <Button
           className="w-2 ml-2 bg-bluegray-700"
@@ -393,9 +424,8 @@ const AddPlayerInfo = () => {
       {cropperVisible && (
         <ShowCropper
           visible={cropperVisible}
-          onSwichVisible={visibleHandler}
+          onSwitchVisible={visibleHandler}
           rowIndex={rowIndex}
-          imageURL={imageURL}
           onGetImageBlob={imagePreviewHandler}
         />
       )}

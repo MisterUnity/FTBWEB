@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import CropperTool from "../Backstage/CropperTool/CropperTool";
 const ShowCropper = (props) => {
@@ -9,13 +7,12 @@ const ShowCropper = (props) => {
         header="Header"
         visible={props.visible}
         style={{ width: "50vw" }}
-        onHide={() => props.onSwichVisible(false)}
+        onHide={() => props.onSwitchVisible(false)}
       >
         {
           <CropperTool
-            imageURL={props.imageURL}
             onGetImageBlob={props.onGetImageBlob}
-            onSwichVisible={props.onSwichVisible}
+            onSwitchVisible={props.onSwitchVisible}
           />
         }
       </Dialog>
