@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, Fragment } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -11,8 +11,11 @@ import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
 import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
 import AuthContext from "../../../store/AuthContext";
-import ShowCropper from "../../../components/UI/ShowCropper/ShowCropper";
+import PhotoCropper from "../../../components/UI/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
+import "primeicons/primeicons.css";
+import { Tooltip } from "primereact/tooltip";
+import "./AddPlayersInfo.scss";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
@@ -51,6 +54,7 @@ const AddPlayerInfo = () => {
   const [position] = useState(positionItem);
   const [rowIndex, setRowIndex] = useState();
   const [rowData, setRowData] = useState();
+  const [bHoverOnUploadOKFlag, setHoverOnUploadOKFlag] = useState(false); //WEICHE:
   // ***
 
   // ***** 登入逾時確認 *****
@@ -78,34 +82,36 @@ const AddPlayerInfo = () => {
   }, [playersInfo]);
   // ***
 
-  // ***** 畫面跳轉處理器 *****
-  const viewSwitchHandler = (viewName) => {
-    navigate(viewName);
-  };
-  // ***
+  // // ***** 畫面跳轉處理器 *****
+  // const viewSwitchHandler = (viewName) => {
+  //   navigate(viewName);
+  // };
+  // // ***
 
-  // ***** 裁切器顯示處理器 *****
-  const visibleHandler = (status) => {
-    setCropperVisible(status);
-  };
-  // ***
+  // // ***** 裁切器顯示處理器 *****
+  // const visibleHandler = (status) => {
+  //   setCropperVisible(status);
+  // };
+  // // ***
 
   // ***** 裁切器顯示處理器 *****
   const imageCropperHandler = (rowIndex, rowData) => {
     setRowIndex(rowIndex);
     setRowData(rowData);
-    visibleHandler(true);
+    // visibleHandler(true); //WEICHE:
+    setCropperVisible(true); //WEICHE:
   };
   // ***
 
   // *****上傳的圖片做預覽處理*****
-  const imagePreviewHandler = (imageData) => {
-    // ***** 以裁切好的圖片追加至相對應rowData裡 *****
-    rowData.image = imageData;
-
+  const imagePreviewHandler = (imageLocalUrl, imageData) => {
+    // ***** 以裁切好的圖片追加至相對應 rowData 裡 *****  //WEICHE: 因為 API 要傳送的是 Blob File，不是本地創建的地址資源 (URL.createObjectURL)
+    rowData.photo = imageData; //WEICHE: 所以這邊新增一個 photoUrl 用來本地顯示
+    rowData.photoUrl = imageLocalUrl; //WEICHE ADD
     setPlayersInfo((prevrPlayersInfo) => {
       let _playersInfo = [...prevrPlayersInfo];
       _playersInfo[rowIndex].photo = imageData;
+      _playersInfo[rowIndex].photoUrl = imageLocalUrl; //WEICHE ADD
       return _playersInfo;
     });
   };
@@ -129,8 +135,8 @@ const AddPlayerInfo = () => {
         // id: new Date().toLocaleString(),
         id: uuidv4(),
         name: "ex:陳小明",
-        image:
-          "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
+        photo: "", //WEICHE:這個用來儲存Blob File
+        photoUrl: "", //WEICHE:這格之後再取一個專有的圖片
         gender: "ex:男",
         age: "ex:20",
         height: "ex:180cm",
@@ -145,13 +151,18 @@ const AddPlayerInfo = () => {
   // ***
 
   // ***** 列-編輯完處理 *****
-  const onRowEditCompleteHandler = (e) => {
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
-      let { newData, index } = e;
-      _playersInfo[index] = newData;
-      return _playersInfo;
-    });
+  // const onRowEditCompleteHandler = (e) => {
+  //   setPlayersInfo((prevrPlayersInfo) => {
+  //     let _playersInfo = [...prevrPlayersInfo];
+  //     let { newData, index } = e;
+  //     _playersInfo[index] = newData;
+  //     return _playersInfo;
+  //   });
+  // };
+  //***** 改成cell-編輯完處理 *****
+  const onCellEditComplete = (e) => {
+    let { rowData, newValue, field, originalEvent: event } = e;
+    rowData[field] = newValue;
   };
   // ***
 
@@ -162,35 +173,69 @@ const AddPlayerInfo = () => {
       field: "photo",
       header: "Image",
       width: "10",
-      editorCallBack: (options) => {
-        return (
-          <div className="flex flex-column justify-content-center">
-            <label
-              className="mb-1 cursor-pointer bg-bluegray-600 
-                         text-blue-50 text-center"
-              onClick={() => {
-                imageCropperHandler(options.rowIndex, options.rowData);
-              }}
-            >
-              編輯圖片
-            </label>
-            <div className="w-6rem h-6rem">
-              <img
-                className="w-full h-full"
-                id="playerImage"
-                src={playersInfo[options.rowIndex].image}
-              />
-            </div>
-          </div>
-        );
-      },
+      // editorCallBack: (options) => {
+      //   return (
+      //     <div className="flex flex-column justify-content-center">
+      //       <label
+      //         className="mb-1 cursor-pointer bg-bluegray-600
+      //                    text-blue-50 text-center"
+      // onClick={() => {
+      //   imageCropperHandler(options.rowIndex, options.rowData);
+      // }}
+      //       >
+      //         編輯圖片
+      //       </label>
+      //       <div className="w-6rem h-6rem">
+      //         <img
+      //           className="w-full h-full"
+      //           id="playerImage"
+      //           src={playersInfo[options.rowIndex].photoUrl}
+      //           alt=""
+      //         />
+      //       </div>
+      //     </div>
+      //   );
+      // },
       BodyCallBack: (rowData, context) => {
+        const strLocalImageUrl = playersInfo[context.rowIndex].photoUrl;
+        const UploadOK = (
+          <i
+            className={`custom-tooltip-btn-${context.rowIndex} pi pi-check cursor-pointer`}
+            style={{ fontSize: "1rem" }}
+          ></i>
+        );
+        const UploadWaiting = (
+          <i
+            className={`custom-tooltip-btn-${context.rowIndex} pi pi-upload cursor-pointer`}
+            style={{ fontSize: "1rem" }}
+            onClick={() => {
+              imageCropperHandler(context.rowIndex, rowData);
+            }}
+          ></i>
+        );
+        let IconUploadStatus = strLocalImageUrl ? UploadOK : UploadWaiting;
+
         return (
-          <img
-            src={playersInfo[context.rowIndex].photo}
-            alt={rowData.name}
-            className="w-6rem h-5rem  border-round"
-          />
+          // <img
+          //   src={playersInfo[context.rowIndex].photoUrl}
+          //   alt={rowData.name}
+          //   className="w-6rem h-5rem border-round"
+          // />
+          <Fragment>
+            <Tooltip target={`.custom-tooltip-btn-${context.rowIndex}`}>
+              {strLocalImageUrl ? (
+                <img
+                  alt="logo"
+                  src={strLocalImageUrl}
+                  height="80px"
+                  width="80px"
+                />
+              ) : (
+                "尚未上傳圖片"
+              )}
+            </Tooltip>
+            {IconUploadStatus}
+          </Fragment>
         );
       },
     },
@@ -210,9 +255,9 @@ const AddPlayerInfo = () => {
           </div>
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.name;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.name;
+      // },
     },
     {
       id: "column3",
@@ -222,6 +267,7 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
+            appendTo={"self"}
             value={options.value}
             options={gender}
             onChange={(e) => options.editorCallback(e.value)}
@@ -229,9 +275,9 @@ const AddPlayerInfo = () => {
           />
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.gender;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.gender;
+      // },
     },
     {
       id: "column4",
@@ -241,6 +287,7 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
+            appendTo={"self"}
             value={options.value}
             options={age}
             onChange={(e) => options.editorCallback(e.value)}
@@ -248,9 +295,9 @@ const AddPlayerInfo = () => {
           />
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.age;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.age;
+      // },
     },
     {
       id: "column5",
@@ -260,6 +307,7 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
+            appendTo={"self"}
             value={options.value}
             options={height}
             onChange={(e) => options.editorCallback(e.value)}
@@ -267,9 +315,9 @@ const AddPlayerInfo = () => {
           />
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.height;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.height;
+      // },
     },
     {
       id: "column6",
@@ -279,6 +327,7 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
+            appendTo={"self"}
             value={options.value}
             options={weight}
             onChange={(e) => options.editorCallback(e.value)}
@@ -286,9 +335,9 @@ const AddPlayerInfo = () => {
           />
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.weight;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.weight;
+      // },
     },
     {
       id: "column7",
@@ -298,6 +347,7 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
+            appendTo={"self"}
             value={options.value}
             options={position}
             onChange={(e) => options.editorCallback(e.value)}
@@ -305,9 +355,9 @@ const AddPlayerInfo = () => {
           />
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.position;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.position;
+      // },
     },
     {
       id: "column8",
@@ -317,6 +367,7 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
+            appendTo={"self"}
             value={options.value}
             options={team}
             onChange={(e) => options.editorCallback(e.value)}
@@ -324,18 +375,18 @@ const AddPlayerInfo = () => {
           />
         );
       },
-      BodyCallBack: (rowData) => {
-        return rowData.team;
-      },
+      // BodyCallBack: (rowData) => {
+      //   return rowData.team;
+      // },
     },
     {
       id: "column9",
       field: "delete",
       header: "Delete",
       width: "10",
-      editorCallBack: () => {
-        return "";
-      },
+      // editorCallBack: () => {
+      //   return "";
+      // },
       BodyCallBack: (rowData, context) => {
         return (
           <Button
@@ -359,6 +410,7 @@ const AddPlayerInfo = () => {
         header={data.header}
         editor={data.editorCallBack}
         body={data.BodyCallBack}
+        onCellEditComplete={onCellEditComplete} //WEICHE:
       />
     );
   });
@@ -371,7 +423,7 @@ const AddPlayerInfo = () => {
         .then((res) => {
           const { StatusCode, StatusMessage } = res.data;
           if (StatusCode === 1 && StatusMessage === "Normal end.") {
-            viewSwitchHandler("playerList");
+            navigate("playerList");
           }
         })
         .catch((err) => {
@@ -379,7 +431,7 @@ const AddPlayerInfo = () => {
         });
     } else {
       alert("登入逾時，將回首頁");
-      viewSwitchHandler("/");
+      navigate("/");
     }
   };
   // ***
@@ -391,13 +443,15 @@ const AddPlayerInfo = () => {
     >
       <DataTable
         value={playersInfo}
-        editMode="row"
+        // editMode="row"
+        editMode="cell"
         dataKey="id"
-        onRowEditComplete={onRowEditCompleteHandler}
+        // onRowEditComplete={onRowEditCompleteHandler}
         tableStyle={{ minWidth: "50rem" }}
+        // className="min-h-screen" //WEICHE:
       >
         {column}
-        <Column
+        {/* <Column
           rowEditor
           headerStyle={{ width: "5%", minWidth: "8rem" }}
           bodyStyle={{ textAlign: "center" }}
@@ -405,30 +459,36 @@ const AddPlayerInfo = () => {
         <Column
           headerStyle={{ width: "5%", minWidth: "8rem" }}
           bodyStyle={{ textAlign: "center" }}
-        />
+        /> */}
       </DataTable>
       <div className="flex justify-content-end">
         <Button
-          className="w-2 bg-bluegray-700"
+          className="w-1 bg-bluegray-700"
           label="＋"
-          icon="pi pi-plus"
           onClick={addRowHandler}
         />
         <Button
           className="w-2 ml-2 bg-bluegray-700"
           label="送出表單"
-          icon="pi pi-plus"
           onClick={sendDataHandler}
         />
       </div>
-      {cropperVisible && (
-        <ShowCropper
+      {/* {cropperVisible && (
+        <PhotoCropper
           visible={cropperVisible}
           onSwitchVisible={visibleHandler}
           rowIndex={rowIndex}
           onGetImageBlob={imagePreviewHandler}
         />
-      )}
+      )} */}
+      <PhotoCropper
+        visible={cropperVisible}
+        // onSwitchVisible={visibleHandler}
+        onHide={() => setCropperVisible(false)}
+        rowIndex={rowIndex}
+        onGetImageBlob={imagePreviewHandler}
+        header="請選擇並剪取您的相片"
+      />
     </div>
   );
 };

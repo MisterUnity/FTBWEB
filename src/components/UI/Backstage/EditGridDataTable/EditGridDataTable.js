@@ -10,46 +10,21 @@ import {
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { v4 as uuidv4 } from "uuid";
+import { useRef } from "react";
+import { Button } from "primereact/button";
 
-// ***** 固定資料區，不會變動也不需刷新 *****
-const initData = [];
-for (let i = 0; i < 16; i++) {
-  initData.push({
-    id: uuidv4(),
-    playerName: "Select a Player",
-    goal: "0",
-    toShoot: "0",
-    cornerBall: "0",
-    goalKick: "0",
-    header: "0",
-    handBall: "0",
-    penaltyKick: "0",
-    freeKick: "0",
-    offside: "0",
-    yellowCard: "0",
-    readCard: "0",
-  });
-}
 const playerList = [
-  "A選手",
-  "B選手",
-  "C選手",
-  "D選手",
-  "E選手",
-  "F選手",
-  "G選手",
-  "H選手",
-  "I選手",
-  "J選手",
-  "K選手",
-  "替補-A選手",
-  "替補-B選手",
-  "替補-C選手",
-  "替補-D選手",
-  "替補-E選手",
+  "Select a Player", 
+  "A選手", "B選手", "C選手",
+  "D選手", "E選手", "F選手", "G選手", "H選手",
+  "I選手", "J選手", "K選手",
+  "替補-A選手", "替補-B選手", "替補-C選手", "替補-D選手", "替補-E選手",
 ];
 const columns = [
-  { field: "playerName", header: "PlayerName" },
+  {
+    field: "playerName",
+    header: "PlayerName",
+  },
   {
     field: "goal",
     header: (
@@ -63,16 +38,41 @@ const columns = [
   {
     field: "toShoot",
     header: (
-      <FontAwesomeIcon icon={toShoot} size="2xl" style={{ color: "#f52424" }} />
+      <FontAwesomeIcon
+        icon={toShoot}
+        size="2xl"
+        style={{ color: "#f52424" }}
+      />
     ),
   },
-  { field: "cornerBall", header: "Corner Ball" },
-  { field: "goalKick", header: "Goal Kick" },
-  { field: "header", header: "Header" },
-  { field: "handBall", header: "Hand Ball" },
-  { field: "penaltyKick", header: "Penalty Kick" },
-  { field: "freeKick", header: "Free Kick" },
-  { field: "offside", header: "offside" },
+  {
+    field: "cornerBall",
+    header: "Corner Ball",
+  },
+  {
+    field: "goalKick",
+    header: "Goal Kick",
+  },
+  {
+    field: "header",
+    header: "Header",
+  },
+  {
+    field: "handBall",
+    header: "Hand Ball",
+  },
+  {
+    field: "penaltyKick",
+    header: "Penalty Kick",
+  },
+  {
+    field: "freeKick",
+    header: "Free Kick",
+  },
+  {
+    field: "offside",
+    header: "offside",
+  },
   {
     field: "yellowCard",
     header: (
@@ -86,27 +86,36 @@ const columns = [
     ),
   },
 ];
-// ***
 
 const EditGridDataTable = () => {
-  const [products, setProducts] = useState();
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  // const [selectedProduct, setSelectedProduct] = useState(null);
+  const [ayPlayersInfo, setPlayers] = useState(null);
+  // const [playerListItems] = useState(playerList);
 
   useEffect(() => {
-    setProducts(initData);
+    const initData = [];
+    for (let i = 0; i < 10; i++) {
+      initData.push({
+        id: uuidv4(),
+        playerName: "Select a Player",
+        goal: "0",
+        toShoot: "0",
+        cornerBall: "0",
+        goalKick: "0",
+        header: "0",
+        handBall: "0",
+        penaltyKick: "0",
+        freeKick: "0",
+        offside: "0",
+        yellowCard: "0",
+        readCard: "0",
+      });
+    }
+    setPlayers(initData);
   }, []);
 
   // ***** 編輯模式：下拉式選單 *****
-  const dropdownEditor = (options) => {
-    return (
-      <Dropdown
-        value={options.value}
-        options={playerList}
-        onChange={(e) => options.editorCallback(e.value)}
-        placeholder="Select a Player"
-      />
-    );
-  };
+  
   // ***
 
   // ***** 編輯模式：計數器 *****
@@ -114,7 +123,7 @@ const EditGridDataTable = () => {
     return (
       <InputNumber
         value={options.value}
-        onValueChange={(e) => options.editorCallback(e.value)}
+        onChange={(e) => options.editorCallback(e.value)}
         mode="decimal"
         showButtons
         min={0}
@@ -124,10 +133,26 @@ const EditGridDataTable = () => {
   };
   // ***
 
-  // ***** 根據所選欄位，回傳不同編輯模式 *****
+  // ***** DataTable連鎖值的處理相關方法 *****
   const cellEditor = (options) => {
     if (options.field === "playerName") return dropdownEditor(options);
     else return textNumberEditor(options);
+  };
+  const dropdownEditor = (options) => {
+    return (
+      <Dropdown
+        appendTo={"self"}
+        value={options.value}
+        options={playerList}
+        onChange={(e) => options.editorCallback(e.value)}
+        placeholder="Select a Player"
+      />
+    );
+  };
+  const onCellEditComplete = (e) => {
+    console.log("Edit complete");
+    let { rowData, newValue, field, originalEvent: event } = e;
+    rowData[field] = newValue;
   };
   // ***
 
@@ -144,56 +169,26 @@ const EditGridDataTable = () => {
   };
   // ***
 
-  // ***** 編輯完後，輸入值的處理 *****
-  const onCellEditComplete = (e) => {
-    const { rowData, newValue, newRowData, field, originalEvent: event } = e;
-
-    switch (field) {
-      case "playerName":
-        const { playerName } = newRowData;
-        // console.log(newRowData);
-        // console.log(newRowData.goal);
-        // console.log(newRowData.playerName);
-        // rowData[field] = "1";
-        break;
-
-      default:
-        if (isPositiveInteger(newValue)) {
-          console.log(newRowData);
-          console.log(newRowData.playerName);
-          rowData[field] = newValue;
-        } else event.preventDefault();
-        break;
-    }
-  };
-  // ***
-
-  const dataTableColumns = columns.map(({ field, header }) => {
-    return (
-      <Column
-        key={field}
-        field={field}
-        header={header}
-        style={{ width: "7%" }}
-        editor={(options) => cellEditor(options)}
-        onCellEditComplete={onCellEditComplete}
-      />
-    );
-  });
-
   return (
-    <div className="card p-fluid">
+    <div className="card p-fluid h-screen">
       <DataTable
-        value={products}
+        value={ayPlayersInfo}
         editMode="cell"
-        tableStyle={{ minWidth: "50rem" }}
-        selectionMode="single"
-        selection={selectedProduct}
-        onSelectionChange={(e) => setSelectedProduct(e.value)}
-        dataKey="id"
       >
-        {dataTableColumns}
+        {columns.map(({ field, header }) => {
+          return (
+            <Column
+              key={field}
+              field={field}
+              header={header}
+              style={{ width: "7%", whiteSpace: "nowrap" }}
+              editor={cellEditor}
+              onCellEditComplete={onCellEditComplete}
+            />
+          );
+        })}
       </DataTable>
+      <Button onClick={e=>{console.log(ayPlayersInfo)}}>Add</Button>
     </div>
   );
 };

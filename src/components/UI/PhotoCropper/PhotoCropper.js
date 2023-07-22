@@ -4,7 +4,11 @@ import { Cropper } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
 import classes from "./CropperTool.module.css";
 
-const CropperTool = (props) => {
+// import { Dialog } from "primereact/dialog";
+// import CropperTool from "../Backstage/CropperTool/CropperTool"; Deleted
+import CSDialog from "../../../cs_components/CSDialog";
+
+const PhotoCropper = ({header, onHide, visible, onGetImageBlob}) => {
   const cropperRef = useRef();
 
   // ***** 各項狀態 *****
@@ -39,15 +43,32 @@ const CropperTool = (props) => {
     if (cropper) {
       const canvas = cropper.getCanvas();
       canvas.toBlob((image) => {
-        props.onGetImageBlob(URL.createObjectURL(image));
-        props.onSwitchVisible(false);
+        // props.onGetImageBlob(URL.createObjectURL(image));
+        // props.onSwitchVisible(false);
+        onGetImageBlob(URL.createObjectURL(image), image);
+        onHide();
       });
     }
   };
   // ***
 
   return (
-    <Fragment>
+    <CSDialog
+      // header="Header"
+      // visible={props.visible}
+      // style={{ width: "50vw" }}
+      // onHide={() => props.onSwitchVisible(false)}
+      header={header}
+      visible={visible}
+      onHide={onHide}
+    >
+      
+      {/* <CropperTool
+        // onGetImageBlob={props.onGetImageBlob}
+        // onSwitchVisible={props.onSwitchVisible}
+        onGetImageBlob={onGetImageBlob}
+      /> */}
+      {/** 原本CropperTool的內容，去掉了Fragment */}
       <div className={classes.cropperWrapper}>
         <Cropper
           className={classes.cropper}
@@ -59,8 +80,8 @@ const CropperTool = (props) => {
       <div className="flex align-items-center">
         <label
           className=" p-1 text-2xl border-round-md 
-                     border-solid cursor-pointer 
-                     text-blue-50 bg-bluegray-600"
+                    border-solid cursor-pointer 
+                    text-blue-50 bg-bluegray-600"
           htmlFor="upLoad"
         >
           選擇檔案
@@ -74,14 +95,13 @@ const CropperTool = (props) => {
         {image && (
           <Button
             className="m-1 text-2xl border-round-md 
-                       border-solid bg-bluegray-600"
+                      border-solid bg-bluegray-600"
             label="確定"
             onClick={onCropHandler}
           />
         )}
       </div>
-    </Fragment>
+    </CSDialog>
   );
 };
-
-export default CropperTool;
+export default PhotoCropper;
