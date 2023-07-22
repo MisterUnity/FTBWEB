@@ -40,12 +40,18 @@ const menuItem = [
   },
   {
     id: "P-5",
+    itemName: "Multi Events Score",
+    icon: faCalendarDays,
+    path: "multiEventsScore",
+  },
+  {
+    id: "P-6",
     itemName: "Edit Schedule",
     icon: faCalendarDays,
     path: "editSchedule",
   },
   {
-    id: "P-6",
+    id: "P-7",
     itemName: "Sign Out",
     icon: faRightFromBracket,
     path: "/",

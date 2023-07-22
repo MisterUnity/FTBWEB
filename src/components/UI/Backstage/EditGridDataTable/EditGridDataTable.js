@@ -89,8 +89,10 @@ const columns = [
 // ***
 
 const EditGridDataTable = () => {
+  // ***** 各項狀態 *****
   const [products, setProducts] = useState();
   const [selectedProduct, setSelectedProduct] = useState(null);
+  // ***
 
   useEffect(() => {
     setProducts(initData);
@@ -100,7 +102,9 @@ const EditGridDataTable = () => {
   const dropdownEditor = (options) => {
     return (
       <Dropdown
-        value={options.value}
+        className="overflow-visible"
+        appendTo="self"
+        value={options.rowData.playerName}
         options={playerList}
         onChange={(e) => options.editorCallback(e.value)}
         placeholder="Select a Player"
@@ -147,20 +151,13 @@ const EditGridDataTable = () => {
   // ***** 編輯完後，輸入值的處理 *****
   const onCellEditComplete = (e) => {
     const { rowData, newValue, newRowData, field, originalEvent: event } = e;
-
     switch (field) {
       case "playerName":
-        const { playerName } = newRowData;
-        // console.log(newRowData);
-        // console.log(newRowData.goal);
-        // console.log(newRowData.playerName);
-        // rowData[field] = "1";
+        rowData[field] = newRowData.playerName;
         break;
 
       default:
         if (isPositiveInteger(newValue)) {
-          console.log(newRowData);
-          console.log(newRowData.playerName);
           rowData[field] = newValue;
         } else event.preventDefault();
         break;
@@ -174,7 +171,7 @@ const EditGridDataTable = () => {
         key={field}
         field={field}
         header={header}
-        style={{ width: "7%" }}
+        style={{ width: "7%", whiteSpace: "nowrap" }}
         editor={(options) => cellEditor(options)}
         onCellEditComplete={onCellEditComplete}
       />
@@ -182,7 +179,7 @@ const EditGridDataTable = () => {
   });
 
   return (
-    <div className="card p-fluid">
+    <div className="card p-fluid ">
       <DataTable
         value={products}
         editMode="cell"
