@@ -440,7 +440,7 @@ const AddPlayerInfo = () => {
           if (StatusCode === 1 && StatusMessage === "Normal end.") {
             navigate("playerList");
           } else {
-            Data.forEach((msg) => {
+            Result.forEach((msg) => {
               toast.current.show({
                 severity: msg.status,
                 summary: `Name: ${msg.name}`,
