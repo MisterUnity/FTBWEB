@@ -1,5 +1,5 @@
 import { ProgressSpinner } from "primereact/progressspinner";
-const LoadingFullPage = () => {
+const LoadingFullPage = (props) => {
   return (
     <div
       className="w-screen h-screen flex flex-column align-items-center justify-content-center"

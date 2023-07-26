@@ -40,9 +40,9 @@ const menuItem = [
   },
   {
     id: "P-5",
-    itemName: "Multi Events Score",
+    itemName: "Edit Comprehensive Data Table",
     icon: faCalendarDays,
-    path: "multiEventsScore",
+    path: "editComprehensiveDataTable",
   },
   {
     id: "P-6",

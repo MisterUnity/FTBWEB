@@ -1,12 +1,12 @@
 import axios from "axios";
-// axios.defaults.withCredentials = true;
+
 const FTBAPI = axios.create({
-  baseURL: "https://ftb-api.azurewebsites.net/api",
+  baseURL: process.env.REACT_APP_BASEURL_PROD,
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",
-    "X-Requested-With": "XMLHttpRequest"
+    "X-Requested-With": "XMLHttpRequest",
   },
-  withCredentials: true
+  withCredentials: true,
 });
 export default FTBAPI;

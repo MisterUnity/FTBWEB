@@ -7,7 +7,7 @@ import EditSchedule from "../page/Backstage/EditSchedule/EditSchedule";
 import PlayerList from "../page/Backstage/PlayerList/PlayerList";
 import AddPlayersInfo from "../page/Backstage/AddPlayersInfo/AddPlayersInfo";
 import TacticalBoard from "../page/Backstage/TacticalBoard/TacticalBoard";
-import MultiEventsScore from "../page/Backstage/MultiEventsScore/MultiEventsScore";
+import EditComprehensiveDataTable from "../page/Backstage/EditComprehensiveDataTable/EditComprehensiveDataTable";
 const router = createBrowserRouter([
   { path: "/", element: <ForestageHome />, errorElement: <Error /> },
   {
@@ -21,7 +21,10 @@ const router = createBrowserRouter([
       { index: true, path: "playerList", element: <PlayerList /> },
       { path: "addPlayersInfo", element: <AddPlayersInfo /> },
       { path: "tacticalBoard", element: <TacticalBoard /> },
-      { path: "multiEventsScore", element: <MultiEventsScore /> },
+      {
+        path: "editComprehensiveDataTable",
+        element: <EditComprehensiveDataTable />,
+      },
       { path: "editSchedule", element: <EditSchedule /> },
     ],
   },

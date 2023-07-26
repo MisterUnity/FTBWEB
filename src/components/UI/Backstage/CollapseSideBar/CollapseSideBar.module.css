@@ -1,0 +1,14 @@
+.collapseSideBar {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.normal {
+  width: 300px;
+  transition: width 0.5s;
+}
+.collapse {
+  width: 40px;
+  transition: width 0.3s;
+}

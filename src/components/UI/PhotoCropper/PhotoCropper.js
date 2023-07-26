@@ -3,8 +3,9 @@ import { Button } from "primereact/button";
 import { Cropper } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
 import classes from "./CropperTool.module.css";
+import CSDialog from "../../../cs_components/CSDialog";
 
-const CropperTool = (props) => {
+const PhotoCropper = ({ header, onHide, visible, onGetImageBlob }) => {
   const cropperRef = useRef();
 
   // ***** 各項狀態 *****
@@ -39,15 +40,15 @@ const CropperTool = (props) => {
     if (cropper) {
       const canvas = cropper.getCanvas();
       canvas.toBlob((image) => {
-        props.onGetImageBlob(URL.createObjectURL(image));
-        props.onSwitchVisible(false);
+        onGetImageBlob(URL.createObjectURL(image), image);
+        onHide();
       });
     }
   };
   // ***
 
   return (
-    <Fragment>
+    <CSDialog header={header} visible={visible} onHide={onHide}>
       <div className={classes.cropperWrapper}>
         <Cropper
           className={classes.cropper}
@@ -59,8 +60,8 @@ const CropperTool = (props) => {
       <div className="flex align-items-center">
         <label
           className=" p-1 text-2xl border-round-md 
-                     border-solid cursor-pointer 
-                     text-blue-50 bg-bluegray-600"
+                      border-solid cursor-pointer 
+                      text-blue-50 bg-bluegray-600"
           htmlFor="upLoad"
         >
           選擇檔案
@@ -80,8 +81,7 @@ const CropperTool = (props) => {
           />
         )}
       </div>
-    </Fragment>
+    </CSDialog>
   );
 };
-
-export default CropperTool;
+export default PhotoCropper;
