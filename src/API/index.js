@@ -5,8 +5,8 @@ const FTBAPI = axios.create({
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",
-    "X-Requested-With": "XMLHttpRequest"
+    "X-Requested-With": "XMLHttpRequest",
   },
-  withCredentials: true
+  withCredentials: true,
 });
 export default FTBAPI;

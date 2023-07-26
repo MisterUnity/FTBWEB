@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useContext, Fragment } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  Fragment,
+  useRef,
+} from "react";
+import { BlockUI } from "primereact/blockui";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -16,6 +23,8 @@ import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
 import "primeicons/primeicons.css";
 import { Tooltip } from "primereact/tooltip";
 import "./AddPlayersInfo.scss";
+import { Toast } from "primereact/toast";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
@@ -54,7 +63,8 @@ const AddPlayerInfo = () => {
   const [position] = useState(positionItem);
   const [rowIndex, setRowIndex] = useState();
   const [rowData, setRowData] = useState();
-  const [bHoverOnUploadOKFlag, setHoverOnUploadOKFlag] = useState(false); //WEICHE:
+  const toast = useRef();
+  const [blocked, setBlocked] = useState(false);
   // ***
 
   // ***** 登入逾時確認 *****
@@ -202,6 +212,9 @@ const AddPlayerInfo = () => {
           <i
             className={`custom-tooltip-btn-${context.rowIndex} pi pi-check cursor-pointer`}
             style={{ fontSize: "1rem" }}
+            onClick={() => {
+              imageCropperHandler(context.rowIndex, rowData);
+            }}
           ></i>
         );
         const UploadWaiting = (
@@ -418,40 +431,53 @@ const AddPlayerInfo = () => {
   // ***** 送出表單處理 *****
   //TODO  待測（送出表單）
   const sendDataHandler = () => {
+    setBlocked(true);
     if (authCtx.signInStatus === true) {
       PostPlayersInfo(playersInfo)
         .then((res) => {
-          const { StatusCode, StatusMessage } = res.data;
+          setBlocked(false);
+          const { StatusCode, StatusMessage, Result, Data } = res.data;
           if (StatusCode === 1 && StatusMessage === "Normal end.") {
             navigate("playerList");
+          } else {
+            Data.forEach((msg) => {
+              toast.current.show({
+                severity: msg.status,
+                summary: `Name: ${msg.name}`,
+                detail: msg.statusMsg,
+                life: 3000,
+              });
+            });
           }
         })
         .catch((err) => {
+          setBlocked(false);
           alert(`ERROR：${err}`);
         });
     } else {
+      setBlocked(false);
       alert("登入逾時，將回首頁");
       navigate("/");
     }
   };
   // ***
-
   return (
-    <div
-      id="dataTableContainer"
-      className="card p-fluid w-full h-full absolute overflow-auto"
-    >
-      <DataTable
-        value={playersInfo}
-        // editMode="row"
-        editMode="cell"
-        dataKey="id"
-        // onRowEditComplete={onRowEditCompleteHandler}
-        tableStyle={{ minWidth: "50rem" }}
-        // className="min-h-screen" //WEICHE:
+    <BlockUI blocked={blocked} containerClassName="h-full">
+      <div
+        id="dataTableContainer"
+        className="card p-fluid w-full h-full absolute overflow-auto relative"
       >
-        {column}
-        {/* <Column
+        <DataTable
+          value={playersInfo}
+          // editMode="row"
+          editMode="cell"
+          dataKey="id"
+          // onRowEditComplete={onRowEditCompleteHandler}
+          tableStyle={{ minWidth: "50rem" }}
+          // className="min-h-screen" //WEICHE:
+        >
+          {column}
+          {/* <Column
           rowEditor
           headerStyle={{ width: "5%", minWidth: "8rem" }}
           bodyStyle={{ textAlign: "center" }}
@@ -460,20 +486,20 @@ const AddPlayerInfo = () => {
           headerStyle={{ width: "5%", minWidth: "8rem" }}
           bodyStyle={{ textAlign: "center" }}
         /> */}
-      </DataTable>
-      <div className="flex justify-content-end">
-        <Button
-          className="w-1 bg-bluegray-700"
-          label="＋"
-          onClick={addRowHandler}
-        />
-        <Button
-          className="w-2 ml-2 bg-bluegray-700"
-          label="送出表單"
-          onClick={sendDataHandler}
-        />
-      </div>
-      {/* {cropperVisible && (
+        </DataTable>
+        <div className="flex justify-content-end">
+          <Button
+            className="w-1 bg-bluegray-700"
+            label="＋"
+            onClick={addRowHandler}
+          />
+          <Button
+            className="w-2 ml-2 bg-bluegray-700"
+            label="送出表單"
+            onClick={sendDataHandler}
+          />
+        </div>
+        {/* {cropperVisible && (
         <PhotoCropper
           visible={cropperVisible}
           onSwitchVisible={visibleHandler}
@@ -481,15 +507,34 @@ const AddPlayerInfo = () => {
           onGetImageBlob={imagePreviewHandler}
         />
       )} */}
-      <PhotoCropper
-        visible={cropperVisible}
-        // onSwitchVisible={visibleHandler}
-        onHide={() => setCropperVisible(false)}
-        rowIndex={rowIndex}
-        onGetImageBlob={imagePreviewHandler}
-        header="請選擇並剪取您的相片"
-      />
-    </div>
+        <PhotoCropper
+          visible={cropperVisible}
+          // onSwitchVisible={visibleHandler}
+          onHide={() => setCropperVisible(false)}
+          rowIndex={rowIndex}
+          onGetImageBlob={imagePreviewHandler}
+          header="請選擇並剪取您的相片"
+        />
+        <Toast ref={toast}></Toast>
+        {blocked ? (
+          <ProgressSpinner
+            style={{
+              width: "50px",
+              height: "50px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+            strokeWidth="8"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+          />
+        ) : (
+          <></>
+        )}
+      </div>
+    </BlockUI>
   );
 };
 export default AddPlayerInfo;
