@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,7 +12,10 @@ import { InputNumber } from "primereact/inputnumber";
 import { v4 as uuidv4 } from "uuid";
 import { useRef } from "react";
 import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../../../store/AuthContext";
 
+import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 const playerList = [
   "Select a Player",
   "A選手",
@@ -97,27 +100,30 @@ const columns = [
 
 const EditComprehensiveDataTable = () => {
   const [ayPlayersInfo, setPlayers] = useState(null);
-
+  const authCtx = useContext(AuthContext);
+  const navigate = useNavigate();
   useEffect(() => {
-    const initData = [];
-    for (let i = 0; i < 16; i++) {
-      initData.push({
-        id: uuidv4(),
-        playerName: "Select a Player",
-        goal: "0",
-        toShoot: "0",
-        cornerBall: "0",
-        goalKick: "0",
-        header: "0",
-        handBall: "0",
-        penaltyKick: "0",
-        freeKick: "0",
-        offside: "0",
-        yellowCard: "0",
-        readCard: "0",
-      });
+    if (checkLogin(authCtx, navigate)) {
+      const initData = [];
+      for (let i = 0; i < 16; i++) {
+        initData.push({
+          id: uuidv4(),
+          playerName: "Select a Player",
+          goal: "0",
+          toShoot: "0",
+          cornerBall: "0",
+          goalKick: "0",
+          header: "0",
+          handBall: "0",
+          penaltyKick: "0",
+          freeKick: "0",
+          offside: "0",
+          yellowCard: "0",
+          readCard: "0",
+        });
+        setPlayers(initData);
+      }
     }
-    setPlayers(initData);
   }, []);
 
   // ***** 編輯模式：計數器 *****

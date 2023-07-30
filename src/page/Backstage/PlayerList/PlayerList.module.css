@@ -6,3 +6,7 @@
   opacity: 0;
   transition: opacity 0.5s ease;
 }
+.bg {
+  background-image: url("../../../assets//playerList_BG.jpg");
+  background-size: cover;
+}

@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useContext, Fragment } from "react";
+import { useEffect, useState, useContext, Fragment, useRef } from "react";
+import { BlockUI } from "primereact/blockui";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -10,12 +11,14 @@ import { v4 as uuidv4 } from "uuid";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
 import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
+import { Tooltip } from "primereact/tooltip";
+import { Toast } from "primereact/toast";
+import { ProgressSpinner } from "primereact/progressspinner";
 import AuthContext from "../../../store/AuthContext";
 import PhotoCropper from "../../../components/UI/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
+import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import "primeicons/primeicons.css";
-import { Tooltip } from "primereact/tooltip";
-import "./AddPlayersInfo.scss";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
@@ -54,24 +57,13 @@ const AddPlayerInfo = () => {
   const [position] = useState(positionItem);
   const [rowIndex, setRowIndex] = useState();
   const [rowData, setRowData] = useState();
+  const toast = useRef();
+  const [blocked, setBlocked] = useState(false);
   // ***
 
   // ***** 登入逾時確認 *****
   useEffect(() => {
-    CheckLogin()
-      .then((res) => {
-        const { StatusCode, StatusMessage } = res.data;
-        if (StatusCode && StatusMessage.includes("Normal")) {
-          authCtx.onSetSignInStatus(true);
-        } else {
-          authCtx.onSetSignInStatus(false);
-          navigate("/");
-        }
-      })
-      .catch((err) => {
-        authCtx.onSetSignInStatus(false);
-        alert(err);
-      });
+    checkLogin(authCtx, navigate);
   }, []);
   // ***
 
@@ -96,8 +88,8 @@ const AddPlayerInfo = () => {
     //WEICHE: 因為 API 要傳送的是 Blob File，不是本地創建的地址資源 (URL.createObjectURL)
     rowData.photo = imageData; //WEICHE: 所以這邊新增一個 photoUrl 用來本地顯示
     rowData.photoUrl = imageLocalUrl; //WEICHE ADD
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
+    setPlayersInfo((prevPlayersInfo) => {
+      let _playersInfo = [...prevPlayersInfo];
       _playersInfo[rowIndex].photo = imageData;
       _playersInfo[rowIndex].photoUrl = imageLocalUrl; //WEICHE ADD
       return _playersInfo;
@@ -107,8 +99,8 @@ const AddPlayerInfo = () => {
 
   // *****列-刪除處理 *****
   const deleteRowHandler = (context) => {
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
+    setPlayersInfo((prevPlayersInfo) => {
+      let _playersInfo = [...prevPlayersInfo];
       _playersInfo.splice(context.rowIndex, 1);
       return _playersInfo;
     });
@@ -117,8 +109,8 @@ const AddPlayerInfo = () => {
 
   // ***** 追加新列處理 *****
   const addRowHandler = () => {
-    setPlayersInfo((prevrPlayersInfo) => {
-      let _playersInfo = [...prevrPlayersInfo];
+    setPlayersInfo((prevPlayersInfo) => {
+      let _playersInfo = [...prevPlayersInfo];
       _playersInfo.push({
         // id: new Date().toLocaleString(),
         id: uuidv4(),
@@ -131,6 +123,7 @@ const AddPlayerInfo = () => {
         weight: "ex:75kg",
         position: "ex:前鋒",
         team: "ex:1隊",
+        // description: "備註",
         delete: "",
       });
       return _playersInfo;
@@ -150,7 +143,7 @@ const AddPlayerInfo = () => {
     {
       id: "column1",
       field: "photo",
-      header: "Image",
+      header: "照片",
       width: "10",
 
       BodyCallBack: (rowData, context) => {
@@ -197,7 +190,7 @@ const AddPlayerInfo = () => {
     {
       id: "column2",
       field: "name",
-      header: "Name",
+      header: "姓名",
       width: "10",
       editorCallBack: (options) => {
         return (
@@ -214,7 +207,7 @@ const AddPlayerInfo = () => {
     {
       id: "column3",
       field: "gender",
-      header: "Gender",
+      header: "性別",
       width: "5",
       editorCallBack: (options) => {
         return (
@@ -231,7 +224,7 @@ const AddPlayerInfo = () => {
     {
       id: "column4",
       field: "age",
-      header: "Age",
+      header: "年齡",
       width: "5",
       editorCallBack: (options) => {
         return (
@@ -248,7 +241,7 @@ const AddPlayerInfo = () => {
     {
       id: "column5",
       field: "height",
-      header: "Height",
+      header: "身高",
       width: "10",
       editorCallBack: (options) => {
         return (
@@ -265,7 +258,7 @@ const AddPlayerInfo = () => {
     {
       id: "column6",
       field: "weight",
-      header: "Weight",
+      header: "體重",
       width: "10",
       editorCallBack: (options) => {
         return (
@@ -282,7 +275,7 @@ const AddPlayerInfo = () => {
     {
       id: "column7",
       field: "position",
-      header: "Position",
+      header: "目前位子",
       width: "10",
       editorCallBack: (options) => {
         return (
@@ -299,7 +292,7 @@ const AddPlayerInfo = () => {
     {
       id: "column8",
       field: "team",
-      header: "Team",
+      header: "隊伍",
       width: "10",
       editorCallBack: (options) => {
         return (
@@ -313,11 +306,28 @@ const AddPlayerInfo = () => {
         );
       },
     },
+    // {
+    //   id: "column9",
+    //   field: "description",
+    //   header: "備註事項",
+    //   width: "10",
+    //   editorCallBack: (options) => {
+    //     return (
+    //       <div className="w-6rem">
+    //         <InputText
+    //           type="text"
+    //           value={options.value}
+    //           onChange={(e) => options.editorCallback(e.target.value)}
+    //         />
+    //       </div>
+    //     );
+    //   },
+    // },
     {
-      id: "column9",
+      id: "column10",
       field: "delete",
-      header: "Delete",
-      width: "10",
+      header: "",
+      width: "5",
 
       BodyCallBack: (rowData, context) => {
         return (
@@ -348,17 +358,28 @@ const AddPlayerInfo = () => {
   });
 
   // ***** 送出表單處理 *****
-  //TODO  待測（送出表單）
   const sendDataHandler = () => {
     if (authCtx.signInStatus === true) {
+      setBlocked(true);
       PostPlayersInfo(playersInfo)
         .then((res) => {
-          const { StatusCode, StatusMessage } = res.data;
+          setBlocked(false);
+          const { StatusCode, StatusMessage, Result } = res.data;
           if (StatusCode === 1 && StatusMessage === "Normal end.") {
             navigate("playerList");
+          } else {
+            Result.forEach((msg) => {
+              toast.current.show({
+                severity: msg.status,
+                summary: `Name: ${msg.name}`,
+                detail: msg.statusMsg,
+                life: 3000,
+              });
+            });
           }
         })
         .catch((err) => {
+          setBlocked(false);
           alert(`ERROR：${err}`);
         });
     } else {
@@ -367,40 +388,59 @@ const AddPlayerInfo = () => {
     }
   };
   // ***
-
   return (
-    <div
-      id="dataTableContainer"
-      className="card p-fluid w-full h-full absolute overflow-auto"
-    >
-      <DataTable
-        value={playersInfo}
-        editMode="cell"
-        dataKey="id"
-        tableStyle={{ minWidth: "50rem" }}
+    <BlockUI blocked={blocked} containerClassName="h-full">
+      <div
+        id="dataTableContainer"
+        className="card p-fluid w-full h-full absolute overflow-auto "
       >
-        {column}
-      </DataTable>
-      <div className="flex justify-content-end">
-        <Button
-          className="w-1 bg-bluegray-700"
-          label="＋"
-          onClick={addRowHandler}
+        <DataTable
+          value={playersInfo}
+          editMode="cell"
+          dataKey="id"
+          tableStyle={{ minWidth: "50rem" }}
+        >
+          {column}
+        </DataTable>
+        <div className="flex justify-content-end">
+          <Button
+            className="w-1 bg-bluegray-700"
+            label="＋"
+            onClick={addRowHandler}
+          />
+          <Button
+            className="w-2 ml-2 bg-bluegray-700"
+            label="送出表單"
+            onClick={sendDataHandler}
+          />
+        </div>
+        <PhotoCropper
+          visible={cropperVisible}
+          onHide={() => setCropperVisible(false)}
+          rowIndex={rowIndex}
+          onGetImageBlob={imagePreviewHandler}
+          header="請選擇並剪取您的相片"
         />
-        <Button
-          className="w-2 ml-2 bg-bluegray-700"
-          label="送出表單"
-          onClick={sendDataHandler}
-        />
+        <Toast ref={toast}></Toast>
+        {blocked ? (
+          <ProgressSpinner
+            style={{
+              width: "50px",
+              height: "50px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+            strokeWidth="8"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+          />
+        ) : (
+          <></>
+        )}
       </div>
-      <PhotoCropper
-        visible={cropperVisible}
-        onHide={() => setCropperVisible(false)}
-        rowIndex={rowIndex}
-        onGetImageBlob={imagePreviewHandler}
-        header="請選擇並剪取您的相片"
-      />
-    </div>
+    </BlockUI>
   );
 };
 export default AddPlayerInfo;

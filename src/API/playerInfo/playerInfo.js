@@ -24,35 +24,74 @@ export const GetPlayerInfo = (id) => {
 
 // Post all Players Info
 export const PostPlayersInfo = async (ayPlayerInfos = []) => {
+  if (ayPlayerInfos.length === 0) throw new Error("沒有新增球員資料!!!");
 
-  if (ayPlayerInfos.length === 0) throw new Error('沒有新增球員資料!!!');
+  const ayFormData = [],
+    pTask = [];
 
-  const ayFormData = [], pTask = [];
-
-  for (let i=0; i< ayPlayerInfos.length; i++) {
+  for (let i = 0; i < ayPlayerInfos.length; i++) {
     delete ayPlayerInfos[i].id;
     const formData = new FormData();
-    formData.append('name', ayPlayerInfos[i].name);
-    formData.append('age', ayPlayerInfos[i].age);
-    formData.append('gender', ayPlayerInfos[i].gender === '男' ? "M" : "F");
-    formData.append('height', ayPlayerInfos[i].height);
-    formData.append('position', ayPlayerInfos[i].position);
-    formData.append('weight', ayPlayerInfos[i].weight);
-    formData.append('photo', ayPlayerInfos[i].photo, ayPlayerInfos[i].name);
-    ayFormData.push(formData)
-  };
-
-  for (let info=0; info < ayFormData.length; info++) {
-    pTask.push(
-      FTBAPI.post("/Player/PostUpResource", ayFormData[info], {
-          headers: {'Content-Type ':'multipart/form-data'},
-          timeout: 1000*60*3 //3min
-        }
-      )
-    )
+    formData.append("name", ayPlayerInfos[i].name);
+    formData.append("age", ayPlayerInfos[i].age);
+    formData.append("gender", ayPlayerInfos[i].gender === "男" ? "M" : "F");
+    formData.append("height", ayPlayerInfos[i].height);
+    formData.append("position", ayPlayerInfos[i].position);
+    formData.append("team", ayPlayerInfos[i].team);
+    formData.append("weight", ayPlayerInfos[i].weight);
+    // formData.append("description", ayPlayerInfos[i].description);
+    formData.append("photo", ayPlayerInfos[i].photo, ayPlayerInfos[i].name);
+    ayFormData.push(formData);
   }
 
-  return Promise.all(pTask).then(res=>res).catch(err=>{throw new Error(err)});
+  for (let info = 0; info < ayFormData.length; info++) {
+    pTask.push(
+      FTBAPI.post("/Player/AddPlayer", ayFormData[info], {
+        headers: { "Content-Type ": "multipart/form-data" },
+        timeout: 1000 * 60 * 3, //3min
+      })
+    );
+  }
+
+  return Promise.all(pTask)
+    .then((res) => {
+      const ayStatusMsg = [];
+      let bAllOK = true;
+      res.forEach(({ data }, index) => {
+        if (data.StatusCode !== 1) {
+          ayStatusMsg.push({
+            name: ayPlayerInfos[index].name,
+            statusMsg: data.ErrorMessage,
+            status: "error",
+          });
+          bAllOK = false;
+        } else {
+          ayStatusMsg.push({
+            name: ayPlayerInfos[index].name,
+            statusMsg: "上傳成功",
+            status: "success",
+          });
+        }
+      });
+      if (bAllOK) {
+        return {
+          data: {
+            StatusCode: 1,
+            StatusMessage: "Normal end.",
+          },
+        };
+      }
+      return {
+        data: {
+          StatusCode: 0,
+          StatusMessage: "Error!!",
+          Result: ayStatusMsg,
+        },
+      };
+    })
+    .catch((err) => {
+      throw new Error(err);
+    });
 };
 
 // Put Player Info
