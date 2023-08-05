@@ -55,6 +55,7 @@ const PhotoCropper = ({ header, onHide, visible, onGetImageBlob }) => {
           ref={cropperRef}
           backgroundClassName={classes.cropperBackground}
           src={image}
+          stencilProps={{ aspectRatio: 1 }}
         />
       </div>
       <div className="flex align-items-center">
