@@ -1,7 +1,7 @@
 import { Provider } from "react-redux";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import AuthContextProvider from "./store/AuthContextProvider";
+import GlobalContextProvider from "./store/GlobalContextProvider";
 import App from "./App";
 import ReduxStore from "./store/ReduxStore/index";
 import "primereact/resources/primereact.min.css";
@@ -14,9 +14,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <React.StrictMode>
   <Provider store={ReduxStore}>
-    <AuthContextProvider>
+    <GlobalContextProvider>
       <App />
-    </AuthContextProvider>
+    </GlobalContextProvider>
   </Provider>
   // </React.StrictMode>
 );

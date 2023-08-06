@@ -1,13 +1,14 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import ForestageMenu from "../../../components/UI/Forestage/ForestageMenu/ForestageMenu";
-import AuthContext from "../../../store/AuthContext";
+import {useGlobalStore} from "../../../store/GlobalContextProvider";
 import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
 import "./ForestageHome.scss";
 
 const ForestageHome = (props) => {
-  const authCtx = useContext(AuthContext);
+  const {authContext, showToast} = useGlobalStore();
+  const context = useGlobalStore();
   const navigate = useNavigate();
   const viewSwitchHandler = () => {
     navigate("/signIn");
@@ -20,20 +21,21 @@ const ForestageHome = (props) => {
         const { StatusCode, StatusMessage } = res.data;
         setController(true); //真正決定顯示的時機在確認登入完之後
         if (StatusCode && StatusMessage.includes("Normal")) {
-          authCtx.onSetSignInStatus(true);
+          authContext.onSetSignInStatus(true);
         } else {
-          authCtx.onSetSignInStatus(false);
+          authContext.onSetSignInStatus(false);
         }
+        showToast('success', '登入成功', 1);
       })
       .catch((err) => {
-        authCtx.onSetSignInStatus(false);
+        authContext.onSetSignInStatus(false);
         alert(err);
       });
   }, []);
 
   const controllerResult = !bShowAuthController ? (
     <></>
-  ) : authCtx.signInStatus ? (
+  ) : authContext.signInStatus ? (
     <ForestageMenu />
   ) : (
     <Button label="Sign In" onClick={viewSwitchHandler} />

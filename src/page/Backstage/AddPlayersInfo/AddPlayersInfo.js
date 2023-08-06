@@ -14,15 +14,15 @@ import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
 import { Tooltip } from "primereact/tooltip";
 import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
-import AuthContext from "../../../store/AuthContext";
-import PhotoCropper from "../../../components/UI/PhotoCropper/PhotoCropper";
+import {useGlobalStore} from "../../../store/GlobalContextProvider";
+import PhotoCropper from "@/components/Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import "primeicons/primeicons.css";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
-  const authCtx = useContext(AuthContext);
+  const authCtx = useGlobalStore();
   // ***** 下拉式表單選項處理 *****
   const genderItem = ["男", "女", "其他"];
   const ageItem = useDropdownItem(1, 41, "歲");

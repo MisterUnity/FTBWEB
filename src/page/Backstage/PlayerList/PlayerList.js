@@ -8,7 +8,7 @@ import CollapseSideBar from "../../../components/UI/Backstage/CollapseSideBar/Co
 import ComprehensiveDataTable from "../../../components/UI/Backstage/ComprehensiveDataTable/ComprehensiveDataTable";
 import classes from "./PlayerList.module.css";
 import blueWhaleLogo from "../../../assets/blue_whale_logo.png";
-import AuthContext from "../../../store/AuthContext";
+import {useGlobalStore} from "../../../store/GlobalContextProvider";
 
 const DUMMY_DATA = [];
 for (let i = 0; i < 16; i++) {
@@ -100,7 +100,7 @@ const PlayerList = () => {
   const [photoTransition, setPhotoTransition] = useState(true);
   const [dataTableType, setDataTableType] = useState();
   const [dataTableValue, setDataTableValue] = useState();
-  const authCtx = useContext(AuthContext);
+  const {authContext} = useGlobalStore();
   const navigate = useNavigate();
 
   // ***** 下拉選單選項 *****
@@ -116,7 +116,7 @@ const PlayerList = () => {
   // ***** 初始數據處理 *****
 
   useEffect(() => {
-    if (checkLogin(authCtx, navigate)) {
+    if (checkLogin(authContext, navigate)) {
       //TODO取得所有資料
 
       //組建側邊欄選手名單

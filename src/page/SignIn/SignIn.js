@@ -1,11 +1,11 @@
-import { useState, Fragment, useContext } from "react";
+import { useState, Fragment } from "react";
 import { Login, Register } from "../../API/Auth/userInfo/userInfo";
 import { useNavigate } from "react-router-dom";
 import SignInCard from "./SignInCard";
 import EnterErrCard from "./EnterErrorCard";
 import MsgSlice from "@/components/UI/MsgSlice/MsgSlice";
 import backDrop from "../../assets/Background.jpg";
-import AuthContext from "../../store/AuthContext";
+import {useGlobalStore} from "../../store/GlobalContextProvider";
 import classes from "./signIn.module.css";
 
 const SignIn = (props) => {
@@ -14,7 +14,7 @@ const SignIn = (props) => {
   const [strSignInOrRegis, setTitle2] = useState("Create an account");
   const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
-  const authCtx = useContext(AuthContext);
+  const {authContext} = useGlobalStore();
   const navigate = useNavigate();
 
   const ChangeTitle = () => {
@@ -35,10 +35,10 @@ const SignIn = (props) => {
         res.data.StatusCode === 1 &&
         res.data.StatusMessage === "Normal end."
       ) {
-        authCtx.onSetSignInStatus(true);
+        authContext.onSetSignInStatus(true);
         navigate("/");
       } else {
-        authCtx.onSetSignInStatus(false);
+        authContext.onSetSignInStatus(false);
         setErrorMsgIsShown(true);
       }
       setIsLoad(false);
@@ -60,11 +60,11 @@ const SignIn = (props) => {
           res.data.StatusCode === 1 &&
           res.data.StatusMessage === "Normal end."
         ) {
-          authCtx.onSetSignInStatus(true);
+          authContext.onSetSignInStatus(true);
           navigate("/");
           DoLogin(userData);
         } else {
-          authCtx.onSetSignInStatus(false);
+          authContext.onSetSignInStatus(false);
           setErrorMsgIsShown(true);
         }
         setIsLoad(false);

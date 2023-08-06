@@ -4,12 +4,12 @@ import { Menu } from "primereact/menu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
-import AuthContext from "../../../../store/AuthContext";
+import {useGlobalStore} from "../../../../store/GlobalContextProvider";
 import { Logout } from "../../../../API/Auth/userInfo/userInfo";
 
 const ForestageMenu = () => {
   const navigate = useNavigate();
-  const authCtx = useContext(AuthContext);
+  const {authContext} = useGlobalStore();
   const menuRight = useRef(null);
   const items = [
     {
@@ -28,7 +28,7 @@ const ForestageMenu = () => {
             res.data.StatusCode === 1 &&
             res.data.StatusMessage === "Normal end."
           ) {
-            authCtx.onSetSignInStatus(false);
+            authContext.onSetSignInStatus(false);
             navigate("/");
           }
         })

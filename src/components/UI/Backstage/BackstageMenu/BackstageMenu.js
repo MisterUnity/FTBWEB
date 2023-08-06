@@ -9,7 +9,7 @@ import {
   faCalendarDays,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import AuthContext from "../../../../store/AuthContext";
+import {useGlobalStore} from "../../../../store/GlobalContextProvider";
 import classes from "./BackstageMenu.module.css";
 
 // 後台選單的顯示項目
@@ -58,7 +58,7 @@ const menuItem = [
   },
 ];
 const BackstageMenu = () => {
-  const authCtx = useContext(AuthContext);
+  const {authContext} = useGlobalStore();
 
   // 登出處理
   const signOutHandler = () => {

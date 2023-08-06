@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useRef } from "react";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../../../store/AuthContext";
+import {useGlobalStore} from "../../../store/GlobalContextProvider";
 
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 const playerList = [
@@ -100,10 +100,10 @@ const columns = [
 
 const EditComprehensiveDataTable = () => {
   const [ayPlayersInfo, setPlayers] = useState(null);
-  const authCtx = useContext(AuthContext);
+  const {authContext} = useGlobalStore();
   const navigate = useNavigate();
   useEffect(() => {
-    if (checkLogin(authCtx, navigate)) {
+    if (checkLogin(authContext, navigate)) {
       const initData = [];
       for (let i = 0; i < 16; i++) {
         initData.push({
