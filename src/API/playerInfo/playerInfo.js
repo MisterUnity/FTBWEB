@@ -32,15 +32,15 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
   for (let i = 0; i < ayPlayerInfos.length; i++) {
     delete ayPlayerInfos[i].id;
     const formData = new FormData();
-    formData.append("name", ayPlayerInfos[i].name);
-    formData.append("age", ayPlayerInfos[i].age);
-    formData.append("gender", ayPlayerInfos[i].gender === "男" ? "M" : "F");
-    formData.append("height", ayPlayerInfos[i].height);
-    formData.append("position", ayPlayerInfos[i].position);
-    formData.append("team", ayPlayerInfos[i].team);
-    formData.append("weight", ayPlayerInfos[i].weight);
+    formData.append("Name", ayPlayerInfos[i].name);
+    formData.append("Age", ayPlayerInfos[i].age);
+    formData.append("Gender", ayPlayerInfos[i].gender === "男" ? "M" : "F");
+    formData.append("Height", ayPlayerInfos[i].height);
+    formData.append("Position", ayPlayerInfos[i].position);
+    formData.append("Team", ayPlayerInfos[i].team);
+    formData.append("Weight", ayPlayerInfos[i].weight);
     // formData.append("description", ayPlayerInfos[i].description);
-    formData.append("photo", ayPlayerInfos[i].photo, ayPlayerInfos[i].name);
+    formData.append("Photo", ayPlayerInfos[i].photo, ayPlayerInfos[i].name);
     ayFormData.push(formData);
   }
 
@@ -95,8 +95,20 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
 };
 
 // Put Player Info
-export const PutPlayerInfo = (id) => {
-  return FTBAPI.put(`/Player/${id}`)
+export const PutPlayerPersonalInfo = (formData) => {
+  return FTBAPI.put(`/Player/${data.ID}`, {
+    headers: { "Content-Type ": "multipart/form-data" },
+  })
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const PutPlayerDataTableInfo = (dataTable) => {
+  return FTBAPI.put(`/Player/${data.ID}`)
     .then((res) => {
       return res;
     })

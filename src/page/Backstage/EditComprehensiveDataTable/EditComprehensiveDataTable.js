@@ -157,6 +157,7 @@ const EditComprehensiveDataTable = () => {
 
   // ***** DataTable連鎖值的處理相關方法 *****
   const cellEditor = (options) => {
+    console.log(options);
     if (options.field === "playerName") return dropdownEditor(options);
     else return textNumberEditor(options);
   };

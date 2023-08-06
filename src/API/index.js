@@ -9,4 +9,19 @@ const FTBAPI = axios.create({
   },
   withCredentials: true,
 });
+
+//回應攔截器
+FTBAPI.interceptors.response.use(
+  (response) => {
+    const { ErrorCode, StatusCode } = response.data;
+    if (ErrorCode && ErrorCode.includes("E") && StatusCode === 0) {
+      throw response;
+    }
+    return response;
+  },
+  (error) => {
+    throw error;
+  }
+);
+
 export default FTBAPI;
