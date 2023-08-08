@@ -1,5 +1,6 @@
 import axios from "axios";
 
+// API 基本配置 Start
 const FTBAPI = axios.create({
   baseURL: process.env.REACT_APP_BASEURL_PROD,
   timeout: 20000,
@@ -9,12 +10,18 @@ const FTBAPI = axios.create({
   },
   withCredentials: true,
 });
+// API 基本配置 End
 
-//回應攔截器
+// 回應攔截器 Start
 FTBAPI.interceptors.response.use(
   (response) => {
-    const { ErrorCode, StatusCode } = response.data;
-    if (ErrorCode && ErrorCode.includes("E") && StatusCode === 0) {
+    const { ErrorCode, StatusCode, ErrorMessage } = response.data;
+    if (
+      ErrorCode &&
+      ErrorCode.includes("E") &&
+      ErrorMessage !== "未登入" &&
+      StatusCode === 0
+    ) {
       throw response;
     }
     return response;
@@ -23,5 +30,6 @@ FTBAPI.interceptors.response.use(
     throw error;
   }
 );
+// 回應攔截器 End
 
 export default FTBAPI;

@@ -13,9 +13,9 @@ import { v4 as uuidv4 } from "uuid";
 import { useRef } from "react";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import {useGlobalStore} from "../../../store/GlobalContextProvider";
-
+import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
+
 const playerList = [
   "Select a Player",
   "A選手",
@@ -99,11 +99,13 @@ const columns = [
 ];
 
 const EditComprehensiveDataTable = () => {
-  const [ayPlayersInfo, setPlayers] = useState(null);
-  const {authContext} = useGlobalStore();
+  const [playerMatchStats, setPlayerMatchData] = useState(null);
+  const { authContext, submitStatusHandler } = useGlobalStore();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (checkLogin(authContext, navigate)) {
+
+  // 初始處理 Start
+  const initHandler = async () => {
+    if (await checkLogin(authContext, navigate)) {
       const initData = [];
       for (let i = 0; i < 16; i++) {
         initData.push({
@@ -121,12 +123,16 @@ const EditComprehensiveDataTable = () => {
           yellowCard: "0",
           readCard: "0",
         });
-        setPlayers(initData);
+        setPlayerMatchData(initData);
       }
     }
+  };
+  useEffect(() => {
+    initHandler();
   }, []);
+  // 初始處理 End
 
-  // ***** 編輯模式：計數器 *****
+  // 編輯模式：下拉選單 Start
   const textNumberEditor = (options) => {
     return (
       <InputNumber
@@ -139,9 +145,9 @@ const EditComprehensiveDataTable = () => {
       />
     );
   };
-  // ***
+  // 編輯模式：下拉選單 End
 
-  // ***** 編輯模式：計數器 *****
+  // 編輯模式：計數器 Start
   const dropdownEditor = (options) => {
     return (
       <Dropdown
@@ -153,24 +159,23 @@ const EditComprehensiveDataTable = () => {
       />
     );
   };
-  // ***
+  // 編輯模式：計數器 End
 
-  // ***** DataTable連鎖值的處理相關方法 *****
+  // 編輯模式的時，顯示的組件處理 Start
   const cellEditor = (options) => {
-    console.log(options);
     if (options.field === "playerName") return dropdownEditor(options);
     else return textNumberEditor(options);
   };
+  // 編輯模式的時，顯示的組件處理 End
 
-  // ***** 編輯完處理 *****
+  // 編輯完處理 Start
   const onCellEditComplete = (e) => {
-    console.log("Edit complete");
     let { rowData, newValue, field, originalEvent: event } = e;
     rowData[field] = newValue;
   };
-  // ***
+  // 編輯完處理 End
 
-  // ***** 輸入值是否為整數判斷 *****
+  // 輸入值是否為整數判斷 Start
   const isPositiveInteger = (val) => {
     let str = String(val);
     str = str.trim();
@@ -181,11 +186,19 @@ const EditComprehensiveDataTable = () => {
     let n = Math.floor(Number(str));
     return n !== Infinity && String(n) === str && n >= 0;
   };
-  // ***
+  // 輸入值是否為整數判斷 End
+
+  // 表單送出處理器 Start
+  const submitHandler = () => {
+    //TODO 數據送出處理未完
+    if (!submitStatusHandler.submitStatus) {
+    }
+  };
+  // 表單送出處理器 End
 
   return (
     <div className="card p-fluid h-screen">
-      <DataTable value={ayPlayersInfo} editMode="cell">
+      <DataTable value={playerMatchStats} editMode="cell">
         {columns.map(({ field, header }) => {
           return (
             <Column
@@ -200,8 +213,9 @@ const EditComprehensiveDataTable = () => {
         })}
       </DataTable>
       <Button
+        disabled
         onClick={(e) => {
-          console.log(ayPlayersInfo);
+          console.log(playerMatchStats);
         }}
       >
         Add

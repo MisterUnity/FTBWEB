@@ -1,5 +1,4 @@
-import React, { useState, useContext, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useMemo, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -11,14 +10,17 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PutPlayerPersonalInfo } from "../../../../API/playerInfo/playerInfo";
-import checkLogin from "../../../Functions/CheckLoginStatus/CheckLoginStatus";
-import AuthContext from "../../../../store/AuthContext";
-import PhotoCropper from "../../../UI/PhotoCropper/PhotoCropper";
+import { useGlobalStore } from "../../../../store/GlobalContextProvider";
+import { GetPlayerInfo } from "../../../../API/playerInfo/playerInfo";
+import PhotoCropper from "../../../Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../../Hook/useDropdownItem/useDropdownItem";
 import blueWhaleLogo from "../../../../assets/blue_whale_logo.png";
-import classes from "./PlayerInfo.module.css";
+
 const PlayersInfo = React.memo(
-  ({ className, playerDetailedInfo, onDisabled }) => {
+  ({ className, playerDetailedInfo, onDisabled, onUpdate }) => {
+    const { showToast, submitContext } = useGlobalStore();
+
+    // 項目狀態 Start
     const [playerInfo, setPlayerInfo] = useState({});
     const [editModel, setEditModel] = useState(false);
     const [cropperVisible, setCropperVisible] = useState(false);
@@ -31,8 +33,9 @@ const PlayersInfo = React.memo(
     const [position, setPosition] = useState("");
     const [team, setTeam] = useState("");
     const [description, setDescription] = useState("");
+    // 項目狀態 End
 
-    // ***** 下拉式表單選項處理 *****
+    // 下拉式表單選項處理 Start
     const genderItem = ["男", "女", "其他"];
     const ageItem = useDropdownItem(1, 41, "歲");
     const heightItem = useDropdownItem(150, 200, "cm");
@@ -53,22 +56,9 @@ const PlayersInfo = React.memo(
       "守門員",
     ];
     const teamItem = ["1隊", "2隊"];
-    // ***
-    const authCtx = useContext(AuthContext);
-    const navigate = useNavigate();
-    const dataRest = () => {
-      setPhoto("");
-      setName("");
-      setAge("");
-      setGender("");
-      setHeight("");
-      setWeight("");
-      setPosition("");
-      setTeam("");
-      setDescription("");
-    };
+    // 下拉式表單選項處理 End
 
-    // ***** 個人資訊欄渲染用陣列資料 *****
+    // 個人資訊欄渲染用資料 Start
     const firstRowInfo = [
       {
         id: "position",
@@ -156,16 +146,33 @@ const PlayersInfo = React.memo(
         },
       },
     ];
-    // ***
+    // 個人資訊欄渲染用資料 End
 
+    // 資料重置處理 Start
+    const dataRest = () => {
+      setPhoto("");
+      setName("");
+      setAge("");
+      setGender("");
+      setHeight("");
+      setWeight("");
+      setPosition("");
+      setTeam("");
+      setDescription("");
+    };
+    // 資料重置處理 End
+
+    // 更新來源資料 Start
     useEffect(() => {
       setPlayerInfo(playerDetailedInfo);
     }, [playerDetailedInfo]);
+    // 更新來源資料 End
 
-    // ***** 編輯『完成』or『取消』處理器 *****
+    // 編輯『完成』or『取消』處理器  Start
     const editStatusHandler = async (editStatus) => {
-      if (await checkLogin(authCtx, navigate)) {
-        if (editStatus === "editCompleted") {
+      if (editStatus === "editCompleted") {
+        if (!submitContext.submitStatus) {
+          submitContext.onSetSubmitStatus(true);
           const formData = new FormData();
           const strValueCheck = (waitForCheckValue, propName) => {
             return waitForCheckValue
@@ -186,31 +193,48 @@ const PlayersInfo = React.memo(
             "Description",
             strValueCheck(description, "description")
           );
-
-          await PutPlayerPersonalInfo(formData)
+          const putResult = await PutPlayerPersonalInfo(formData)
             .then((res) => {
               const { StatusCode, StatusMessage, Result } = res.data;
               if (StatusCode && StatusMessage.includes("Normal end.")) {
-                console.log("更新成功");
-                //TODO 本地資料處理
+                showToast("success", "資料更新成功", 1);
               } else {
                 //TODO 其餘訊息時要做什麼處理
               }
             })
             .catch((err) => {
               alert(err);
+              submitContext.onSetSubmitStatus(false);
+              return false;
             });
+          if (!putResult) {
+            submitContext.onSetSubmitStatus(false);
+            return false;
+          }
 
-          onUpdate();
+          GetPlayerInfo(playerDetailedInfo["ID"])
+            .then((res) => {
+              const { StatusCode, StatusMessage, Result } = res.data;
+              if (StatusCode && StatusMessage.includes("Normal end.")) {
+                onUpdate(Result);
+                onDisabled();
+                setEditModel(!editStatus);
+                submitContext.onSetSubmitStatus(false);
+              }
+            })
+            .catch((err) => {
+              submitContext.onSetSubmitStatus(false);
+              alert(err);
+            });
         }
+      } else {
+        onDisabled();
+        setEditModel(!editStatus);
       }
-
-      onDisabled();
-      setEditModel(!editStatus);
     };
-    // ***
+    // 編輯『完成』or『取消』處理器  End
 
-    // ***** 按鈕類型處理器 *****
+    // 按鈕類型處理器 Start
     const btnTypeHandler = () => {
       if (editModel) {
         const btnData = [
@@ -220,6 +244,7 @@ const PlayersInfo = React.memo(
         return btnData.map((btnIcon) => {
           return (
             <Button
+              disabled={submitContext.submitStatus}
               key={btnIcon.id}
               className="mx-1 border-none bg-pink-50"
               onClick={editStatusHandler.bind(null, btnIcon.editStatus)}
@@ -253,9 +278,9 @@ const PlayersInfo = React.memo(
         );
       }
     };
-    // ***
+    // 按鈕類型處理器 End
 
-    // ***** 姓名欄元素模式處理器 *****
+    // 姓名欄處理器 Start
     const nameElementHandler = useMemo(() => {
       return editModel ? (
         <InputText
@@ -268,9 +293,36 @@ const PlayersInfo = React.memo(
         playerInfo["Name"]
       );
     }, [name, editModel, playerInfo]);
-    // ***
+    // 姓名欄處理器 End
 
-    // ***** 資料渲染處理 *****
+    // 相片欄處理器 Start
+    const photoElementHandler = () => {
+      return editModel ? (
+        photo ? (
+          <img
+            className="w-full h-full cursor-pointer"
+            src={photo.localUrl}
+            alt="選手照片"
+            onClick={() => setCropperVisible(true)}
+          />
+        ) : (
+          <div
+            className={`pi pi-upload cursor-pointer`}
+            style={{ fontSize: "8rem" }}
+            onClick={() => setCropperVisible(true)}
+          ></div>
+        )
+      ) : (
+        <img
+          className="w-full h-full"
+          src={playerInfo["Photo"]}
+          alt="選手照片"
+        />
+      );
+    };
+    // 相片欄處理器 End
+
+    // 資料渲染處理 Start
     const rowInfoHandler = (rowInfo) => {
       return rowInfo.map((item) => {
         return (
@@ -306,36 +358,13 @@ const PlayersInfo = React.memo(
         );
       });
     };
-    // ***
+    // 資料渲染處理 End
 
+    // 取得剪裁好的圖像檔 Start
     const imagePreviewHandler = (imageLocalUrl, imageData) => {
       setPhoto({ localUrl: imageLocalUrl, blob: imageData });
     };
-
-    const photoElementHandler = () => {
-      return editModel ? (
-        photo ? (
-          <img
-            className="w-full h-full cursor-pointer"
-            src={photo.localUrl}
-            alt="選手照片"
-            onClick={() => setCropperVisible(true)}
-          />
-        ) : (
-          <div
-            className={`pi pi-upload cursor-pointer`}
-            style={{ fontSize: "8rem" }}
-            onClick={() => setCropperVisible(true)}
-          ></div>
-        )
-      ) : (
-        <img
-          className="w-full h-full"
-          src={playerInfo["Photo"]}
-          alt="選手照片"
-        />
-      );
-    };
+    // 取得剪裁好的圖像檔 End
 
     return (
       <div className={`${className} flex align-items-center`}>

@@ -8,56 +8,52 @@ import MsgSlice from "../../components/UI/MsgSlice/MsgSlice";
 import classes from "./signInCard.module.css";
 
 const initialState = { value: "", isValid: null };
-const SignInCardReducer = (state, action) => {
-  switch (action.type) {
-    case "USER_NAME":
-      return {
-        value: action.userName,
-        isValid: action.userName.trim().length > 0,
-      };
-    case "PASSWORD":
-      return {
-        value: action.password,
-        isValid: action.password.trim().length > 0,
-      };
-    case "NICKNAME":
-      return {
-        value: action.nickname,
-        isValid: action.nickname.trim().length > 0,
-      };
-    default:
-      return state;
-  }
-};
-
-const SignInCard = (props) => {
-  //Sign In || Register
-  let {strTitle} = props;
+const SignInCard = ({ strTitle }) => {
+  // 表單標題處理 Start
   if (!strTitle) strTitle = "Sign In";
-  
+  // 表單標題處理 End
 
-  // Check Enter Value is Valid
+  // 項目狀態 Start
   const [formIsValid, setFormIsValid] = useState(false);
+  // 項目狀態 End
 
-  // userName輸入內容狀態
+  // 個輸入內容用Reducer來處理狀態 Start
+  const SignInCardReducer = (state, action) => {
+    switch (action.type) {
+      case "USER_NAME":
+        return {
+          value: action.userName,
+          isValid: action.userName.trim().length > 0,
+        };
+      case "PASSWORD":
+        return {
+          value: action.password,
+          isValid: action.password.trim().length > 0,
+        };
+      case "NICKNAME":
+        return {
+          value: action.nickname,
+          isValid: action.nickname.trim().length > 0,
+        };
+      default:
+        return state;
+    }
+  };
   const [userNameState, dispatchUserName] = useReducer(
     SignInCardReducer,
     initialState
   );
-
-  // password輸入內容狀態
   const [passwordState, dispatchPassword] = useReducer(
     SignInCardReducer,
     initialState
   );
-
-   // Nickname輸入內容狀態
-   const [nickNameState, dispatchNickname] = useReducer(
+  const [nickNameState, dispatchNickname] = useReducer(
     SignInCardReducer,
     initialState
   );
+  // 個輸入內容用Reducer來處理狀態 End
 
-  //
+  // 姓名，密碼，暱稱處理器 Start
   const userNameChangeHandler = (e) => {
     dispatchUserName({ type: "USER_NAME", userName: e.target.value });
   };
@@ -67,21 +63,23 @@ const SignInCard = (props) => {
   const nicknameChangeHandler = (e) => {
     dispatchNickname({ type: "NICKNAME", nickname: e.target.value });
   };
+  // 姓名，密碼，暱稱處理器 End
 
-  // useEffect的依賴項
+  // useEffect的依賴項 Start
   const { isValid: userNameIsValid } = userNameState;
   const { isValid: passwordIsValid } = passwordState;
   const { isValid: nicknameIsValid } = nickNameState;
   const { value: userName } = userNameState;
   const { value: userPassword } = passwordState;
   const { value: nickname } = nickNameState;
+  // useEffect的依賴項 End
 
-  // 確認userName和password是否有效，有效的話開放『 LogIn 』按鈕
+  // 確認userName和password是否有效，有效的話開放『 LogIn 』按鈕 Start
   useEffect(() => {
     const identifier = setTimeout(() => {
-      if (strTitle === 'Register') {
+      if (strTitle === "Register") {
         setFormIsValid(userNameIsValid && passwordIsValid && nicknameIsValid);
-      }else{
+      } else {
         setFormIsValid(userNameIsValid && passwordIsValid);
       }
     }, 500);
@@ -90,8 +88,9 @@ const SignInCard = (props) => {
       clearTimeout(identifier);
     };
   }, [userNameIsValid, passwordIsValid, nicknameIsValid, strTitle]);
+  // 確認userName和password是否有效，有效的話開放『 LogIn 』按鈕 End
 
-  // 依據表單狀態更改『 Button 』樣式
+  // 依據表單狀態更改『 Button 』樣式  Start
   const btnValid = props.isLoad ? (
     <Button
       label={
@@ -104,35 +103,48 @@ const SignInCard = (props) => {
   ) : (
     <Button label={strTitle} disabled />
   );
+  // 依據表單狀態更改『 Button 』樣式  End
 
-  // Send Form Data Handler
+  // 送出表單資料處理 Start
   const sendFormHandler = (e) => {
     e.preventDefault();
-    if (strTitle === 'Sign In') {
+    if (strTitle === "Sign In") {
       props.onSendUserInfo({
         act: userName,
-        pwd: userPassword
+        pwd: userPassword,
       });
     } else {
       props.onSendUserInfo({
         act: userName,
         pwd: userPassword,
-        name: nickname
+        name: nickname,
       });
     }
   };
+  // 送出表單資料處理 End
 
-  const nameBar = strTitle==="Register" ? (
-    <div className="m-3">
-      <span>
-        <FontAwesomeIcon icon={faUser} style={{ color: "#ffffff" }} />
-      </span>
-      <span className="p-float-label">
-        <InputText id="Nickname" onChange={nicknameChangeHandler}  className="w-full"/>
-        <label className="ml-3" htmlFor="Nickname">Nickname</label>
-      </span>
-    </div>
-  ): <></>
+  // 姓名欄根據strTitle回傳不同組件 Start
+  const nameBar =
+    strTitle === "Register" ? (
+      <div className="m-3">
+        <span>
+          <FontAwesomeIcon icon={faUser} style={{ color: "#ffffff" }} />
+        </span>
+        <span className="p-float-label">
+          <InputText
+            id="Nickname"
+            onChange={nicknameChangeHandler}
+            className="w-full"
+          />
+          <label className="ml-3" htmlFor="Nickname">
+            Nickname
+          </label>
+        </span>
+      </div>
+    ) : (
+      <></>
+    );
+  // 姓名欄根據strTitle回傳不同組件 End
 
   return (
     <MsgSlice className={`${props.className} ${classes.SignInCard} `}>
@@ -148,7 +160,11 @@ const SignInCard = (props) => {
             <FontAwesomeIcon icon={faUser} style={{ color: "#ffffff" }} />
           </span>
           <span className="p-float-label">
-            <InputText id="username" onChange={userNameChangeHandler}  className="w-full"/>
+            <InputText
+              id="username"
+              onChange={userNameChangeHandler}
+              className="w-full"
+            />
             <label className="ml-3" htmlFor="username">
               Username
             </label>

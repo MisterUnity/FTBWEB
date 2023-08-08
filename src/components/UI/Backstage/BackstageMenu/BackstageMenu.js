@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,10 +9,9 @@ import {
   faCalendarDays,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import {useGlobalStore} from "../../../../store/GlobalContextProvider";
 import classes from "./BackstageMenu.module.css";
 
-// 後台選單的顯示項目
+// 後台選單目錄 Start
 const menuItem = [
   {
     id: "P-1",
@@ -57,15 +56,16 @@ const menuItem = [
     path: "/",
   },
 ];
-const BackstageMenu = () => {
-  const {authContext} = useGlobalStore();
+// 後台選單目錄 End
 
-  // 登出處理
+const BackstageMenu = React.memo(() => {
+  // 登出後台處理 Start
   const signOutHandler = () => {
     <Link to="/signIn" />;
   };
+  // 登出後台處理 Start
 
-  // li 項目處理
+  // li 項目處理 Start
   const menuList = menuItem.map((item) => {
     return (
       <li className="my-6 cursor-pointer" key={item.id}>
@@ -86,6 +86,8 @@ const BackstageMenu = () => {
       </li>
     );
   });
+  // li 項目處理 End
+
   return <ul className={classes.BackstageMenu}>{menuList}</ul>;
-};
+});
 export default BackstageMenu;

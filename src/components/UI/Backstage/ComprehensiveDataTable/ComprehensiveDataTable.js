@@ -4,6 +4,7 @@ import { Column } from "primereact/column";
 import { v4 as uuidv4 } from "uuid";
 
 const ComprehensiveDataTable = React.memo(({ dataTableValue, className }) => {
+  // 列資料渲染處理 Start
   const columns = () => {
     if (dataTableValue.ColumnName) {
       return dataTableValue.ColumnName.map((data) => {
@@ -13,6 +14,7 @@ const ComprehensiveDataTable = React.memo(({ dataTableValue, className }) => {
       });
     }
   };
+  // 列資料渲染處理 End
 
   return (
     <div className={`card overflow-auto ${className}`}>

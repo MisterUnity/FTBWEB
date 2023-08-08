@@ -1,6 +1,6 @@
 import FTBAPI from "../index";
 
-// Get all Players Info
+// 取得所有球員清單 Start
 export const GetPlayersInfo = () => {
   return FTBAPI.get("/Player")
     .then((res) => {
@@ -10,8 +10,9 @@ export const GetPlayersInfo = () => {
       throw err;
     });
 };
+// 取得所有球員清單 End
 
-// Get all Player Info
+// 取得指定球員數據 Start
 export const GetPlayerInfo = (id) => {
   return FTBAPI.get(`/Player/${id}`)
     .then((res) => {
@@ -21,8 +22,9 @@ export const GetPlayerInfo = (id) => {
       throw err;
     });
 };
+// 取得指定球員數據 End
 
-// Post all Players Info
+// 新增球員資料 Start
 export const PostPlayersInfo = async (ayPlayerInfos = []) => {
   if (ayPlayerInfos.length === 0) throw new Error("沒有新增球員資料!!!");
 
@@ -93,10 +95,11 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
       throw new Error(err);
     });
 };
+// 新增球員資料 End
 
-// Put Player Info
+// 更新指定球員個人資料 Start
 export const PutPlayerPersonalInfo = (formData) => {
-  return FTBAPI.put(`/Player/${data.ID}`, {
+  return FTBAPI.put(`/Player/${formData.ID}`, {
     headers: { "Content-Type ": "multipart/form-data" },
   })
     .then((res) => {
@@ -106,9 +109,11 @@ export const PutPlayerPersonalInfo = (formData) => {
       throw err;
     });
 };
+// 更新指定球員個人資料 End
 
+// 更新指定球員數據資料 Start
 export const PutPlayerDataTableInfo = (dataTable) => {
-  return FTBAPI.put(`/Player/${data.ID}`)
+  return FTBAPI.put(`/Player/${dataTable.ID}`)
     .then((res) => {
       return res;
     })
@@ -116,8 +121,9 @@ export const PutPlayerDataTableInfo = (dataTable) => {
       throw err;
     });
 };
+// 更新指定球員數據資料 End
 
-// Delete Player Info
+// 刪除指定球員資料 Start
 export const DeletePlayerInfo = (id) => {
   return FTBAPI.delete(`/Player/${id}`)
     .then((res) => {
@@ -127,3 +133,4 @@ export const DeletePlayerInfo = (id) => {
       throw err;
     });
 };
+// 刪除指定球員資料 End

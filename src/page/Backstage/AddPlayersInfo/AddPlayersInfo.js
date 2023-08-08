@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, Fragment, useRef } from "react";
+import { useEffect, useState, Fragment, useRef } from "react";
 import { BlockUI } from "primereact/blockui";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
@@ -10,11 +10,10 @@ import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { v4 as uuidv4 } from "uuid";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
-import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
 import { Tooltip } from "primereact/tooltip";
 import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
-import {useGlobalStore} from "../../../store/GlobalContextProvider";
+import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import PhotoCropper from "@/components/Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
@@ -22,8 +21,9 @@ import "primeicons/primeicons.css";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
-  const authCtx = useGlobalStore();
-  // ***** 下拉式表單選項處理 *****
+  const toast = useRef();
+  const { authContext, submitContext } = useGlobalStore();
+  // 下拉式表單選項處理 Start
   const genderItem = ["男", "女", "其他"];
   const ageItem = useDropdownItem(1, 41, "歲");
   const heightItem = useDropdownItem(150, 200, "cm");
@@ -44,9 +44,9 @@ const AddPlayerInfo = () => {
     "守門員",
   ];
   const teamItem = ["1隊", "2隊"];
-  // ***
+  // 下拉式表單選項處理 End
 
-  // ***** 各項狀態 *****
+  // 項目狀態 Start
   const [cropperVisible, setCropperVisible] = useState(false);
   const [playersInfo, setPlayersInfo] = useState([]);
   const [gender] = useState(genderItem);
@@ -57,32 +57,31 @@ const AddPlayerInfo = () => {
   const [position] = useState(positionItem);
   const [rowIndex, setRowIndex] = useState();
   const [rowData, setRowData] = useState();
-  const toast = useRef();
   const [blocked, setBlocked] = useState(false);
-  // ***
+  // 項目狀態 End
 
-  // ***** 登入逾時確認 *****
+  // 登入逾時確認 Start
   useEffect(() => {
-    checkLogin(authCtx, navigate);
+    checkLogin(authContext, navigate);
   }, []);
-  // ***
+  // 登入逾時確認 End
 
-  // ***** scrollBar自動跳轉至底 *****
+  // scrollBar自動跳轉至底 Start
   useEffect(() => {
     const div = document.getElementById("dataTableContainer");
     div.scrollTop = div.scrollHeight;
   }, [playersInfo]);
-  // ***
+  // scrollBar自動跳轉至底 End
 
-  // ***** 裁切器顯示處理器 *****
+  // 裁切器顯示處理器 Start
   const imageCropperHandler = (rowIndex, rowData) => {
     setRowIndex(rowIndex);
     setRowData(rowData);
     setCropperVisible(true);
   };
-  // ***
+  // 裁切器顯示處理器 End
 
-  // *****上傳的圖片做預覽處理*****
+  //上傳的圖片做預覽處理 Start
   const imagePreviewHandler = (imageLocalUrl, imageData) => {
     // ***** 以裁切好的圖片追加至相對應 rowData 裡 *****
     //WEICHE: 因為 API 要傳送的是 Blob File，不是本地創建的地址資源 (URL.createObjectURL)
@@ -95,9 +94,9 @@ const AddPlayerInfo = () => {
       return _playersInfo;
     });
   };
-  // ***
+  // 上傳的圖片做預覽處理 End
 
-  // *****列-刪除處理 *****
+  // 列-刪除處理 Start
   const deleteRowHandler = (context) => {
     setPlayersInfo((prevPlayersInfo) => {
       let _playersInfo = [...prevPlayersInfo];
@@ -105,9 +104,9 @@ const AddPlayerInfo = () => {
       return _playersInfo;
     });
   };
-  // ***
+  // 列-刪除處理 End
 
-  // ***** 追加新列處理 *****
+  // 追加新列處理 Start
   const addRowHandler = () => {
     setPlayersInfo((prevPlayersInfo) => {
       let _playersInfo = [...prevPlayersInfo];
@@ -129,16 +128,16 @@ const AddPlayerInfo = () => {
       return _playersInfo;
     });
   };
-  // ***
+  // 追加新列處理 End
 
-  //***** cell-編輯完處理 *****
+  // cell-編輯完處理 Start
   const onCellEditComplete = (e) => {
     let { rowData, newValue, field, originalEvent: event } = e;
     rowData[field] = newValue;
   };
-  // ***
+  // cell-編輯完處理 End
 
-  // ***** Column渲染資料準備 *****
+  // Column渲染資料準備 Start
   const columnsData = [
     {
       id: "column1",
@@ -341,9 +340,9 @@ const AddPlayerInfo = () => {
       },
     },
   ];
-  // ***
+  // Column渲染資料準備 End
 
-  // ***** 渲染各行處理 *****
+  // 渲染各行處理 Start
   const column = columnsData.map((data) => {
     return (
       <Column
@@ -356,38 +355,47 @@ const AddPlayerInfo = () => {
       />
     );
   });
+  // 渲染各行處理 End
 
-  // ***** 送出表單處理 *****
-  const sendDataHandler = () => {
-    if (authCtx.signInStatus === true) {
-      setBlocked(true);
-      PostPlayersInfo(playersInfo)
-        .then((res) => {
-          setBlocked(false);
-          const { StatusCode, StatusMessage, Result } = res.data;
-          if (StatusCode === 1 && StatusMessage === "Normal end.") {
-            navigate("playerList");
-          } else {
-            Result.forEach((msg) => {
-              toast.current.show({
-                severity: msg.status,
-                summary: `Name: ${msg.name}`,
-                detail: msg.statusMsg,
-                life: 3000,
+  // 送出表單處理 Start
+  const sendDataHandler = async () => {
+    if (!submitContext.submitStatus) {
+      submitContext.onSetSubmitStatus(true);
+      if (await checkLogin(authContext, navigate)) {
+        setBlocked(true);
+        PostPlayersInfo(playersInfo)
+          .then((res) => {
+            setBlocked(false);
+            const { StatusCode, StatusMessage, Result } = res.data;
+            if (StatusCode === 1 && StatusMessage === "Normal end.") {
+              submitContext.onSetSubmitStatus(false);
+              navigate("playerList");
+            } else {
+              Result.forEach((msg) => {
+                toast.current.show({
+                  severity: msg.status,
+                  summary: `Name: ${msg.name}`,
+                  detail: msg.statusMsg,
+                  life: 3000,
+                });
               });
-            });
-          }
-        })
-        .catch((err) => {
-          setBlocked(false);
-          alert(`ERROR：${err}`);
-        });
-    } else {
-      alert("登入逾時，將回首頁");
-      navigate("/");
+              submitContext.onSetSubmitStatus(false);
+            }
+          })
+          .catch((err) => {
+            setBlocked(false);
+            alert(`ERROR：${err}`);
+            submitContext.onSetSubmitStatus(false);
+          });
+      } else {
+        alert("登入逾時，將回首頁");
+        submitContext.onSetSubmitStatus(false);
+        navigate("/");
+      }
     }
   };
-  // ***
+  // 送出表單處理 End
+
   return (
     <BlockUI blocked={blocked} containerClassName="h-full">
       <div
@@ -411,6 +419,7 @@ const AddPlayerInfo = () => {
           <Button
             className="w-2 ml-2 bg-bluegray-700"
             label="送出表單"
+            disabled={submitContext.submitStatus}
             onClick={sendDataHandler}
           />
         </div>

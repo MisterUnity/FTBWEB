@@ -1,7 +1,6 @@
+import React from "react";
 import classes from "./MsgSlice.module.css";
-const MsgSlice = (props) => {
-  return (
-    <div className={`${classes.slice} ${props.className}`}>{props.children}</div>
-  );
-};
+const MsgSlice = React.memo(({ className, children }) => {
+  return <div className={`${classes.slice} ${className}`}>{children}</div>;
+});
 export default MsgSlice;

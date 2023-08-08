@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "primereact/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
@@ -8,7 +8,7 @@ const CollapseSideBar = React.memo(
     return (
       <div
         className={`${collapse ? classes.collapse : classes.normal}
-                  ${classes.collapseSideBar} ${className}`}
+                    ${classes.collapseSideBar} ${className}`}
       >
         <div className="flex justify-content-end ">
           <Button

@@ -5,8 +5,7 @@ const checkLogin = async (authCtx, navigate) => {
   await CheckLogin()
     .then((res) => {
       const { StatusCode, StatusMessage } = res.data;
-      //TODO Normal部分是否變成為 Normal end
-      if (StatusCode && StatusMessage.includes("Normal")) {
+      if (StatusCode && StatusMessage.includes("Normal end.")) {
         authCtx.onSetSignInStatus(true);
         result = true;
       } else {

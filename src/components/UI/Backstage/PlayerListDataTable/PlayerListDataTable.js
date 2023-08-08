@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 
 const PlayerListDataTable = React.memo(
   ({ playersData, hide, onClickPlayer, disabled }) => {
+    // 項目狀態 Start
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    // 項目狀態 End
+
     return (
       <div className="card">
         <DataTable
