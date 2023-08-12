@@ -8,7 +8,7 @@ import MsgSlice from "../../components/UI/MsgSlice/MsgSlice";
 import classes from "./signInCard.module.css";
 
 const initialState = { value: "", isValid: null };
-const SignInCard = ({ strTitle }) => {
+const SignInCard = ({ className, isLoad, strTitle, onSendUserInfo }) => {
   // 表單標題處理 Start
   if (!strTitle) strTitle = "Sign In";
   // 表單標題處理 End
@@ -91,7 +91,7 @@ const SignInCard = ({ strTitle }) => {
   // 確認userName和password是否有效，有效的話開放『 LogIn 』按鈕 End
 
   // 依據表單狀態更改『 Button 』樣式  Start
-  const btnValid = props.isLoad ? (
+  const btnValid = isLoad ? (
     <Button
       label={
         <FontAwesomeIcon icon={faSpinner} spin style={{ color: "#ffffff" }} />
@@ -109,12 +109,12 @@ const SignInCard = ({ strTitle }) => {
   const sendFormHandler = (e) => {
     e.preventDefault();
     if (strTitle === "Sign In") {
-      props.onSendUserInfo({
+      onSendUserInfo({
         act: userName,
         pwd: userPassword,
       });
     } else {
-      props.onSendUserInfo({
+      onSendUserInfo({
         act: userName,
         pwd: userPassword,
         name: nickname,
@@ -147,7 +147,7 @@ const SignInCard = ({ strTitle }) => {
   // 姓名欄根據strTitle回傳不同組件 End
 
   return (
-    <MsgSlice className={`${props.className} ${classes.SignInCard} `}>
+    <MsgSlice className={`${className} ${classes.SignInCard} `}>
       <form
         onSubmit={sendFormHandler}
         className="flex flex-column justify-content-center"

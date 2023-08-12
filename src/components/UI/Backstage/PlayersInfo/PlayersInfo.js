@@ -7,17 +7,20 @@ import {
   faPenToSquare,
   faCheck,
   faXmark,
+  faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PutPlayerPersonalInfo } from "../../../../API/playerInfo/playerInfo";
 import { useGlobalStore } from "../../../../store/GlobalContextProvider";
 import { GetPlayerInfo } from "../../../../API/playerInfo/playerInfo";
+import { DeletePlayerInfo } from "../../../../API/playerInfo/playerInfo";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import PhotoCropper from "../../../Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../../Hook/useDropdownItem/useDropdownItem";
 import blueWhaleLogo from "../../../../assets/blue_whale_logo.png";
 
 const PlayersInfo = React.memo(
-  ({ className, playerDetailedInfo, onDisabled, onUpdate }) => {
+  ({ className, playerDetailedInfo, onDisabled, onUpdate, onDelete }) => {
     const { showToast, submitContext } = useGlobalStore();
 
     // 項目狀態 Start
@@ -168,8 +171,51 @@ const PlayersInfo = React.memo(
     }, [playerDetailedInfo]);
     // 更新來源資料 End
 
+    // 『進入編輯模式』or『刪除球員資料』處理器  Start
+    const standardModeHandler = async (standardStatus) => {
+      if (standardStatus === "enterEdit") {
+        onDisabled();
+        setEditModel(!editModel);
+      } else {
+        if (!submitContext.submitStatus) {
+          const accept = () => {
+            submitContext.onSetSubmitStatus(true);
+            DeletePlayerInfo(playerInfo["ID"])
+              .then((res) => {
+                console.log(res);
+                const { StatusCode, StatusMessage, Result } = res.data;
+                if (StatusCode && StatusMessage.includes("Normal end.")) {
+                  showToast("success", "資料刪除成功", 1);
+                  onDelete(playerInfo["ID"]);
+                  submitContext.onSetSubmitStatus(false);
+                } else {
+                  //TODO delete API還未完善
+                  console.log("Delete API還未完善");
+                }
+              })
+              .catch((err) => {
+                alert(err);
+                submitContext.onSetSubmitStatus(false);
+              });
+          };
+          const reject = () => {
+            return;
+          };
+          confirmDialog({
+            message: "您確定刪除此球員資料嗎？",
+            header: "Delete Confirmation",
+            icon: "pi pi-info-circle",
+            acceptClassName: "p-button-danger",
+            accept,
+            reject,
+          });
+        }
+      }
+    };
+    // 『進入編輯模式』or『刪除球員資料』處理器  End
+
     // 編輯『完成』or『取消』處理器  Start
-    const editStatusHandler = async (editStatus) => {
+    const editModeHandler = async (editStatus) => {
       if (editStatus === "editCompleted") {
         if (!submitContext.submitStatus) {
           submitContext.onSetSubmitStatus(true);
@@ -218,6 +264,7 @@ const PlayersInfo = React.memo(
               if (StatusCode && StatusMessage.includes("Normal end.")) {
                 onUpdate(Result);
                 onDisabled();
+                dataRest();
                 setEditModel(!editStatus);
                 submitContext.onSetSubmitStatus(false);
               }
@@ -228,6 +275,7 @@ const PlayersInfo = React.memo(
             });
         }
       } else {
+        dataRest();
         onDisabled();
         setEditModel(!editStatus);
       }
@@ -237,17 +285,17 @@ const PlayersInfo = React.memo(
     // 按鈕類型處理器 Start
     const btnTypeHandler = () => {
       if (editModel) {
-        const btnData = [
+        const EditModeBtn = [
           { id: "btnCompleted", icon: faCheck, editStatus: "editCompleted" },
           { id: "btnCancel", icon: faXmark, editStatus: "cancelEdit" },
         ];
-        return btnData.map((btnIcon) => {
+        return EditModeBtn.map((btnIcon) => {
           return (
             <Button
-              disabled={submitContext.submitStatus}
-              key={btnIcon.id}
               className="mx-1 border-none bg-pink-50"
-              onClick={editStatusHandler.bind(null, btnIcon.editStatus)}
+              key={btnIcon.id}
+              disabled={submitContext.submitStatus}
+              onClick={editModeHandler.bind(null, btnIcon.editStatus)}
               label={
                 <FontAwesomeIcon
                   icon={btnIcon.icon}
@@ -259,23 +307,27 @@ const PlayersInfo = React.memo(
           );
         });
       } else {
-        return (
-          <Button
-            className="border-none bg-pink-50"
-            onClick={() => {
-              dataRest();
-              onDisabled();
-              setEditModel(!editModel);
-            }}
-            label={
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                size="xl"
-                style={{ color: "#000000" }}
-              />
-            }
-          />
-        );
+        const standardModeBtn = [
+          { id: "btnEnterEdit", icon: faPenToSquare, editStatus: "enterEdit" },
+          { id: "btnDelete", icon: faTrashCan, editStatus: "deleteData" },
+        ];
+        return standardModeBtn.map((btnIcon) => {
+          return (
+            <Button
+              className="mx-1 border-none bg-pink-50"
+              key={btnIcon.id}
+              disabled={submitContext.submitStatus}
+              onClick={standardModeHandler.bind(null, btnIcon.editStatus)}
+              label={
+                <FontAwesomeIcon
+                  icon={btnIcon.icon}
+                  size="xl"
+                  style={{ color: "#000000" }}
+                />
+              }
+            />
+          );
+        });
       }
     };
     // 按鈕類型處理器 End
@@ -380,6 +432,7 @@ const PlayersInfo = React.memo(
         <div className="col-8 h-18rem flex flex-column ">
           <div className="col-12 flex justify-content-between align-items-center">
             <div className="text-5xl">{nameElementHandler}</div>
+            <ConfirmDialog />
             <div>{btnTypeHandler()}</div>
           </div>
           <div className="my-4 ml-4 flex  justify-content-start">

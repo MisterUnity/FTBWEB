@@ -1,139 +1,170 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMobile as card,
-  faMeteor as toShoot,
-  faFutbol,
-} from "@fortawesome/free-solid-svg-icons";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { v4 as uuidv4 } from "uuid";
-import { useRef } from "react";
+import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from "../../../store/GlobalContextProvider";
+import { GetPlayersInfo } from "../../../API/playerInfo/playerInfo";
+import { RadioButton } from "primereact/radiobutton";
+import { Calendar } from "primereact/calendar";
+import { AddGameRecord } from "../../../API/playerInfo/playerInfo";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 
-const playerList = [
-  "Select a Player",
-  "A選手",
-  "B選手",
-  "C選手",
-  "D選手",
-  "E選手",
-  "F選手",
-  "G選手",
-  "H選手",
-  "I選手",
-  "J選手",
-  "K選手",
-  "替補-A選手",
-  "替補-B選手",
-  "替補-C選手",
-  "替補-D選手",
-  "替補-E選手",
-];
 const columns = [
   {
     field: "playerName",
-    header: "PlayerName",
+    header: "選手",
   },
   {
     field: "goal",
-    header: (
-      <FontAwesomeIcon
-        icon={faFutbol}
-        size="2xl"
-        style={{ color: "#000000" }}
-      />
-    ),
+    header: "得分",
   },
   {
     field: "toShoot",
-    header: (
-      <FontAwesomeIcon icon={toShoot} size="2xl" style={{ color: "#f52424" }} />
-    ),
-  },
-  {
-    field: "cornerBall",
-    header: "Corner Ball",
-  },
-  {
-    field: "goalKick",
-    header: "Goal Kick",
-  },
-  {
-    field: "header",
-    header: "Header",
-  },
-  {
-    field: "handBall",
-    header: "Hand Ball",
+    header: "射門",
   },
   {
     field: "penaltyKick",
-    header: "Penalty Kick",
+    header: "12碼罰球",
   },
   {
     field: "freeKick",
-    header: "Free Kick",
+    header: "自由球",
+  },
+  {
+    field: "cornerBall",
+    header: "角球",
+  },
+  {
+    field: "handBall",
+    header: "手球",
   },
   {
     field: "offside",
-    header: "offside",
+    header: "越線",
+  },
+  {
+    field: "technicalFoul",
+    header: "技術性犯規",
   },
   {
     field: "yellowCard",
-    header: (
-      <FontAwesomeIcon icon={card} size="2xl" style={{ color: "#ffdd00" }} />
-    ),
+    header: "黃牌",
   },
   {
     field: "readCard",
-    header: (
-      <FontAwesomeIcon icon={card} size="2xl" style={{ color: "#ff0000" }} />
-    ),
+    header: "紅牌",
   },
 ];
+const teamItem = [
+  "台北熊讚",
+  "新北航源",
+  "台中藍鯨",
+  "高雄陽信",
+  "花蓮",
+  "戰神女足",
+];
+let allPlayerList = [];
 
 const EditComprehensiveDataTable = () => {
-  const [playerMatchStats, setPlayerMatchData] = useState(null);
-  const { authContext, submitStatusHandler } = useGlobalStore();
+  const { authContext, submitContext } = useGlobalStore();
   const navigate = useNavigate();
+
+  // 項目狀態 Start
+  const [playerGameData, setPlayerGameData] = useState(null);
+  const [playerList, setPlayerList] = useState([]);
+  const [myTeam, setMyTeam] = useState([]);
+  const [opponentTeam, setOpponentTeam] = useState([]);
+  const [field, setField] = useState("1");
+  const [date, setDate] = useState(null);
+  const [playingField, setPlayingField] = useState("");
+  const [gameData, setGameData] = useState([]);
+  const datatableRef = useRef();
+  // 項目狀態 End
 
   // 初始處理 Start
   const initHandler = async () => {
     if (await checkLogin(authContext, navigate)) {
-      const initData = [];
-      for (let i = 0; i < 16; i++) {
-        initData.push({
-          id: uuidv4(),
-          playerName: "Select a Player",
-          goal: "0",
-          toShoot: "0",
-          cornerBall: "0",
-          goalKick: "0",
-          header: "0",
-          handBall: "0",
-          penaltyKick: "0",
-          freeKick: "0",
-          offside: "0",
-          yellowCard: "0",
-          readCard: "0",
+      const leaguePlayerList = await GetPlayersInfo()
+        .then((res) => {
+          const { StatusCode, StatusMessage, Result } = res.data;
+          if (StatusCode && StatusMessage.includes("Normal end.")) {
+            return [...Result];
+          } else {
+            console.log("傳送無錯誤，但沒取得資料 from EditComprehensive Page");
+          }
+        })
+        .catch((err) => {
+          alert(err);
+          return false;
         });
-        setPlayerMatchData(initData);
-      }
+      if (!leaguePlayerList) return false;
+      allPlayerList = leaguePlayerList.map((item) => ({ ...item }));
+      setGameData((prevGameData) => {
+        let _gameData = prevGameData.map((item) => ({ ...item }));
+        for (let i = 0; i < 16; i++) {
+          _gameData.push({
+            id: uuidv4(),
+            playerName: "Select a Player",
+            goal: "0",
+            toShoot: "0",
+            penaltyKick: "0",
+            freeKick: "0",
+            cornerBall: "0",
+            handBall: "0",
+            offside: "0",
+            technicalFoul: "0",
+            yellowCard: "0",
+            readCard: "0",
+          });
+        }
+        return _gameData;
+      });
     }
   };
+
   useEffect(() => {
     initHandler();
   }, []);
   // 初始處理 End
 
-  // 編輯模式：下拉選單 Start
+  // 根據選擇隊伍顯示不同球員清單處理 End
+  useEffect(() => {
+    setGameData((prevGameData) => {
+      const _gameData = prevGameData.map((item) => {
+        item.playerName = "Select a Player";
+        item.goal = "0";
+        item.toShoot = "0";
+        item.penaltyKick = "0";
+        item.freeKick = "0";
+        item.cornerBall = "0";
+        item.handBall = "0";
+        item.offside = "0";
+        item.technicalFoul = "0";
+        item.yellowCard = "0";
+        item.readCard = "0";
+        return item;
+      });
+      return _gameData;
+    });
+    const _playerList = allPlayerList.filter((item) => {
+      return item["Team"] === myTeam;
+    });
+    const playerList = [];
+    for (const key in _playerList) {
+      playerList.push(_playerList[key]["Name"]);
+    }
+    setPlayerList(playerList);
+  }, [myTeam]);
+  // 根據選擇隊伍顯示不同球員清單處理 End
+
+  // 編輯模式：計數器 Start
   const textNumberEditor = (options) => {
+    console.log("textNumber", options);
     return (
       <InputNumber
         value={options.value}
@@ -145,10 +176,11 @@ const EditComprehensiveDataTable = () => {
       />
     );
   };
-  // 編輯模式：下拉選單 End
+  // 編輯模式：計數器 End
 
-  // 編輯模式：計數器 Start
+  // 編輯模式：下拉選單 Start
   const dropdownEditor = (options) => {
+    console.log("dropdown", options);
     return (
       <Dropdown
         appendTo={"self"}
@@ -159,14 +191,56 @@ const EditComprehensiveDataTable = () => {
       />
     );
   };
-  // 編輯模式：計數器 End
+  // 編輯模式：下拉選單 End
 
   // 編輯模式的時，顯示的組件處理 Start
   const cellEditor = (options) => {
+    console.log("顯示的組件處理");
     if (options.field === "playerName") return dropdownEditor(options);
     else return textNumberEditor(options);
   };
   // 編輯模式的時，顯示的組件處理 End
+
+  // radioBtn樣式處理 Start
+  const radioBtnHandler = () => {
+    const btnData = [
+      {
+        id: "homeGame",
+        label: "主場",
+        inputId: "field1",
+        name: "homeGame",
+        value: "homeGame",
+        checked: "1",
+      },
+      {
+        id: "awayGame",
+        label: "客場",
+        inputId: "field2",
+        name: "awayGame",
+        value: "awayGame",
+        checked: "0",
+      },
+    ];
+    return btnData.map((item) => {
+      return (
+        <div key={item.id} className="flex align-items-center ml-3">
+          <RadioButton
+            inputId={item.inputId}
+            name={item.name}
+            value={item.value}
+            onChange={(e) =>
+              setField(e.target.value === "homeGame" ? "1" : "0")
+            }
+            checked={field === item.checked}
+          />
+          <label htmlFor={item.inputId} className="ml-2">
+            {item.label}
+          </label>
+        </div>
+      );
+    });
+  };
+  // radioBtn樣式處理 End
 
   // 編輯完處理 Start
   const onCellEditComplete = (e) => {
@@ -190,15 +264,105 @@ const EditComprehensiveDataTable = () => {
 
   // 表單送出處理器 Start
   const submitHandler = () => {
-    //TODO 數據送出處理未完
-    if (!submitStatusHandler.submitStatus) {
+    if (!submitContext.submitStatus) {
+      submitContext.onSetSubmitStatus(true);
+      const dateConversion = () => {
+        const year = date.getFullYear().toString();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        const formattedDate = `${year}-${month}-${day}`;
+        return formattedDate;
+      };
+      const _gameData = {
+        team: myTeam,
+        opponent: opponentTeam,
+        isHome: field,
+        place: playingField,
+        date: dateConversion(),
+      };
+      const gameData = [...playerGameData];
+      for (const aryIndex in gameData) {
+        // TODO 待改動
+        gameData[aryIndex] = { ..._gameData, ...gameData[aryIndex] };
+      }
+      AddGameRecord(gameData)
+        .then((res) => {})
+        .catch((err) => {
+          alert(err);
+        });
+      submitContext.onSetSubmitStatus(false);
     }
   };
   // 表單送出處理器 End
 
+  const OnMyTeamChg = (e) => {
+    setMyTeam(e.target.value);
+    // datatableRef.current.clearState();
+    datatableRef.current.reset();
+  };
+  const OnDataTableValueChg = (context1, context2) => {
+    console.log("OnDataTableValueChg", { context1, context2 });
+  };
+
   return (
     <div className="card p-fluid h-screen">
-      <DataTable value={playerMatchStats} editMode="cell">
+      <div className="flex col-12">
+        <div className="flex align-items-center ">
+          <label className="text-lg ">您的隊伍：</label>
+          <Dropdown
+            appendTo={"self"}
+            value={myTeam}
+            options={teamItem}
+            onChange={(e) => {
+              OnMyTeamChg(e);
+            }}
+            placeholder="請選擇隊伍"
+          />
+        </div>
+        <div className="flex align-items-center ">
+          <label className="text-lg ml-5">主客場：</label>
+          {radioBtnHandler()}
+        </div>
+        <div className="flex align-items-center my-2 ">
+          <label className="text-lg ml-5">對戰隊伍：</label>
+          <Dropdown
+            appendTo={"self"}
+            value={opponentTeam}
+            options={teamItem}
+            onChange={(e) => setOpponentTeam(e.target.value)}
+            placeholder="請選擇隊伍"
+          />
+        </div>
+        <div className="flex align-items-center ml-6">
+          <label className="text-lg ">比賽日期：</label>
+          <Calendar
+            className="w-5"
+            value={date}
+            onChange={(e) => setDate(e.value)}
+            showIcon
+            dateFormat="yy-mm-dd"
+          />
+        </div>
+        <div className="flex align-items-center ">
+          <label className="text-lg " htmlFor="playingField">
+            比賽場館：
+          </label>
+          <InputText
+            id="playingField"
+            className="w-5"
+            type="text"
+            value={playingField}
+            placeholder="請輸入比賽場館"
+            onChange={(e) => setPlayingField(e.target.value)}
+          />
+        </div>
+      </div>
+      <DataTable
+        ref={datatableRef}
+        value={gameData}
+        editMode="cell"
+        onValueChange={OnDataTableValueChg}
+      >
         {columns.map(({ field, header }) => {
           return (
             <Column
@@ -213,13 +377,15 @@ const EditComprehensiveDataTable = () => {
         })}
       </DataTable>
       <Button
-        disabled
-        onClick={(e) => {
-          console.log(playerMatchStats);
-        }}
-      >
-        Add
-      </Button>
+        disabled={submitContext.submitStatus}
+        label="送出表單"
+        onClick={(e) => submitHandler()}
+      />
+      <div>
+        <p className="text-2xl text-pink-500">
+          ※ 請先選擇您的隊伍，否則選手清單將為空。 ※
+        </p>
+      </div>
     </div>
   );
 };

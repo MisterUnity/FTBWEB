@@ -27,25 +27,22 @@ export const GetPlayerInfo = (id) => {
 // 新增球員資料 Start
 export const PostPlayersInfo = async (ayPlayerInfos = []) => {
   if (ayPlayerInfos.length === 0) throw new Error("沒有新增球員資料!!!");
-
   const ayFormData = [],
     pTask = [];
-
   for (let i = 0; i < ayPlayerInfos.length; i++) {
     delete ayPlayerInfos[i].id;
     const formData = new FormData();
-    formData.append("Name", ayPlayerInfos[i].name);
-    formData.append("Age", ayPlayerInfos[i].age);
-    formData.append("Gender", ayPlayerInfos[i].gender === "男" ? "M" : "F");
-    formData.append("Height", ayPlayerInfos[i].height);
-    formData.append("Position", ayPlayerInfos[i].position);
-    formData.append("Team", ayPlayerInfos[i].team);
-    formData.append("Weight", ayPlayerInfos[i].weight);
+    formData.append("name", ayPlayerInfos[i].name);
+    formData.append("age", ayPlayerInfos[i].age);
+    formData.append("gender", ayPlayerInfos[i].gender === "男" ? "M" : "F");
+    formData.append("height", ayPlayerInfos[i].height);
+    formData.append("position", ayPlayerInfos[i].position);
+    formData.append("team", ayPlayerInfos[i].team);
+    formData.append("weight", ayPlayerInfos[i].weight);
+    formData.append("photo", ayPlayerInfos[i].photo, ayPlayerInfos[i].name);
     // formData.append("description", ayPlayerInfos[i].description);
-    formData.append("Photo", ayPlayerInfos[i].photo, ayPlayerInfos[i].name);
     ayFormData.push(formData);
   }
-
   for (let info = 0; info < ayFormData.length; info++) {
     pTask.push(
       FTBAPI.post("/Player/AddPlayer", ayFormData[info], {
@@ -57,6 +54,7 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
 
   return Promise.all(pTask)
     .then((res) => {
+      console.log("結果", res.data);
       const ayStatusMsg = [];
       let bAllOK = true;
       res.forEach(({ data }, index) => {
@@ -96,6 +94,18 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
     });
 };
 // 新增球員資料 End
+
+// 新增球員比賽數據 Start
+export const AddGameRecord = (gameRecord) => {
+  return FTBAPI.post("/Player/AddGameRecord")
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+// 新增球員比賽數據 End
 
 // 更新指定球員個人資料 Start
 export const PutPlayerPersonalInfo = (formData) => {

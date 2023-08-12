@@ -43,7 +43,14 @@ const AddPlayerInfo = () => {
     "進攻型中場",
     "守門員",
   ];
-  const teamItem = ["1隊", "2隊"];
+  const teamItem = [
+    "台北熊讚",
+    "新北航源",
+    "台中藍鯨",
+    "高雄陽信",
+    "花蓮",
+    "戰神女足",
+  ];
   // 下拉式表單選項處理 End
 
   // 項目狀態 Start
@@ -111,7 +118,6 @@ const AddPlayerInfo = () => {
     setPlayersInfo((prevPlayersInfo) => {
       let _playersInfo = [...prevPlayersInfo];
       _playersInfo.push({
-        // id: new Date().toLocaleString(),
         id: uuidv4(),
         name: "ex:陳小明",
         photo: "", //WEICHE:這個用來儲存Blob File

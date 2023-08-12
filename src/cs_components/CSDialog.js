@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog } from "primereact/dialog";
 // 之後待製作的組件
 const CSDialog = React.memo(({ header, visible, style, onHide, children }) => {

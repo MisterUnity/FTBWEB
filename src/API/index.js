@@ -20,8 +20,10 @@ FTBAPI.interceptors.response.use(
       ErrorCode &&
       ErrorCode.includes("E") &&
       ErrorMessage !== "未登入" &&
+      ErrorMessage !== "資料已經存在" &&
       StatusCode === 0
     ) {
+      console.log("丟錯誤");
       throw response;
     }
     return response;
