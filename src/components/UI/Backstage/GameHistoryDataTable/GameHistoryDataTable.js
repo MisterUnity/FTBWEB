@@ -90,6 +90,8 @@ const GameHistoryDataTable = React.memo(({ gameRecord }) => {
         />
       </CSDialog>
       <DataTable
+        scrollable={true}
+        scrollHeight="150px"
         value={dataReconstructionHandler()}
         className="w-full"
         selectionMode="single"

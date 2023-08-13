@@ -75,15 +75,14 @@ const EditComprehensiveDataTable = () => {
   const navigate = useNavigate();
 
   // 項目狀態 Start
-  const [playerGameData, setPlayerGameData] = useState(null);
   const [playerList, setPlayerList] = useState([]);
   const [myTeam, setMyTeam] = useState([]);
   const [opponentTeam, setOpponentTeam] = useState([]);
-  const [field, setField] = useState("1");
+  const [isHome, setIsHome] = useState("1");
   const [date, setDate] = useState(null);
   const [playingField, setPlayingField] = useState("");
   const [gameData, setGameData] = useState([]);
-  const datatableRef = useRef();
+  const dataTableRef = useRef();
   // 項目狀態 End
 
   // 初始處理 Start
@@ -104,6 +103,7 @@ const EditComprehensiveDataTable = () => {
         });
       if (!leaguePlayerList) return false;
       allPlayerList = leaguePlayerList.map((item) => ({ ...item }));
+
       setGameData((prevGameData) => {
         let _gameData = prevGameData.map((item) => ({ ...item }));
         for (let i = 0; i < 16; i++) {
@@ -132,9 +132,18 @@ const EditComprehensiveDataTable = () => {
   }, []);
   // 初始處理 End
 
-  // 根據選擇隊伍顯示不同球員清單處理 End
+  // 根據選擇隊伍顯示不同球員清單處理 Start
+  const onMyTeamChg = (e) => {
+    console.log("rest觸發");
+    setMyTeam(e.target.value);
+    // dataTableRef.current.clearState();
+    /* 因無法直接清除到PrimeReact-dataTable內部記憶的舊值，只能用 
+        內部的 Method『dataTableRef.current.reset();』來清除 */
+    dataTableRef.current.reset();
+  };
   useEffect(() => {
     setGameData((prevGameData) => {
+      console.log("資料重置");
       const _gameData = prevGameData.map((item) => {
         item.playerName = "Select a Player";
         item.goal = "0";
@@ -151,20 +160,19 @@ const EditComprehensiveDataTable = () => {
       });
       return _gameData;
     });
+
     const _playerList = allPlayerList.filter((item) => {
       return item["Team"] === myTeam;
     });
-    const playerList = [];
-    for (const key in _playerList) {
-      playerList.push(_playerList[key]["Name"]);
-    }
+    const playerList = _playerList.map((playerInfo) => {
+      return playerInfo["Name"];
+    });
     setPlayerList(playerList);
   }, [myTeam]);
   // 根據選擇隊伍顯示不同球員清單處理 End
 
   // 編輯模式：計數器 Start
   const textNumberEditor = (options) => {
-    console.log("textNumber", options);
     return (
       <InputNumber
         value={options.value}
@@ -180,7 +188,7 @@ const EditComprehensiveDataTable = () => {
 
   // 編輯模式：下拉選單 Start
   const dropdownEditor = (options) => {
-    console.log("dropdown", options);
+    console.log({ options });
     return (
       <Dropdown
         appendTo={"self"}
@@ -195,7 +203,6 @@ const EditComprehensiveDataTable = () => {
 
   // 編輯模式的時，顯示的組件處理 Start
   const cellEditor = (options) => {
-    console.log("顯示的組件處理");
     if (options.field === "playerName") return dropdownEditor(options);
     else return textNumberEditor(options);
   };
@@ -203,38 +210,24 @@ const EditComprehensiveDataTable = () => {
 
   // radioBtn樣式處理 Start
   const radioBtnHandler = () => {
-    const btnData = [
-      {
-        id: "homeGame",
-        label: "主場",
-        inputId: "field1",
-        name: "homeGame",
-        value: "homeGame",
-        checked: "1",
-      },
-      {
-        id: "awayGame",
-        label: "客場",
-        inputId: "field2",
-        name: "awayGame",
-        value: "awayGame",
-        checked: "0",
-      },
-    ];
+    const btnData = ["homeGame", "awayGame"];
     return btnData.map((item) => {
       return (
-        <div key={item.id} className="flex align-items-center ml-3">
+        <div key={item} className="flex align-items-center ml-3">
           <RadioButton
-            inputId={item.inputId}
-            name={item.name}
-            value={item.value}
+            inputId={item === "homeGame" ? "field1" : "field2"}
+            name={item === "homeGame" ? "homeGame" : "awayGame"}
+            value={item === "homeGame" ? "homeGame" : "awayGame"}
             onChange={(e) =>
-              setField(e.target.value === "homeGame" ? "1" : "0")
+              setIsHome(e.target.value === "homeGame" ? "1" : "0")
             }
-            checked={field === item.checked}
+            checked={isHome === (item === "homeGame" ? "1" : "0")}
           />
-          <label htmlFor={item.inputId} className="ml-2">
-            {item.label}
+          <label
+            htmlFor={item === "homeGame" ? "field1" : "field2"}
+            className="ml-2"
+          >
+            {item === "homeGame" ? "主場" : "客場"}
           </label>
         </div>
       );
@@ -244,12 +237,14 @@ const EditComprehensiveDataTable = () => {
 
   // 編輯完處理 Start
   const onCellEditComplete = (e) => {
+    console.log("編輯完成", e);
     let { rowData, newValue, field, originalEvent: event } = e;
+    console.log({ rowData }, { newValue });
     rowData[field] = newValue;
   };
   // 編輯完處理 End
 
-  // 輸入值是否為整數判斷 Start
+  // 輸入值是否為整數判斷 Start * 目前此函數未使用
   const isPositiveInteger = (val) => {
     let str = String(val);
     str = str.trim();
@@ -273,18 +268,16 @@ const EditComprehensiveDataTable = () => {
         const formattedDate = `${year}-${month}-${day}`;
         return formattedDate;
       };
-      const _gameData = {
+      const appendedData = {
         team: myTeam,
         opponent: opponentTeam,
-        isHome: field,
+        isHome: isHome,
         place: playingField,
         date: dateConversion(),
       };
-      const gameData = [...playerGameData];
-      for (const aryIndex in gameData) {
-        // TODO 待改動
-        gameData[aryIndex] = { ..._gameData, ...gameData[aryIndex] };
-      }
+      // TODO 還未處理完
+      const _gameData = gameData.map((item) => ({ ...item, ...appendedData }));
+
       AddGameRecord(gameData)
         .then((res) => {})
         .catch((err) => {
@@ -295,27 +288,15 @@ const EditComprehensiveDataTable = () => {
   };
   // 表單送出處理器 End
 
-  const OnMyTeamChg = (e) => {
-    setMyTeam(e.target.value);
-    // datatableRef.current.clearState();
-    datatableRef.current.reset();
-  };
-  const OnDataTableValueChg = (context1, context2) => {
-    console.log("OnDataTableValueChg", { context1, context2 });
-  };
-
   return (
-    <div className="card p-fluid h-screen">
+    <div className="card p-fluid h-screen page-edit-player">
       <div className="flex col-12">
         <div className="flex align-items-center ">
           <label className="text-lg ">您的隊伍：</label>
           <Dropdown
-            appendTo={"self"}
             value={myTeam}
             options={teamItem}
-            onChange={(e) => {
-              OnMyTeamChg(e);
-            }}
+            onChange={(e) => onMyTeamChg(e)}
             placeholder="請選擇隊伍"
           />
         </div>
@@ -357,12 +338,7 @@ const EditComprehensiveDataTable = () => {
           />
         </div>
       </div>
-      <DataTable
-        ref={datatableRef}
-        value={gameData}
-        editMode="cell"
-        onValueChange={OnDataTableValueChg}
-      >
+      <DataTable ref={dataTableRef} value={gameData} editMode="cell">
         {columns.map(({ field, header }) => {
           return (
             <Column

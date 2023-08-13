@@ -128,8 +128,8 @@ const AddPlayerInfo = () => {
         weight: "ex:75kg",
         position: "ex:前鋒",
         team: "ex:1隊",
-        // description: "備註",
         delete: "",
+        // description: "備註" => 目前使用不到
       });
       return _playersInfo;
     });
@@ -312,6 +312,7 @@ const AddPlayerInfo = () => {
       },
     },
     // {
+    //   這組目前用不到
     //   id: "column9",
     //   field: "description",
     //   header: "備註事項",
@@ -375,7 +376,7 @@ const AddPlayerInfo = () => {
             const { StatusCode, StatusMessage, Result } = res.data;
             if (StatusCode === 1 && StatusMessage === "Normal end.") {
               submitContext.onSetSubmitStatus(false);
-              navigate("playerList");
+              navigate("/backstageHome/playerList");
             } else {
               Result.forEach((msg) => {
                 toast.current.show({
@@ -406,7 +407,7 @@ const AddPlayerInfo = () => {
     <BlockUI blocked={blocked} containerClassName="h-full">
       <div
         id="dataTableContainer"
-        className="card p-fluid w-full h-full absolute overflow-auto "
+        className="page-add-player card p-fluid w-full h-full absolute overflow-auto "
       >
         <DataTable
           value={playersInfo}

@@ -11,6 +11,8 @@ const PlayerListDataTable = React.memo(
     return (
       <div className="card">
         <DataTable
+          scrollable={true}
+          scrollHeight="400px"
           hidden={hide}
           value={playersData}
           selectionMode="single"

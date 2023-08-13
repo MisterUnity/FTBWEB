@@ -85,8 +85,8 @@ const PlayerList = () => {
 
       setPlayerListData(playerListData);
       // 獲取第一筆選手資料
-      // GetPlayerInfo(playerListData[0].ID)
-      GetPlayerInfo("b4d1715b-c0de-4313-9d82-106b86f54ec8") //測試用
+      GetPlayerInfo(playerListData[0].ID)
+        // GetPlayerInfo("b4d1715b-c0de-4313-9d82-106b86f54ec8") //測試用
         .then((res) => {
           const { StatusCode, StatusMessage, Result } = res.data;
           if (StatusCode && StatusMessage.includes("Normal end.")) {
@@ -171,9 +171,9 @@ const PlayerList = () => {
             </div>
           </div>
 
-          {/*側邊欄（顯示選手清單） */}
+          {/*側邊欄（顯示選手清單）*/}
           <CollapseSideBar
-            className="h-full bg-primary-500 opacity-60"
+            className="h-full bg-primary-500 opacity-60  "
             collapse={isHide}
             onSetIsHide={hideHandler}
           >
