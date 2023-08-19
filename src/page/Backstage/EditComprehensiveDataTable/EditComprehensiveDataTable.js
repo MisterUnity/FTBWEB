@@ -16,7 +16,7 @@ import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLogi
 
 const columns = [
   {
-    field: "playerName",
+    field: "name",
     header: "選手",
   },
   {
@@ -56,7 +56,7 @@ const columns = [
     header: "黃牌",
   },
   {
-    field: "readCard",
+    field: "redCard",
     header: "紅牌",
   },
 ];
@@ -68,21 +68,21 @@ const teamItem = [
   "花蓮",
   "戰神女足",
 ];
-let allPlayerList = [];
 
+let allPlayerList = [];
 const EditComprehensiveDataTable = () => {
-  const { authContext, submitContext } = useGlobalStore();
+  const { authContext, submitContext, showToast } = useGlobalStore();
   const navigate = useNavigate();
+  const dataTableRef = useRef();
 
   // 項目狀態 Start
-  const [playerList, setPlayerList] = useState([]);
-  const [myTeam, setMyTeam] = useState([]);
-  const [opponentTeam, setOpponentTeam] = useState([]);
-  const [isHome, setIsHome] = useState("1");
+  const [playerList, setPlayerList] = useState("");
+  const [myTeam, setMyTeam] = useState("");
+  const [opponentTeam, setOpponentTeam] = useState("");
+  const [isHome, setIsHome] = useState(1);
   const [date, setDate] = useState(null);
   const [playingField, setPlayingField] = useState("");
   const [gameData, setGameData] = useState([]);
-  const dataTableRef = useRef();
   // 項目狀態 End
 
   // 初始處理 Start
@@ -103,64 +103,74 @@ const EditComprehensiveDataTable = () => {
         });
       if (!leaguePlayerList) return false;
       allPlayerList = leaguePlayerList.map((item) => ({ ...item }));
-
       setGameData((prevGameData) => {
         let _gameData = prevGameData.map((item) => ({ ...item }));
         for (let i = 0; i < 16; i++) {
           _gameData.push({
             id: uuidv4(),
-            playerName: "Select a Player",
-            goal: "0",
-            toShoot: "0",
-            penaltyKick: "0",
-            freeKick: "0",
-            cornerBall: "0",
-            handBall: "0",
-            offside: "0",
-            technicalFoul: "0",
-            yellowCard: "0",
-            readCard: "0",
+            name: "Select a Player",
+            goal: 0,
+            toShoot: 0,
+            penaltyKick: 0,
+            freeKick: 0,
+            cornerBall: 0,
+            handBall: 0,
+            offside: 0,
+            technicalFoul: 0,
+            yellowCard: 0,
+            redCard: 0,
           });
         }
         return _gameData;
       });
     }
   };
-
   useEffect(() => {
     initHandler();
   }, []);
   // 初始處理 End
 
+  // 隊伍互鎖處理 Start
+  const onTeamChg = (e, type) => {
+    const currentTeam = e.target.value;
+    if (type === "myTeam") {
+      if (currentTeam !== opponentTeam) {
+        setMyTeam(currentTeam);
+      } else {
+        showToast("提示", "無法選擇和對戰隊伍相同的隊伍", 0);
+      }
+    } else {
+      if (currentTeam !== myTeam) {
+        setOpponentTeam(currentTeam);
+      } else {
+        showToast("提示", "無法選擇和您的隊伍相同的隊伍", 0);
+      }
+    }
+  };
+  // 隊伍互鎖處理 End
+
   // 根據選擇隊伍顯示不同球員清單處理 Start
-  const onMyTeamChg = (e) => {
-    console.log("rest觸發");
-    setMyTeam(e.target.value);
-    // dataTableRef.current.clearState();
+  useEffect(() => {
     /* 因無法直接清除到PrimeReact-dataTable內部記憶的舊值，只能用 
         內部的 Method『dataTableRef.current.reset();』來清除 */
     dataTableRef.current.reset();
-  };
-  useEffect(() => {
     setGameData((prevGameData) => {
-      console.log("資料重置");
       const _gameData = prevGameData.map((item) => {
-        item.playerName = "Select a Player";
-        item.goal = "0";
-        item.toShoot = "0";
-        item.penaltyKick = "0";
-        item.freeKick = "0";
-        item.cornerBall = "0";
-        item.handBall = "0";
-        item.offside = "0";
-        item.technicalFoul = "0";
-        item.yellowCard = "0";
-        item.readCard = "0";
+        item.name = "Select a Player";
+        item.goal = 0;
+        item.toShoot = 0;
+        item.penaltyKick = 0;
+        item.freeKick = 0;
+        item.cornerBall = 0;
+        item.handBall = 0;
+        item.offside = 0;
+        item.technicalFoul = 0;
+        item.yellowCard = 0;
+        item.redCard = 0;
         return item;
       });
       return _gameData;
     });
-
     const _playerList = allPlayerList.filter((item) => {
       return item["Team"] === myTeam;
     });
@@ -186,15 +196,25 @@ const EditComprehensiveDataTable = () => {
   };
   // 編輯模式：計數器 End
 
+  // 選手重複確認 Start
+  const playerNameCheck = (value, options) => {
+    const result = gameData.find((player) => player.name === value);
+    if (!result) {
+      options.editorCallback(value);
+    } else {
+      showToast("選手重複提示", `${value}，已被選取。`, 0);
+    }
+  };
+  // 選手重複確認 End
+
   // 編輯模式：下拉選單 Start
   const dropdownEditor = (options) => {
-    console.log({ options });
     return (
       <Dropdown
         appendTo={"self"}
         value={options.value}
         options={playerList}
-        onChange={(e) => options.editorCallback(e.value)}
+        onChange={(e) => playerNameCheck(e.value, options)}
         placeholder="Select a Player"
       />
     );
@@ -203,7 +223,7 @@ const EditComprehensiveDataTable = () => {
 
   // 編輯模式的時，顯示的組件處理 Start
   const cellEditor = (options) => {
-    if (options.field === "playerName") return dropdownEditor(options);
+    if (options.field === "name") return dropdownEditor(options);
     else return textNumberEditor(options);
   };
   // 編輯模式的時，顯示的組件處理 End
@@ -218,10 +238,8 @@ const EditComprehensiveDataTable = () => {
             inputId={item === "homeGame" ? "field1" : "field2"}
             name={item === "homeGame" ? "homeGame" : "awayGame"}
             value={item === "homeGame" ? "homeGame" : "awayGame"}
-            onChange={(e) =>
-              setIsHome(e.target.value === "homeGame" ? "1" : "0")
-            }
-            checked={isHome === (item === "homeGame" ? "1" : "0")}
+            onChange={(e) => setIsHome(e.target.value === "homeGame" ? 1 : 0)}
+            checked={isHome === (item === "homeGame" ? 1 : 0)}
           />
           <label
             htmlFor={item === "homeGame" ? "field1" : "field2"}
@@ -237,51 +255,90 @@ const EditComprehensiveDataTable = () => {
 
   // 編輯完處理 Start
   const onCellEditComplete = (e) => {
-    console.log("編輯完成", e);
     let { rowData, newValue, field, originalEvent: event } = e;
-    console.log({ rowData }, { newValue });
     rowData[field] = newValue;
   };
   // 編輯完處理 End
 
   // 輸入值是否為整數判斷 Start * 目前此函數未使用
   const isPositiveInteger = (val) => {
-    let str = String(val);
-    str = str.trim();
-    if (!str) {
-      return false;
-    }
-    str = str.replace(/^0+/, "") || "0";
-    let n = Math.floor(Number(str));
-    return n !== Infinity && String(n) === str && n >= 0;
+    // let str = String(val);
+    // str = str.trim();
+    // if (!str) {
+    //   return false;
+    // }
+    // str = str.replace(/^0+/, "") || "0";
+    // let n = Math.floor(Number(str));
+    // return n !== Infinity && String(n) === str && n >= 0;
   };
   // 輸入值是否為整數判斷 End
 
   // 表單送出處理器 Start
-  const submitHandler = () => {
+  const submitHandler = async () => {
     if (!submitContext.submitStatus) {
       submitContext.onSetSubmitStatus(true);
-      const dateConversion = () => {
+      let formattedDate = false;
+      if (date && myTeam && opponentTeam && playingField) {
         const year = date.getFullYear().toString();
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const day = date.getDate().toString().padStart(2, "0");
-        const formattedDate = `${year}-${month}-${day}`;
-        return formattedDate;
-      };
+        formattedDate = `${year}-${month}-${day}`;
+      } else {
+        console.log("錯誤");
+        showToast(
+          "提醒訊息",
+          date
+            ? myTeam
+              ? opponentTeam
+                ? "請輸入比賽場地"
+                : "請選擇對戰隊伍"
+              : "請選擇您的隊伍"
+            : "請選擇比賽日期",
+          0
+        );
+        formattedDate = false;
+      }
+
+      if (!formattedDate) {
+        submitContext.onSetSubmitStatus(false);
+        return false;
+      }
       const appendedData = {
         team: myTeam,
         opponent: opponentTeam,
         isHome: isHome,
         place: playingField,
-        date: dateConversion(),
+        date: formattedDate,
       };
       // TODO 還未處理完
-      const _gameData = gameData.map((item) => ({ ...item, ...appendedData }));
+      const finalData = gameData.map((item) => ({ ...item, ...appendedData }));
+      for (const index in finalData) {
+        const playerName = finalData[index]["name"];
+        if (playerName === "Select a Player") {
+          // 刪除無效的資料
+          delete finalData[index];
+        } else {
+          //  把渲染時需要的 key (id)，換成能夠對應後端資料庫相對應的球員 ID
+          const playerNameInfo = allPlayerList.find(
+            (item) => item["Name"] === playerName
+          );
+          finalData[index]["id"] = playerNameInfo["ID"];
+        }
+      }
 
-      AddGameRecord(gameData)
-        .then((res) => {})
+      await AddGameRecord(finalData)
+        .then((res) => {
+          const { StatusCode, StatusMessage, Result } = res.data;
+          if (StatusCode && StatusMessage.includes("Normal end.")) {
+            showToast("狀態提示", "資料追加成功", 1);
+            submitContext.onSetSubmitStatus(false);
+          } else {
+            showToast("狀態提示", "資料傳送失敗，出現未知問題", 0);
+          }
+        })
         .catch((err) => {
-          alert(err);
+          showToast("狀態提示", `錯誤訊息：${err}`, 0);
+          submitContext.onSetSubmitStatus(false);
         });
       submitContext.onSetSubmitStatus(false);
     }
@@ -296,7 +353,7 @@ const EditComprehensiveDataTable = () => {
           <Dropdown
             value={myTeam}
             options={teamItem}
-            onChange={(e) => onMyTeamChg(e)}
+            onChange={(e) => onTeamChg(e, "myTeam")}
             placeholder="請選擇隊伍"
           />
         </div>
@@ -310,7 +367,7 @@ const EditComprehensiveDataTable = () => {
             appendTo={"self"}
             value={opponentTeam}
             options={teamItem}
-            onChange={(e) => setOpponentTeam(e.target.value)}
+            onChange={(e) => onTeamChg(e, "opponentTeam")}
             placeholder="請選擇隊伍"
           />
         </div>
@@ -335,6 +392,7 @@ const EditComprehensiveDataTable = () => {
             value={playingField}
             placeholder="請輸入比賽場館"
             onChange={(e) => setPlayingField(e.target.value)}
+            required
           />
         </div>
       </div>

@@ -15,20 +15,23 @@ const FTBAPI = axios.create({
 // 回應攔截器 Start
 FTBAPI.interceptors.response.use(
   (response) => {
+    console.log({ response });
     const { ErrorCode, StatusCode, ErrorMessage } = response.data;
     if (
       ErrorCode &&
       ErrorCode.includes("E") &&
       ErrorMessage !== "未登入" &&
       ErrorMessage !== "資料已經存在" &&
+      ErrorMessage !== "無資料" &&
       StatusCode === 0
     ) {
-      console.log("丟錯誤");
+      console.log("攔截器", response);
       throw response;
     }
     return response;
   },
   (error) => {
+    console.log({ error });
     throw error;
   }
 );

@@ -22,7 +22,7 @@ import "primeicons/primeicons.css";
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
   const toast = useRef();
-  const { authContext, submitContext } = useGlobalStore();
+  const { authContext, submitContext, showToast } = useGlobalStore();
   // 下拉式表單選項處理 Start
   const genderItem = ["男", "女", "其他"];
   const ageItem = useDropdownItem(1, 41, "歲");
@@ -366,6 +366,7 @@ const AddPlayerInfo = () => {
 
   // 送出表單處理 Start
   const sendDataHandler = async () => {
+    //TODO 要過濾掉沒有選擇隊伍的資料
     if (!submitContext.submitStatus) {
       submitContext.onSetSubmitStatus(true);
       if (await checkLogin(authContext, navigate)) {
@@ -375,8 +376,15 @@ const AddPlayerInfo = () => {
             setBlocked(false);
             const { StatusCode, StatusMessage, Result } = res.data;
             if (StatusCode === 1 && StatusMessage === "Normal end.") {
-              submitContext.onSetSubmitStatus(false);
-              navigate("/backstageHome/playerList");
+              showToast(
+                "狀態提示",
+                "資料追加成功，3秒後將切換至選手清單頁面",
+                1
+              );
+              setTimeout(() => {
+                submitContext.onSetSubmitStatus(false);
+                navigate("/backstageHome/playerList");
+              }, 3000);
             } else {
               Result.forEach((msg) => {
                 toast.current.show({
@@ -391,13 +399,15 @@ const AddPlayerInfo = () => {
           })
           .catch((err) => {
             setBlocked(false);
-            alert(`ERROR：${err}`);
+            showToast("狀態提示", `錯誤消息：${err}`, 0);
             submitContext.onSetSubmitStatus(false);
           });
       } else {
-        alert("登入逾時，將回首頁");
-        submitContext.onSetSubmitStatus(false);
-        navigate("/");
+        showToast("狀態提示", "登入逾時，3秒後將返回首頁", 0);
+        setTimeout(() => {
+          submitContext.onSetSubmitStatus(false);
+          navigate("/");
+        }, 3000);
       }
     }
   };

@@ -97,7 +97,7 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
 
 // 新增球員比賽數據 Start
 export const AddGameRecord = (gameRecord) => {
-  return FTBAPI.post("/Player/AddGameRecord")
+  return FTBAPI.post("/Player/AddGameRecord", gameRecord)
     .then((res) => {
       return res;
     })
@@ -108,9 +108,9 @@ export const AddGameRecord = (gameRecord) => {
 // 新增球員比賽數據 End
 
 // 更新指定球員個人資料 Start
-export const PutPlayerPersonalInfo = (formData) => {
-  return FTBAPI.put(`/Player/${formData.ID}`, {
-    headers: { "Content-Type ": "multipart/form-data" },
+export const PutPlayerPersonalInfo = (ID, formData) => {
+  return FTBAPI.put(`/Player/${ID}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   })
     .then((res) => {
       return res;
@@ -135,7 +135,14 @@ export const PutPlayerDataTableInfo = (dataTable) => {
 
 // 刪除指定球員資料 Start
 export const DeletePlayerInfo = (id) => {
-  return FTBAPI.delete(`/Player/${id}`)
+  return FTBAPI.delete(`/Player/${id}`, {
+    onUploadProgress: (progressEvent) => {
+      const loaded = progressEvent.loaded; // 已上傳的字節數
+      const total = progressEvent.total; // 總字節數
+      const progress = (loaded / total) * 100; // 計算進度百分比
+      console.log("進度條", progress);
+    },
+  })
     .then((res) => {
       return res;
     })

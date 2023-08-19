@@ -12,15 +12,20 @@ import {
 import { InputTextarea } from "primereact/inputtextarea";
 import { PutPlayerPersonalInfo } from "../../../../API/playerInfo/playerInfo";
 import { useGlobalStore } from "../../../../store/GlobalContextProvider";
-import { GetPlayerInfo } from "../../../../API/playerInfo/playerInfo";
 import { DeletePlayerInfo } from "../../../../API/playerInfo/playerInfo";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import PhotoCropper from "../../../Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../../Hook/useDropdownItem/useDropdownItem";
-import blueWhaleLogo from "../../../../assets/blue_whale_logo.png";
 
 const PlayersInfo = React.memo(
-  ({ className, playerDetailedInfo, onDisabled, onUpdate, onDelete }) => {
+  ({
+    className,
+    Logo,
+    playerDetailedInfo,
+    onDisabled,
+    onLocalUpdate,
+    onDelete,
+  }) => {
     const { showToast, submitContext } = useGlobalStore();
 
     // 項目狀態 Start
@@ -165,6 +170,12 @@ const PlayersInfo = React.memo(
     };
     // 資料重置處理 End
 
+    // 取得剪裁好的圖像檔 Start
+    const imagePreviewHandler = (imageLocalUrl, imageData) => {
+      setPhoto({ localUrl: imageLocalUrl, blob: imageData });
+    };
+    // 取得剪裁好的圖像檔 End
+
     // 更新來源資料 Start
     useEffect(() => {
       setPlayerInfo(playerDetailedInfo);
@@ -175,26 +186,24 @@ const PlayersInfo = React.memo(
     const standardModeHandler = async (standardStatus) => {
       if (standardStatus === "enterEdit") {
         onDisabled();
-        setEditModel(!editModel);
+        setEditModel(true);
       } else {
         if (!submitContext.submitStatus) {
           const accept = () => {
             submitContext.onSetSubmitStatus(true);
             DeletePlayerInfo(playerInfo["ID"])
               .then((res) => {
-                console.log(res);
                 const { StatusCode, StatusMessage, Result } = res.data;
                 if (StatusCode && StatusMessage.includes("Normal end.")) {
                   showToast("success", "資料刪除成功", 1);
                   onDelete(playerInfo["ID"]);
                   submitContext.onSetSubmitStatus(false);
                 } else {
-                  //TODO delete API還未完善
-                  console.log("Delete API還未完善");
+                  showToast("錯誤", "資料刪除，發生不明原因錯誤", 0);
                 }
               })
               .catch((err) => {
-                alert(err);
+                showToast("錯誤", `錯誤訊息：${err}`, 0);
                 submitContext.onSetSubmitStatus(false);
               });
           };
@@ -219,65 +228,75 @@ const PlayersInfo = React.memo(
       if (editStatus === "editCompleted") {
         if (!submitContext.submitStatus) {
           submitContext.onSetSubmitStatus(true);
-          const formData = new FormData();
-          const strValueCheck = (waitForCheckValue, propName) => {
-            return waitForCheckValue
-              ? waitForCheckValue.trim()
-                ? waitForCheckValue
+          // 確認輸入字串值是否為空值，如果是的話就返回未更改前的值
+          const strEmptyCheck = (value, propName) => {
+            return value
+              ? value.trim()
+                ? value
                 : playerInfo[propName]
               : playerInfo[propName];
           };
-          formData.append("Photo", photo.blob ? photo.blob : playerInfo.Photo);
-          formData.append("Name", strValueCheck(name, "Name"));
-          formData.append("Age", strValueCheck(age, "Name"));
-          formData.append("Gender", strValueCheck(gender, "Gender"));
-          formData.append("Height", strValueCheck(height, "height"));
-          formData.append("Weight", strValueCheck(weight, "Weight"));
-          formData.append("Position", strValueCheck(position, "Position"));
-          formData.append("Team", strValueCheck(team, "Team"));
+
+          // 組件 『 Form-Data』類型資料
+          const ID = playerInfo["ID"];
+          const blob = new Blob([playerInfo.Photo], { type: "image/jpeg" });
+          const formData = new FormData();
+          // formData.append("photo", photo.blob ? photo.blob : playerInfo.Photo);
+          formData.append("id", ID);
+          formData.append("name", strEmptyCheck(name, "Name"));
+          formData.append("gender", strEmptyCheck(gender, "Gender"));
+          formData.append("height", strEmptyCheck(height, "Height"));
+          formData.append("weight", strEmptyCheck(weight, "Weight"));
+          formData.append("position", strEmptyCheck(position, "Position"));
+          formData.append("photo", blob);
+          formData.append("age", strEmptyCheck(name, "Age"));
+          formData.append("team", strEmptyCheck(team, "Team"));
           formData.append(
-            "Description",
-            strValueCheck(description, "description")
+            "description",
+            strEmptyCheck(description, "Description")
           );
-          const putResult = await PutPlayerPersonalInfo(formData)
+          console.log("送出ID", formData.get("id"));
+          console.log("送出資料", formData.get("name"));
+          console.log("送出資料", formData.get("gender"));
+          console.log("送出資料", formData.get("height"));
+          console.log("送出資料", formData.get("weight"));
+          console.log("送出資料", formData.get("position"));
+          console.log("送出資料", formData.get("description"));
+          console.log("送出資料", formData.get("photo"));
+          console.log("送出資料", formData.get("age"));
+          console.log("送出資料", formData.get("team"));
+          console.log("送後端");
+          const putResult = await PutPlayerPersonalInfo(ID, formData)
             .then((res) => {
               const { StatusCode, StatusMessage, Result } = res.data;
               if (StatusCode && StatusMessage.includes("Normal end.")) {
                 showToast("success", "資料更新成功", 1);
+                return true;
               } else {
-                //TODO 其餘訊息時要做什麼處理
+                showToast("錯誤", "資料更新，發生不明原因錯誤", 0);
+                return false;
               }
             })
             .catch((err) => {
-              alert(err);
+              showToast("錯誤", `錯誤訊息：${err}`, 0);
               submitContext.onSetSubmitStatus(false);
               return false;
             });
+          // 更新失敗時，跳出不繼續執行。
           if (!putResult) {
             submitContext.onSetSubmitStatus(false);
             return false;
           }
-
-          GetPlayerInfo(playerDetailedInfo["ID"])
-            .then((res) => {
-              const { StatusCode, StatusMessage, Result } = res.data;
-              if (StatusCode && StatusMessage.includes("Normal end.")) {
-                onUpdate(Result);
-                onDisabled();
-                dataRest();
-                setEditModel(!editStatus);
-                submitContext.onSetSubmitStatus(false);
-              }
-            })
-            .catch((err) => {
-              submitContext.onSetSubmitStatus(false);
-              alert(err);
-            });
+          onLocalUpdate(ID);
+          onDisabled();
+          dataRest();
+          setEditModel(false);
+          submitContext.onSetSubmitStatus(false);
         }
       } else {
         dataRest();
         onDisabled();
-        setEditModel(!editStatus);
+        setEditModel(false);
       }
     };
     // 編輯『完成』or『取消』處理器  End
@@ -349,26 +368,18 @@ const PlayersInfo = React.memo(
 
     // 相片欄處理器 Start
     const photoElementHandler = () => {
-      return editModel ? (
-        photo ? (
-          <img
-            className="w-full h-full cursor-pointer"
-            src={photo.localUrl}
-            alt="選手照片"
-            onClick={() => setCropperVisible(true)}
-          />
-        ) : (
-          <div
-            className={`pi pi-upload cursor-pointer`}
-            style={{ fontSize: "8rem" }}
-            onClick={() => setCropperVisible(true)}
-          ></div>
-        )
-      ) : (
+      return (
         <img
-          className="w-full h-full"
-          src={playerInfo["Photo"]}
+          className={`w-full h-full ${editModel ? "cursor-pointer" : ""}`}
+          src={
+            editModel
+              ? photo.localUrl
+                ? photo.localUrl
+                : playerInfo["Photo"]
+              : playerInfo["Photo"]
+          }
           alt="選手照片"
+          onClick={editModel ? () => setCropperVisible(true) : () => {}}
         />
       );
     };
@@ -380,9 +391,7 @@ const PlayersInfo = React.memo(
         return (
           <div key={item.id} className="col-2 border-gray-300 border-left-2">
             <div className="text-sm text-bluegray-400">{item.header}</div>
-            {!editModel ? (
-              <div className="text-xl">{item.readingMode}</div>
-            ) : (
+            {editModel ? (
               <div>
                 {item.editMode.type === "dropdown" ? (
                   <Dropdown
@@ -397,26 +406,20 @@ const PlayersInfo = React.memo(
                 ) : (
                   <InputTextarea
                     value={item.editMode.value}
-                    onChange={(e) => {
-                      item.editMode.callBack(e.target.value);
-                    }}
+                    onChange={(e) => item.editMode.callBack(e.target.value)}
                     rows={2}
                     cols={30}
                   />
                 )}
               </div>
+            ) : (
+              <div className="text-xl">{item.readingMode}</div>
             )}
           </div>
         );
       });
     };
     // 資料渲染處理 End
-
-    // 取得剪裁好的圖像檔 Start
-    const imagePreviewHandler = (imageLocalUrl, imageData) => {
-      setPhoto({ localUrl: imageLocalUrl, blob: imageData });
-    };
-    // 取得剪裁好的圖像檔 End
 
     return (
       <div className={`${className} flex align-items-center`}>
@@ -443,7 +446,7 @@ const PlayersInfo = React.memo(
           </div>
         </div>
         <div className="col-2">
-          <img className="w-full h-full" src={blueWhaleLogo} alt="隊徽" />
+          <img className="w-full h-full" src={Logo} alt="隊徽" />
         </div>
       </div>
     );
