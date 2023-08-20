@@ -237,35 +237,38 @@ const PlayersInfo = React.memo(
               : playerInfo[propName];
           };
 
+          let sendName = strEmptyCheck(name, "Name");
+
           // 組件 『 Form-Data』類型資料
           const ID = playerInfo["ID"];
-          const blob = new Blob([playerInfo.Photo], { type: "image/jpeg" });
+          // const blob = new Blob([playerInfo.Photo], { type: "image/jpeg" });
           const formData = new FormData();
           // formData.append("photo", photo.blob ? photo.blob : playerInfo.Photo);
           formData.append("id", ID);
-          formData.append("name", strEmptyCheck(name, "Name"));
-          formData.append("gender", strEmptyCheck(gender, "Gender"));
+          formData.append("name", sendName);
+          formData.append("gender", strEmptyCheck(gender, "Gender")==="男"?"M":"F");
           formData.append("height", strEmptyCheck(height, "Height"));
           formData.append("weight", strEmptyCheck(weight, "Weight"));
           formData.append("position", strEmptyCheck(position, "Position"));
-          formData.append("photo", blob);
-          formData.append("age", strEmptyCheck(name, "Age"));
+          // formData.append("photo", blob);
+          formData.append("photo", photo.blob, sendName);
+          formData.append("age", strEmptyCheck(age, "Age"));
           formData.append("team", strEmptyCheck(team, "Team"));
           formData.append(
             "description",
             strEmptyCheck(description, "Description")
           );
-          console.log("送出ID", formData.get("id"));
-          console.log("送出資料", formData.get("name"));
-          console.log("送出資料", formData.get("gender"));
-          console.log("送出資料", formData.get("height"));
-          console.log("送出資料", formData.get("weight"));
-          console.log("送出資料", formData.get("position"));
-          console.log("送出資料", formData.get("description"));
-          console.log("送出資料", formData.get("photo"));
-          console.log("送出資料", formData.get("age"));
-          console.log("送出資料", formData.get("team"));
-          console.log("送後端");
+          // console.log("送出ID", formData.get("id"));
+          // console.log("送出資料", formData.get("name"));
+          // console.log("送出資料", formData.get("gender"));
+          // console.log("送出資料", formData.get("height"));
+          // console.log("送出資料", formData.get("weight"));
+          // console.log("送出資料", formData.get("position"));
+          // console.log("送出資料", formData.get("description"));
+          // console.log("送出資料", formData.get("photo"));
+          // console.log("送出資料", formData.get("age"));
+          // console.log("送出資料", formData.get("team"));
+          // console.log("送後端");
           const putResult = await PutPlayerPersonalInfo(ID, formData)
             .then((res) => {
               const { StatusCode, StatusMessage, Result } = res.data;
