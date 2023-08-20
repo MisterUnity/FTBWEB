@@ -5,6 +5,7 @@ import { GetPlayerInfo } from "../../../API/playerInfo/playerInfo";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import { Button } from "primereact/button";
+import { PutGameData } from "../../../API/playerInfo/playerInfo";
 import CSDialog from "../../../cs_components/CSDialog";
 import GameHistoryDataTable from "../../../components/UI/Backstage/GameHistoryDataTable/GameHistoryDataTable";
 import PlayerInfo from "../../../components/UI/Backstage/PlayersInfo/PlayersInfo";
@@ -62,7 +63,7 @@ const PlayerList = () => {
           }
         })
         .catch((err) => {
-          showToast("錯誤", `錯誤訊息：${err}`, 0);
+          showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
           return false;
         });
 
@@ -83,7 +84,7 @@ const PlayerList = () => {
           }
         })
         .catch((err) => {
-          showToast("錯誤", `錯誤訊息：${err}`, 0);
+          showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
         });
     }
   };
@@ -224,6 +225,47 @@ const PlayerList = () => {
   };
   // 刪除選手資料處理 End
 
+  const UpdateGameRecordHandler = async (dataInfo) => {
+    //追加ID資料
+    const id = playerDetailedInfo["ID"];
+    dataInfo["id"] = id;
+    // 送要更新的資料
+
+    const result = await PutGameData(id, dataInfo)
+      .then((res) => {
+        const { StatusCode, StatusMessage, Result } = res.data;
+        if (StatusCode === 1 && StatusMessage === "Normal end.") {
+          return true;
+        } else {
+          showToast("錯誤", "資料更新發生不明原因錯誤", 0);
+          return false;
+        }
+      })
+      .catch((err) => {
+        showToast("狀態提示", `錯誤消息：${err.data.ErrorMessage}`, 0);
+        return false;
+      });
+
+    if (!result) {
+      return false;
+    }
+
+    // 取已更新過的球員比賽數據（和更新的『 ID 』同一筆）
+    GetPlayerInfo(id)
+      .then((res) => {
+        const { StatusCode, StatusMessage, Result } = res.data;
+        if (StatusCode && StatusMessage.includes("Normal end.")) {
+          setPlayerDetailedInfo(Result);
+          showToast("狀態提示", "成功更新比賽數據", 1);
+        } else {
+          showToast("錯誤", "更新比賽數據發生不明原因錯誤", 0);
+        }
+      })
+      .catch((err) => {
+        showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
+      });
+  };
+
   return (
     <Fragment>
       {isLoad ? (
@@ -265,6 +307,7 @@ const PlayerList = () => {
               {
                 <GameHistoryDataTable
                   gameRecord={playerDetailedInfo.GameHistory}
+                  UpdateGameRecord={UpdateGameRecordHandler}
                 />
               }
             </div>
