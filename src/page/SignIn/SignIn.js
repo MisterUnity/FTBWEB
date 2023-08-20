@@ -9,13 +9,13 @@ import backDrop from "../../assets/Background.jpg";
 import classes from "./signIn.module.css";
 
 const SignIn = React.memo((props) => {
-  const { userContext, authContext } = useGlobalStore();
+  const { userContext, authContext, showToast } = useGlobalStore();
   const navigate = useNavigate();
 
   // 項目狀態 Start
   const [strTitle, setTitle] = useState("Sign In");
   const [strSignInOrRegis, setTitle2] = useState("Create an account");
-  const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
+  // const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   // 項目狀態 End
 
@@ -36,23 +36,15 @@ const SignIn = React.memo((props) => {
   const DoLogin = (userData) => {
     return Login(userData)
       .then((res) => {
-        if (
-          res.data.StatusCode === 1 &&
-          res.data.StatusMessage === "Normal end."
-        ) {
-          console.log("用戶", userData);
-          authContext.onSetSignInStatus(true);
-          userContext.onSetUserName(userData.act);
-          navigate("/");
-        } else {
-          authContext.onSetSignInStatus(false);
-          setErrorMsgIsShown(true);
-        }
+        authContext.onSetSignInStatus(true);
+        userContext.onSetUserName(userData.act);
+        navigate("/");
         setIsLoad(false);
       })
       .catch((err) => {
+        console.log({err})
         setIsLoad(false);
-        alert(err);
+        showToast("錯誤", err.data.ErrorMessage, 0);
       });
   };
   // 登入處理 End
@@ -64,31 +56,23 @@ const SignIn = React.memo((props) => {
     } else {
       Register(userData)
         .then((res) => {
-          if (
-            res.data.StatusCode === 1 &&
-            res.data.StatusMessage === "Normal end."
-          ) {
-            authContext.onSetSignInStatus(true);
-            navigate("/");
-            DoLogin(userData);
-          } else {
-            authContext.onSetSignInStatus(false);
-            setErrorMsgIsShown(true);
-          }
+          authContext.onSetSignInStatus(true);
+          navigate("/");
+          DoLogin(userData);
           setIsLoad(false);
         })
         .catch((err) => {
           setIsLoad(false);
-          alert(err);
+          showToast("錯誤", err.data.ErrorMessage, 0);
         });
     }
   };
 
-  // 是否顯示錯誤訊息處理 Start
-  const hideErrorMsgHandler = () => {
-    setErrorMsgIsShown(false);
-  };
-  // 是否顯示錯誤訊息處理 End
+  // // 是否顯示錯誤訊息處理 Start
+  // const hideErrorMsgHandler = () => {
+  //   setErrorMsgIsShown(false);
+  // };
+  // // 是否顯示錯誤訊息處理 End
 
   const showNewToHere =
     strTitle === "Sign In" ? (
@@ -103,9 +87,9 @@ const SignIn = React.memo((props) => {
         <img className="w-full h-full" src={backDrop} alt="Backdrop" />
       </div>
       <div className={classes.signIn}>
-        {errorMsgIsShown && (
+        {/* {errorMsgIsShown && (
           <EnterErrCard onHideErrorMsg={hideErrorMsgHandler} />
-        )}
+        )} */}
         <SignInCard
           onSendUserInfo={sendUserInfoHandler}
           isLoad={isLoad}

@@ -20,13 +20,9 @@ FTBAPI.interceptors.response.use(
     const { ErrorCode, StatusCode, ErrorMessage } = response.data;
     if (
       ErrorCode &&
-      ErrorCode.includes("E") &&
-      ErrorMessage !== "未登入" &&
-      ErrorMessage !== "資料已經存在" &&
-      ErrorMessage !== "無資料" &&
+      ErrorCode.includes("E") && 
       StatusCode === 0
     ) {
-      console.log("攔截器", response);
       throw response;
     }
     return response;
