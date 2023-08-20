@@ -7,7 +7,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 
 const ComprehensiveDataTable = React.memo(
-  ({ className, gameData, columnsInfo }) => {
+  ({ className, gameData, columnsInfo, UpdateGameRecord }) => {
     const [tableType, setTableType] = useState("總數據");
     const [tableData, setTableData] = useState([]);
     const [columnType, seColumnType] = useState("MixColumns");
@@ -82,19 +82,20 @@ const ComprehensiveDataTable = React.memo(
     // 編輯完成時所做處理 End
 
     const editCompleted = () => {
-      switch (columnType) {
-        case "MixColumns":
-          gameData["MixData"] = tableData[0];
-          break;
-        case "OffColumns":
-          gameData["OffensiveData"] = tableData[0];
-          break;
-        case "DefColumns":
-          gameData["DefensiveData"] = tableData[0];
-          break;
+      const data = {
+        date: gameData.date,
+        opponent: gameData.opponent,
+      };
+      // 因變更過的資料，類型會變成number，所以用類型來判斷有變更過的data。
+      for (const props in tableData[0]) {
+        if (tableData[0].hasOwnProperty(props)) {
+          if (typeof tableData[0][props] === "number") {
+            data[props] = tableData[0][props];
+          }
+        }
       }
-      console.log({ tableData });
-      console.log({ gameData });
+      UpdateGameRecord(data);
+      // TODO 更改的欄位，以及選手ID，對戰隊伍，日期。
       setEditMode(false);
     };
 

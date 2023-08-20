@@ -281,7 +281,7 @@ const PlayersInfo = React.memo(
               }
             })
             .catch((err) => {
-              showToast("錯誤", `錯誤訊息：${err}`, 0);
+              showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
               submitContext.onSetSubmitStatus(false);
               return false;
             });

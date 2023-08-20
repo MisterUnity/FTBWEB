@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import ComprehensiveDataTable from "../../../UI/Backstage/ComprehensiveDataTable/ComprehensiveDataTable";
 import CSDialog from "../../../../cs_components/CSDialog";
 
-const GameHistoryDataTable = React.memo(({ gameRecord }) => {
+const GameHistoryDataTable = React.memo(({ gameRecord, UpdateGameRecord }) => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [isShowGameData, setIsShowGameData] = useState(null);
   const [gameData, setGameData] = useState(null);
@@ -66,6 +66,10 @@ const GameHistoryDataTable = React.memo(({ gameRecord }) => {
         <div>{`對戰隊伍：${rowData.Opponent}`}</div>
       </div>
     );
+    // 更新比賽數據時需要的資料。
+    _gameData["date"] = rowData.Date;
+    _gameData["opponent"] = rowData.Opponent;
+
     setDialogTitle(title);
     setGameData(_gameData);
     setIsShowGameData(true);
@@ -87,6 +91,7 @@ const GameHistoryDataTable = React.memo(({ gameRecord }) => {
           className="w-full"
           columnsInfo={columnsData()}
           gameData={gameData}
+          UpdateGameRecord={UpdateGameRecord}
         />
       </CSDialog>
       <DataTable
