@@ -83,8 +83,8 @@ const ComprehensiveDataTable = React.memo(
 
     const editCompleted = () => {
       const data = {
-        date: gameData.date,
-        opponent: gameData.opponent,
+        Date: gameData.date,
+        Opponent: gameData.opponent,
       };
       // 因變更過的資料，類型會變成number，所以用類型來判斷有變更過的data。
       for (const props in tableData[0]) {

@@ -122,8 +122,8 @@ export const PutPlayerPersonalInfo = (ID, formData) => {
 // 更新指定球員個人資料 End
 
 // 更新指定球員數據資料 Start
-export const PutGameData = (ID, dataTable) => {
-  return FTBAPI.put(`/Player/${ID}`, dataTable)
+export const UpdateGameData = (ID, dataTable={}) => {
+  return FTBAPI.patch(`/Player/UpdateGameRecord/${ID}`, JSON.stringify(`${JSON.stringify(dataTable)}`))
     .then((res) => {
       return res;
     })
