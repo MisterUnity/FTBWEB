@@ -3,7 +3,7 @@ import axios from "axios";
 // API 基本配置 Start
 const FTBAPI = axios.create({
   //REACT_APP_BASEURL || REACT_APP_BASEURL_PROD
-  baseURL: process.env.REACT_APP_BASEURL_PROD,
+  baseURL: process.env.REACT_APP_BASEURL,
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",
@@ -32,6 +32,17 @@ FTBAPI.interceptors.response.use(
   },
   (error) => {
     console.log("攔截器 ERROR", { error });
+    if (error.code === "ERR_NETWORK") {
+      const oErrObj = {
+        data: {
+          Result: "",
+          Status: 0,
+          ErrorCode: "ERR_NETWORK",
+          ErrorMessage: "網路錯誤",
+        },
+      };
+      throw oErrObj;
+    }
     throw error;
   }
 );

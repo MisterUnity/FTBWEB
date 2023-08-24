@@ -5,7 +5,7 @@ import { GetPlayerInfo } from "../../../API/playerInfo/playerInfo";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import { Button } from "primereact/button";
-import { PutGameData } from "../../../API/playerInfo/playerInfo";
+import { UpdateGameData } from "../../../API/playerInfo/playerInfo";
 import CSDialog from "../../../cs_components/CSDialog";
 import GameHistoryDataTable from "../../../components/UI/Backstage/GameHistoryDataTable/GameHistoryDataTable";
 import PlayerInfo from "../../../components/UI/Backstage/PlayersInfo/PlayersInfo";
@@ -225,21 +225,16 @@ const PlayerList = () => {
   const UpdateGameRecordHandler = async (dataInfo) => {
     //追加ID資料
     const id = playerDetailedInfo["ID"];
-    dataInfo["id"] = id;
+    dataInfo["ID"] = id;
     // 送要更新的資料
 
-    const result = await PutGameData(id, dataInfo)
+    const result = await UpdateGameData(id, dataInfo)
       .then((res) => {
         const { StatusCode, StatusMessage, Result } = res.data;
-        if (StatusCode === 1 && StatusMessage === "Normal end.") {
-          return true;
-        } else {
-          showToast("錯誤", "資料更新發生不明原因錯誤", 0);
-          return false;
-        }
+        return true;
       })
       .catch((err) => {
-        showToast("狀態提示", `錯誤消息：${err.data.ErrorMessage}`, 0);
+        showToast("狀態提示", `錯誤消息：${err?.data?.ErrorMessage ? err.data.ErrorMessage : err}`, 0);
         return false;
       });
 
