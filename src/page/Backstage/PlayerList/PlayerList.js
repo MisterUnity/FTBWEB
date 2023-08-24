@@ -49,10 +49,6 @@ const PlayerList = () => {
       // 獲取球員清單
       const listData = await GetPlayersInfo()
         .then((res) => {
-          const { ErrorMessage } = res;
-          //無球員資料
-          if (ErrorMessage === "無資料") return false;
-
           const { StatusCode, StatusMessage, Result } = res.data;
           if (StatusCode && StatusMessage.includes("Normal end.")) {
             setHavePlayerList(true);
@@ -158,6 +154,7 @@ const PlayerList = () => {
       .then((res) => {
         const { StatusCode, StatusMessage, Result } = res.data;
         if (StatusCode && StatusMessage.includes("Normal end.")) {
+          console.log({ Result });
           setPlayerDetailedInfo(Result);
           showToast("成功", "成功取得最新資料", 1);
           return true;

@@ -51,10 +51,8 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
       })
     );
   }
-
   return Promise.all(pTask)
     .then((res) => {
-      console.log("結果", res.data);
       const ayStatusMsg = [];
       let bAllOK = true;
       res.forEach(({ data }, index) => {
@@ -90,7 +88,7 @@ export const PostPlayersInfo = async (ayPlayerInfos = []) => {
       };
     })
     .catch((err) => {
-      throw new Error(err);
+      throw err;
     });
 };
 // 新增球員資料 End

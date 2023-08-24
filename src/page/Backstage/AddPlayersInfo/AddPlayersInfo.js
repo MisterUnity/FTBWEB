@@ -398,8 +398,8 @@ const AddPlayerInfo = () => {
             }
           })
           .catch((err) => {
+            showToast("錯誤", `錯誤訊息：${err}`, 0);
             setBlocked(false);
-            showToast("狀態提示", `錯誤消息：${err}`, 0);
             submitContext.onSetSubmitStatus(false);
           });
       } else {

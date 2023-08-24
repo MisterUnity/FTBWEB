@@ -42,7 +42,7 @@ const SignIn = React.memo((props) => {
         setIsLoad(false);
       })
       .catch((err) => {
-        console.log({err})
+        console.log({ err });
         setIsLoad(false);
         showToast("錯誤", err.data.ErrorMessage, 0);
       });
