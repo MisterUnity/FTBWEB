@@ -247,39 +247,43 @@ const AddSchedule = (props) => {
   // 送出表單處理 End
 
   return (
-    <div className="page-add-schedule w-full h-full absolute overflow-auto">
-      <div className="m-3 flex align-items-center text-xl">
-        <p>請選擇您的隊伍：</p>
-        <Dropdown
-          value={myTeam}
-          options={teamInit}
-          onChange={(e) => setMyTeam(e.target.value)}
-          placeholder="Select a opponent"
-        />
-        <p className="ml-3 text-sm text-pink-500">※ 切換隊伍時將會清空資料 ※</p>
+    <BlockUI blocked={blocked} containerClassName="h-full">
+      <div className="page-add-schedule w-full h-full absolute overflow-auto">
+        <div className="m-3 flex align-items-center text-xl">
+          <p>請選擇您的隊伍：</p>
+          <Dropdown
+            value={myTeam}
+            options={teamInit}
+            onChange={(e) => setMyTeam(e.target.value)}
+            placeholder="Select a opponent"
+          />
+          <p className="ml-3 text-sm text-pink-500">
+            ※ 切換隊伍時將會清空資料 ※
+          </p>
+        </div>
+        <DataTable
+          value={schedule}
+          editMode="cell"
+          dataKey="id"
+          tableStyle={{ minWidth: "50rem" }}
+        >
+          {columnRenderHandler}
+        </DataTable>
+        <div className="flex justify-content-end">
+          <Button
+            className="w-1 bg-bluegray-700"
+            label="＋"
+            onClick={addRowHandler}
+          />
+          <Button
+            className="w-2 ml-2 bg-bluegray-700"
+            label="送出表單"
+            disabled={submitContext.submitStatus}
+            onClick={sendDataHandler}
+          />
+        </div>
       </div>
-      <DataTable
-        value={schedule}
-        editMode="cell"
-        dataKey="id"
-        tableStyle={{ minWidth: "50rem" }}
-      >
-        {columnRenderHandler}
-      </DataTable>
-      <div className="flex justify-content-end">
-        <Button
-          className="w-1 bg-bluegray-700"
-          label="＋"
-          onClick={addRowHandler}
-        />
-        <Button
-          className="w-2 ml-2 bg-bluegray-700"
-          label="送出表單"
-          disabled={submitContext.submitStatus}
-          onClick={sendDataHandler}
-        />
-      </div>
-    </div>
+    </BlockUI>
   );
 };
 export default AddSchedule;

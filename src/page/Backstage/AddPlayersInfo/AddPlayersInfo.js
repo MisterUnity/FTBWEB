@@ -114,7 +114,7 @@ const AddPlayerInfo = () => {
   // 追加新列處理 Start
   const addRowHandler = () => {
     setPlayersInfo((prevPlayersInfo) => {
-      let _playersInfo = [...prevPlayersInfo];
+      let _playersInfo = JSON.parse(JSON.stringify(prevPlayersInfo));
       _playersInfo.push({
         id: uuidv4(),
         name: "ex:陳小明",
@@ -126,7 +126,7 @@ const AddPlayerInfo = () => {
         weight: "ex:75kg",
         position: "ex:前鋒",
         team: "ex:1隊",
-        delete: "",
+        // delete: "",
         // description: "備註" => 目前使用不到
       });
       return _playersInfo;
@@ -348,7 +348,7 @@ const AddPlayerInfo = () => {
   // Column渲染資料準備 End
 
   // 渲染各行處理 Start
-  const column = columnsData.map((data) => {
+  const columnRenderHandler = columnsData.map((data) => {
     return (
       <Column
         key={data.id}
@@ -364,10 +364,47 @@ const AddPlayerInfo = () => {
 
   // 送出表單處理 Start
   const sendDataHandler = async () => {
-    //TODO 要過濾掉沒有選擇隊伍的資料
     if (!submitContext.submitStatus) {
-      submitContext.onSetSubmitStatus(true);
       if (await checkLogin(authContext, navigate)) {
+        submitContext.onSetSubmitStatus(true);
+        const playersData = playersInfo.map((item) => ({ ...item }));
+
+        // 確認資料不為空
+        if (playersData.length <= 0) {
+          showToast("警告", "資料不可為空", 3);
+          submitContext.onSetSubmitStatus(false);
+          return false;
+        }
+        // 查找空欄位的部分
+        for (const [index, item] of playersData.entries()) {
+          for (const props in item) {
+            if (item.hasOwnProperty.call(item, props)) {
+              console.log(item[props]);
+              if (props === "photo" && item[props] === "") {
+                showToast(
+                  "訊息",
+                  `第${index + 1}行，的『 ${props} 』值不可為空`,
+                  3
+                );
+                submitContext.onSetSubmitStatus(false);
+                return;
+              }
+              // 『 photo 』為blob類型，無法使用『 includes 』方法所以要先判斷類型。
+              else if (
+                typeof item[props] === "string" &&
+                item[props].includes("ex")
+              ) {
+                showToast(
+                  "訊息",
+                  `第${index + 1}行，的『 ${props} 』值不可為空`,
+                  3
+                );
+                submitContext.onSetSubmitStatus(false);
+                return;
+              }
+            }
+          }
+        }
         setBlocked(true);
         PostPlayersInfo(playersInfo)
           .then((res) => {
@@ -395,12 +432,6 @@ const AddPlayerInfo = () => {
             setBlocked(false);
             submitContext.onSetSubmitStatus(false);
           });
-      } else {
-        showToast("狀態提示", "登入逾時，3秒後將返回首頁", 0);
-        setTimeout(() => {
-          submitContext.onSetSubmitStatus(false);
-          navigate("/");
-        }, 3000);
       }
     }
   };
@@ -418,7 +449,7 @@ const AddPlayerInfo = () => {
           dataKey="id"
           tableStyle={{ minWidth: "50rem" }}
         >
-          {column}
+          {columnRenderHandler}
         </DataTable>
         <div className="flex justify-content-end">
           <Button

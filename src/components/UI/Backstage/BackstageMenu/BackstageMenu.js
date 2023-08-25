@@ -68,7 +68,7 @@ const BackstageMenu = React.memo(() => {
   // li 項目處理 Start
   const menuList = menuItem.map((item) => {
     return (
-      <li className="my-6 cursor-pointer" key={item.id}>
+      <li className="my-5 cursor-pointer" key={item.id}>
         <span className="m-4">
           <FontAwesomeIcon
             icon={item.icon}
@@ -77,7 +77,7 @@ const BackstageMenu = React.memo(() => {
           />
         </span>
         <Link
-          className="text-blue-50 text-2xl no-underline"
+          className="text-blue-50 text-lg no-underline"
           to={item.path}
           onClick={item.itemName === "Sign Out" ? signOutHandler : null}
         >
