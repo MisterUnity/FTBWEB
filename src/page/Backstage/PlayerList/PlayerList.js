@@ -227,14 +227,21 @@ const PlayerList = () => {
     const id = playerDetailedInfo["ID"];
     dataInfo["ID"] = id;
     // 送要更新的資料
-
+    if (Object.keys(dataInfo).length <= 3) {
+      showToast("訊息", "無資料待更新", 2);
+      return;
+    }
     const result = await UpdateGameData(id, dataInfo)
       .then((res) => {
         const { StatusCode, StatusMessage, Result } = res.data;
         return true;
       })
       .catch((err) => {
-        showToast("狀態提示", `錯誤消息：${err?.data?.ErrorMessage ? err.data.ErrorMessage : err}`, 0);
+        showToast(
+          "狀態提示",
+          `錯誤消息：${err?.data?.ErrorMessage ? err.data.ErrorMessage : err}`,
+          0
+        );
         return false;
       });
 

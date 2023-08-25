@@ -11,7 +11,6 @@ import { v4 as uuidv4 } from "uuid";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "primereact/tooltip";
-import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import PhotoCropper from "@/components/Functions/PhotoCropper/PhotoCropper";
@@ -21,7 +20,6 @@ import "primeicons/primeicons.css";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
-  const toast = useRef();
   const { authContext, submitContext, showToast } = useGlobalStore();
   // 下拉式表單選項處理 Start
   const genderItem = ["男", "女", "其他"];
@@ -106,7 +104,7 @@ const AddPlayerInfo = () => {
   // 列-刪除處理 Start
   const deleteRowHandler = (context) => {
     setPlayersInfo((prevPlayersInfo) => {
-      let _playersInfo = [...prevPlayersInfo];
+      let _playersInfo = JSON.parse(JSON.stringify(prevPlayersInfo));
       _playersInfo.splice(context.rowIndex, 1);
       return _playersInfo;
     });
@@ -387,12 +385,7 @@ const AddPlayerInfo = () => {
               }, 3000);
             } else {
               Result.forEach((msg) => {
-                toast.current.show({
-                  severity: msg.status,
-                  summary: `Name: ${msg.name}`,
-                  detail: msg.statusMsg,
-                  life: 3000,
-                });
+                showToast(`Name: ${msg.name}`, msg.statusMsg, msg.status);
               });
               submitContext.onSetSubmitStatus(false);
             }
@@ -447,7 +440,6 @@ const AddPlayerInfo = () => {
           onGetImageBlob={imagePreviewHandler}
           header="請選擇並剪取您的相片"
         />
-        <Toast ref={toast}></Toast>
         {blocked ? (
           <ProgressSpinner
             style={{

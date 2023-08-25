@@ -3,7 +3,7 @@ import axios from "axios";
 // API 基本配置 Start
 const FTBAPI = axios.create({
   //REACT_APP_BASEURL || REACT_APP_BASEURL_PROD
-  baseURL: process.env.REACT_APP_BASEURL,
+  baseURL: process.env.REACT_APP_BASEURL_PROD,
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",

@@ -8,16 +8,16 @@ const checkLogin = async (authCtx, navigate) => {
       if (StatusCode && StatusMessage.includes("Normal end.")) {
         authCtx.onSetSignInStatus(true);
         result = true;
-      } else {
-        authCtx.onSetSignInStatus(false);
-        alert("登入逾時，返回至首頁");
-        navigate("/");
-        result = false;
       }
     })
     .catch((err) => {
+      if ((err.data.ErrorCode = "E0004")) {
+        alert("登入逾時，返回至首頁");
+        navigate("/");
+      } else {
+        alert(err.data.ErrorMessage);
+      }
       authCtx.onSetSignInStatus(false);
-      alert(err);
       result = false;
     });
   return result;

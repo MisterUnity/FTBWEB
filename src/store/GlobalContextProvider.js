@@ -19,8 +19,26 @@ const GlobalContextProvider = ({ children }) => {
   // 吐司條功能 Start
   const toast = useRef();
   const showToast = (title, content, statusCode) => {
+    let severity;
+    switch (statusCode) {
+      case 0:
+        severity = "error";
+        break;
+      case 1:
+        severity = "success";
+        break;
+      case 2:
+        severity = "info";
+        break;
+      case 3:
+        severity = "warn";
+        break;
+      default:
+        severity = "success";
+        break;
+    }
     toast.current.show({
-      severity: statusCode ? "success" : "error",
+      severity: severity,
       summary: title,
       detail: content,
       life: 3000,

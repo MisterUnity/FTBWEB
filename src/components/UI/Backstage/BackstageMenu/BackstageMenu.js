@@ -45,9 +45,9 @@ const menuItem = [
   },
   {
     id: "P-6",
-    itemName: "Edit Schedule",
+    itemName: "Add Schedule",
     icon: faCalendarDays,
-    path: "editSchedule",
+    path: "addSchedule",
   },
   {
     id: "P-7",
