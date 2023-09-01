@@ -13,18 +13,18 @@ const BackstageHome = () => {
       <Header
         className={`
         ${BackstageHeader.BackstageHeader} flex flex-none justify-content-between 
-                                           align-items-center bg-bluegray-900`}
+                                           align-items-center w-full bg-bluegray-900`}
       >
         <SideBar />
         <h1 className="mr-3">Football Tactical Plan</h1>
       </Header>
 
-      <Main className="flex-grow-1 relative">
+      <Main className="flex-grow-1 relative w-full">
         <Outlet />
       </Main>
 
       <Footer
-        className={`${BackstageFooter.BackstageFooter} flex-none bg-bluegray-900`}
+        className={`${BackstageFooter.BackstageFooter} flex-none w-full bg-bluegray-900`}
       >
         <h3 className="text-center">
           Copyright © 2023 - 2050 . All rights reserved.

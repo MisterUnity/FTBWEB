@@ -28,24 +28,14 @@ const AddSchedule = (props) => {
   const navigate = useNavigate();
 
   const [schedule, setSchedule] = useState([]);
-  const [myTeam, setMyTeam] = useState("台北熊讚");
   const [blocked, setBlocked] = useState();
-  const [teamItem, setTeamItem] = useState([]);
-  const [team] = useState(teamItem);
+  // const [team] = useState(teamItem);
 
   // 登入逾時確認 Start
   useEffect(() => {
     checkLogin(authContext, navigate);
   }, []);
   // 登入逾時確認 End
-
-  // 切換自身隊伍時，會清除所有資料，以免出現對手選到自己隊伍。 Start
-  useEffect(() => {
-    const _teamItem = teamInit.filter((item) => item !== myTeam);
-    setSchedule([]);
-    setTeamItem(_teamItem);
-  }, [myTeam]);
-  // 切換自身隊伍時，會清除所有資料，以免出現對手選到自己隊伍。 End
 
   // 列-刪除處理 Start
   const deleteRowHandler = (context) => {
@@ -64,7 +54,8 @@ const AddSchedule = (props) => {
       _schedule.push({
         id: uuidv4(),
         date: "請選擇日期",
-        opponent: "請選擇對手",
+        team1: "請選擇隊伍",
+        team2: "請選擇隊伍",
         field: "請輸入場地",
       });
       return _schedule;
@@ -94,6 +85,21 @@ const AddSchedule = (props) => {
   };
   // 解構『 DATE 』類型資料，組成字串 End
 
+  // 防止選到同一個隊伍 Start
+  const duplicatePreventionHandler = (options, value) => {
+    if (
+      options.rowData["team1"] === value ||
+      options.rowData["team2"] === value
+    ) {
+      showToast("訊息", `『 ${value} 』隊伍重複`, 3);
+      // 返回舊值
+      return options.value;
+    }
+    // 返回新值
+    return value;
+  };
+  // 防止選到同一個隊伍 End
+
   // Column渲染資料準備 Start
   const columnsData = [
     {
@@ -116,16 +122,41 @@ const AddSchedule = (props) => {
     },
     {
       id: "column2",
-      field: "opponent",
-      header: "對手",
+      field: "team1",
+      header: "隊伍1",
       width: "20",
       editorCallBack: (options) => {
         return (
           <Dropdown
             appendTo={"self"}
             value={options.value}
-            options={teamItem}
-            onChange={(e) => options.editorCallback(e.value)}
+            options={teamInit}
+            onChange={(e) =>
+              options.editorCallback(
+                duplicatePreventionHandler(options, e.value)
+              )
+            }
+            placeholder="Select a opponent"
+          />
+        );
+      },
+    },
+    {
+      id: "column2",
+      field: "team2",
+      header: "隊伍2",
+      width: "20",
+      editorCallBack: (options) => {
+        return (
+          <Dropdown
+            appendTo={"self"}
+            value={options.value}
+            options={teamInit}
+            onChange={(e) =>
+              options.editorCallback(
+                duplicatePreventionHandler(options, e.value)
+              )
+            }
             placeholder="Select a opponent"
           />
         );
@@ -188,21 +219,22 @@ const AddSchedule = (props) => {
     if (!submitContext.submitStatus) {
       if (await checkLogin(authContext, navigate)) {
         submitContext.onSetSubmitStatus(true);
-        const scheduleData = {};
-        scheduleData[myTeam] = schedule.map((item) => ({ ...item }));
-        if (scheduleData[myTeam].length <= 0) {
+        let scheduleData = {};
+        scheduleData = schedule.map((item) => ({ ...item }));
+        console.log({ scheduleData });
+        if (scheduleData.length <= 0) {
           showToast("警告", "資料不可為空", 3);
           submitContext.onSetSubmitStatus(false);
           return false;
         }
 
         // 查找值為空的欄位
-        for (const [index, item] of scheduleData[myTeam].entries()) {
+        for (const [index, item] of scheduleData.entries()) {
           for (const props in item) {
             if (item.hasOwnProperty.call(item, props)) {
               let status;
               if (item[props].includes("請選擇日期")) status = 1;
-              else if (item[props].includes("請選擇對手")) status = 2;
+              else if (item[props].includes("請選擇隊伍")) status = 2;
               else if (item[props].includes("請輸入場地")) status = 3;
               switch (status) {
                 case 1:
@@ -210,7 +242,7 @@ const AddSchedule = (props) => {
                   submitContext.onSetSubmitStatus(false);
                   return;
                 case 2:
-                  showToast("訊息", `第${index + 1}行，對手不可為空`, 3);
+                  showToast("訊息", `第${index + 1}行，隊伍不可為空`, 3);
                   submitContext.onSetSubmitStatus(false);
                   return;
                 case 3:
@@ -226,6 +258,7 @@ const AddSchedule = (props) => {
           }
         }
         console.log({ scheduleData });
+        return;
         setBlocked(true);
         PostSchedule(scheduleData)
           .then((res) => {
@@ -249,18 +282,6 @@ const AddSchedule = (props) => {
   return (
     <BlockUI blocked={blocked} containerClassName="h-full">
       <div className="page-add-schedule w-full h-full absolute overflow-auto">
-        <div className="m-3 flex align-items-center text-xl">
-          <p>請選擇您的隊伍：</p>
-          <Dropdown
-            value={myTeam}
-            options={teamInit}
-            onChange={(e) => setMyTeam(e.target.value)}
-            placeholder="Select a opponent"
-          />
-          <p className="ml-3 text-sm text-pink-500">
-            ※ 切換隊伍時將會清空資料 ※
-          </p>
-        </div>
         <DataTable
           value={schedule}
           editMode="cell"

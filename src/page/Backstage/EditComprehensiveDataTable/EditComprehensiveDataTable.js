@@ -294,7 +294,7 @@ const EditComprehensiveDataTable = () => {
                 : "請選擇對戰隊伍"
               : "請選擇您的隊伍"
             : "請選擇比賽日期",
-          0
+          3
         );
         formattedDate = false;
       }
@@ -310,7 +310,6 @@ const EditComprehensiveDataTable = () => {
         place: playingField,
         date: formattedDate,
       };
-      // TODO 還未處理完
       const finalData = gameData.map((item) => ({ ...item, ...appendedData }));
       for (const index in finalData) {
         const playerName = finalData[index]["name"];
