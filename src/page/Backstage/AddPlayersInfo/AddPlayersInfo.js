@@ -173,7 +173,7 @@ const AddPlayerInfo = () => {
 
         return (
           <Fragment>
-            <Tooltip target={`.custom-tooltip-btn-${context.rowIndex}`}>
+            <Tooltip target={`.custom-tooltip-btn-${context.rowIndex}`} autoHide={false}>
               {strLocalImageUrl ? (
                 <img
                   alt="logo"

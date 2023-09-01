@@ -13,12 +13,14 @@ import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
-
 import classes from "./TacticalBoard.module.css";
+import { Tooltip } from 'primereact/tooltip';
+import { ListBox } from 'primereact/listbox';
+import "./style.scss"
+import { GetPlayersInfo } from "@/API/playerInfo/playerInfo";
 import Draggable from "react-draggable";
-
+let bSetPostionFlag = false;
 const fixedFormationItem = [
   "4-3-3",
   "4-4-2",
@@ -123,6 +125,10 @@ const fixedFormationPosition = {
 };
 const tempCustomPosition = [];
 const customFormationItem = [];
+
+const YellowBorderClassName = 'yellow-bdr';
+const ayPlayerList = [];
+
 //TODO 陣形固定模式，自定義模式（用radio按鈕）
 const TacticalBoard = () => {
   const [formationType, setFormationType] = useState("4-3-3");
@@ -137,10 +143,26 @@ const TacticalBoard = () => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const textRef = useRef(null);
+  const [boxStyle, setBoxStyle] = useState(null);
+  const [positionLabel, setPositionLabel] = useState("設定球員站位");
 
   // 初始處理 Start
   const intiHandler = async () => {
     if (await checkLogin(authContext, navigate)) {
+      //取得球員清單
+      const res = await GetPlayersInfo().then(res=>{
+        const {Result} = res.data;
+        Result.forEach(ele=>{
+          ayPlayerList.push({
+            name: ele.Name
+          });
+        });
+      }).catch(err=>{
+        showToast("錯誤", "獲取球員清單發生不明原因錯誤。", 0);
+      });
+
+      if (!res) return false;
+
       // 取得目前父元素視窗大小
       handleResize();
 
@@ -192,6 +214,7 @@ const TacticalBoard = () => {
       position.push({
         left: Math.round((object["left"] / 100) * containerSizeInfo.width),
         top: Math.round((object["top"] / 100) * containerSizeInfo.height),
+        name: ''
       });
     });
     // 返回一個新『 objectArray 』陣列類型數據。
@@ -201,23 +224,35 @@ const TacticalBoard = () => {
 
   // 陣形渲染處理 Start
   const formationRenderHandler = (objectArray) => {
-    return objectArray.map((object) => {
+    return objectArray.map((object, index) => {
+      const uuidForDrag = uuidv4();
       return (
-        <div
-          key={uuidv4()}
-          className={`${classes.box}`}
-          style={{
-            position: "absolute",
-            left: object["left"] + "px",
-            top: object["top"] + "px",
-          }}
-        >
-          <FontAwesomeIcon
-            icon={faShirt}
-            size="2xl"
-            style={{ color: "#ffffff" }}
-          />
-        </div>
+        <Fragment key={uuidv4()}>
+          <div
+            key={uuidForDrag}
+            className={`box--static row-${index} ${boxStyle}`}
+            style={{
+              position: "absolute",
+              left: object["left"] + "px",
+              top: object["top"] + "px",
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faShirt}
+              size="2xl"
+              style={{ color: "#ffffff" }}
+            />
+            <div className={'box--playerName'}>名字放這裡</div>
+          </div>
+          {bSetPostionFlag ? <Tooltip target={`.row-${index}`} autoHide={false}>
+            <ListBox filter onChange={(e) => console.log('需要更新"名字放這裡"的值，且要儲存進localStorage')}
+              options={ayPlayerList} optionLabel="name" className="w-full md:w-14rem"
+              virtualScrollerOptions={{ itemSize: 30 }}
+              listStyle={{ height: '250px' }}
+            />
+          </Tooltip>:<></>}
+          
+        </Fragment>
       );
     });
   };
@@ -262,7 +297,7 @@ const TacticalBoard = () => {
     // 單位轉換 『 百分比 』to『 px 』
     const position = pctConvertPx(positionsData);
     setFormation(formationRenderHandler(position));
-  }, [formationType]);
+  }, [formationType, boxStyle]);
   // 陣形變換後重新渲染 End
 
   // 自定義陣形變換後重新渲染 Start
@@ -351,15 +386,16 @@ const TacticalBoard = () => {
 
   // 創建在『 自定義模式 』下可隨意拉動的元素 Start
   const customFormationRenderHandler = divRefs.map((ref, index) => {
+    const uuid = uuidv4();
     return (
       <Draggable
         // onDrag={dragHandler}
-        // onStop={dragHandlers}
-        key={uuidv4()}
+        // onStop={dragHandler}
+        key={uuid}
         bounds="parent"
-        defaultPosition={{ x: 0, y: 0 }}
+        defaultPosition={{x:0, y:0}}
       >
-        <div className={`${classes.box}`} ref={ref["ref"]}>
+        <div className={`box--moveable`} ref={ref["ref"]}>
           <FontAwesomeIcon
             icon={faShirt}
             size="2xl"
@@ -371,9 +407,35 @@ const TacticalBoard = () => {
   });
   // 創建在『 自定義模式 』下可隨意拉動的元素 End
 
+  // WEICHE ADD START
+  // function dragHandler () {
+  //   const customPosition = [];
+  //   divRefs.forEach((ref, index) => {
+  //     customPosition.push(getPositionHandler(index));
+  //   });
+  //   setPositionRecord(customPosition);
+  // }
+
+  function SetCircleStyle () {
+    if (!bSetPostionFlag) {
+      bSetPostionFlag = true;
+      setBoxStyle(YellowBorderClassName);
+      setPositionLabel("儲存球員站位");
+    }else{
+      bSetPostionFlag = false;
+      setBoxStyle('');
+      setPositionLabel("設定球員佔位");
+    }
+  }
+
+  function SetName(object, name) {
+    console.log('找到object的位置灌入名字', object, name)
+  }
+  // WEICHE ADD END
+
   return (
     <Fragment>
-      <div className="absolute w-full h-full flex ">
+      <div className="absolute w-full h-full flex TaticalBoard">
         <div className="relative w-11 h-full bg-primary-700 flex-grow-1">
           <div
             ref={containerRef}
@@ -447,6 +509,16 @@ const TacticalBoard = () => {
               disabled={disabled}
               type="text"
               ref={textRef}
+            />
+          </div>
+          <div className="m-2">
+            <Button
+              className="ml-2"
+              label={positionLabel}
+              disabled={!disabled}
+              onClick={() => {
+                SetCircleStyle();
+              }}
             />
           </div>
         </div>

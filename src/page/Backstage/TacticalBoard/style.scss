@@ -1,0 +1,50 @@
+// 定義 box 基礎型態，不要 cursor pointer
+%box-base {
+    position: relative;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(0, 0, 0);
+    overflow: visible;
+}
+
+.TaticalBoard {
+    // 可以移動的box
+    .box--moveable {
+        @extend %box-base;
+        &:hover {
+            cursor: grab;
+            filter: brightness(90%);
+        }
+        &:active {
+            cursor: grabbing;
+        }
+    }
+    
+    // 不可移動的box
+    .box--static {
+        @extend %box-base;
+    }
+    
+    .box--playerName {
+        position: absolute;
+        color: white;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-53%);
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    // 類似這種編輯狀台才要 cursor pointer
+    .yellow-bdr {
+        border: solid 2px rgb(204, 204, 154);
+        box-shadow: 0px 0px 5px 1px yellow;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
