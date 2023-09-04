@@ -44,7 +44,7 @@ const SignIn = React.memo((props) => {
       .catch((err) => {
         console.log({ err });
         setIsLoad(false);
-        showToast("錯誤", err.data.ErrorMessage, 0);
+        showToast("錯誤", err.message, 0);
       });
   };
   // 登入處理 End

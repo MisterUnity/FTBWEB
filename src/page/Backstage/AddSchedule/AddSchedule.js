@@ -249,21 +249,16 @@ const AddSchedule = (props) => {
                   showToast("訊息", `第${index + 1}行，場地不可為空`, 3);
                   submitContext.onSetSubmitStatus(false);
                   return;
-                default:
-                  // 刪除不必要資料（『 ID 』只有在渲染時所需要）
-                  delete item["id"];
-                  break;
               }
             }
           }
         }
-        console.log({ scheduleData });
-        return;
         setBlocked(true);
         PostSchedule(scheduleData)
           .then((res) => {
             const { StatusCode, StatusMessage, Result } = res.data;
             if (StatusCode === 1 && StatusMessage === "Normal end.") {
+              setSchedule([]); // 初始化賽程資料
               showToast("狀態提示", "賽程追加成功", 1);
               setBlocked(false);
               submitContext.onSetSubmitStatus(false);
