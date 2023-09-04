@@ -3,7 +3,7 @@ import { Login, Register } from "../../API/Auth/userInfo/userInfo";
 import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from "../../store/GlobalContextProvider";
 import SignInCard from "./SignInCard";
-import EnterErrCard from "./EnterErrorCard";
+// import EnterErrCard from "./EnterErrorCard";
 import MsgSlice from "@/components/UI/MsgSlice/MsgSlice";
 import backDrop from "../../assets/Background.jpg";
 import classes from "./signIn.module.css";
@@ -44,7 +44,7 @@ const SignIn = React.memo((props) => {
       .catch((err) => {
         console.log({ err });
         setIsLoad(false);
-        showToast("錯誤", err.data.ErrorMessage, 0);
+        showToast("錯誤", err.message, 0);
       });
   };
   // 登入處理 End

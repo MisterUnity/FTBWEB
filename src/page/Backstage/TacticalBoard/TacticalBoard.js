@@ -2,7 +2,7 @@ import React, {
   Fragment,
   useEffect,
   useState,
-  useContext,
+  // useContext,
   useRef,
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,9 +15,9 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import classes from "./TacticalBoard.module.css";
-import { Tooltip } from 'primereact/tooltip';
-import { ListBox } from 'primereact/listbox';
-import "./style.scss"
+import { Tooltip } from "primereact/tooltip";
+import { ListBox } from "primereact/listbox";
+import "./style.scss";
 import { GetPlayersInfo } from "@/API/playerInfo/playerInfo";
 import Draggable from "react-draggable";
 let bSetPostionFlag = false;
@@ -126,7 +126,7 @@ const fixedFormationPosition = {
 const tempCustomPosition = [];
 const customFormationItem = [];
 
-const YellowBorderClassName = 'yellow-bdr';
+const YellowBorderClassName = "yellow-bdr";
 const ayPlayerList = [];
 
 //TODO 陣形固定模式，自定義模式（用radio按鈕）
@@ -139,27 +139,43 @@ const TacticalBoard = () => {
   const [custom, setCustom] = useState(false);
   const [fatherContainerInfo, setFatherContainerInfo] = useState(null);
   const [currentType, setCurrentType] = useState(1);
-  const { authContext, submitContext, showToast } = useGlobalStore();
+  const { authContext, showToast } = useGlobalStore();
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const textRef = useRef(null);
   const [boxStyle, setBoxStyle] = useState(null);
   const [positionLabel, setPositionLabel] = useState("設定球員站位");
 
+  // 創建帶有 『 useRef 』的陣列 Start
+  /* 創建11組帶有『 useRef 』的陣列。
+     因『 useRef 』無法直接放在Push方法裡面，所以用物件形式來包裝，在加至陣列裡 */
+  const ref = { ref: useRef(null) };
+  const divRefs = [];
+  const namesRef = [];
+  for (let i = 0; i < 11; i++) {
+    const _ref = JSON.parse(JSON.stringify(ref));
+    divRefs.push(_ref);
+    namesRef.push(_ref);
+  }
+
+  // 創建帶有 『 useRef 』的陣列 End
+
   // 初始處理 Start
   const intiHandler = async () => {
     if (await checkLogin(authContext, navigate)) {
       //取得球員清單
-      const res = await GetPlayersInfo().then(res=>{
-        const {Result} = res.data;
-        Result.forEach(ele=>{
-          ayPlayerList.push({
-            name: ele.Name
+      const res = await GetPlayersInfo()
+        .then((res) => {
+          const { Result } = res.data;
+          Result.forEach((ele) => {
+            ayPlayerList.push({
+              name: ele.Name,
+            });
           });
+        })
+        .catch((err) => {
+          showToast("錯誤", "獲取球員清單發生不明原因錯誤。", 0);
         });
-      }).catch(err=>{
-        showToast("錯誤", "獲取球員清單發生不明原因錯誤。", 0);
-      });
 
       if (!res) return false;
 
@@ -210,17 +226,35 @@ const TacticalBoard = () => {
       : containerRef.current.getBoundingClientRect();
     const position = [];
     // 把數據單位從『 百分比 』轉換成『 px 』
-    objectArray.forEach((object) => {
+
+    objectArray.forEach((object, index) => {
       position.push({
         left: Math.round((object["left"] / 100) * containerSizeInfo.width),
         top: Math.round((object["top"] / 100) * containerSizeInfo.height),
-        name: ''
+        nameRef: namesRef[index],
       });
     });
     // 返回一個新『 objectArray 』陣列類型數據。
     return position;
   };
   // 單位轉換 『 百分比 』轉換成『 px 』 並返回一個陣列 End
+
+  // 設置站位的球員姓名。 Start
+  function SetName(index, name) {
+    // 重複確認
+    let result = true;
+    namesRef.forEach((object) => {
+      if (object["ref"]["current"]["innerText"] === name) {
+        showToast("訊息", `${name}已被選取。`, 3);
+        result = false;
+      }
+    });
+
+    if (result) {
+      namesRef[index]["ref"].current.innerText = name;
+    }
+  }
+  // 設置站位的球員姓名。 End
 
   // 陣形渲染處理 Start
   const formationRenderHandler = (objectArray) => {
@@ -242,16 +276,25 @@ const TacticalBoard = () => {
               size="2xl"
               style={{ color: "#ffffff" }}
             />
-            <div className={'box--playerName'}>名字放這裡</div>
+            <div ref={object["nameRef"]["ref"]} className={"box--playerName"}>
+              名字放這裡
+            </div>
           </div>
-          {bSetPostionFlag ? <Tooltip target={`.row-${index}`} autoHide={false}>
-            <ListBox filter onChange={(e) => console.log('需要更新"名字放這裡"的值，且要儲存進localStorage')}
-              options={ayPlayerList} optionLabel="name" className="w-full md:w-14rem"
-              virtualScrollerOptions={{ itemSize: 30 }}
-              listStyle={{ height: '250px' }}
-            />
-          </Tooltip>:<></>}
-          
+          {bSetPostionFlag ? (
+            <Tooltip target={`.row-${index}`} autoHide={false}>
+              <ListBox
+                filter
+                onChange={(e) => SetName(index, e.value.name)}
+                options={ayPlayerList}
+                optionLabel="name"
+                className="w-full md:w-14rem"
+                virtualScrollerOptions={{ itemSize: 30 }}
+                listStyle={{ height: "250px" }}
+              />
+            </Tooltip>
+          ) : (
+            <></>
+          )}
         </Fragment>
       );
     });
@@ -314,16 +357,6 @@ const TacticalBoard = () => {
   // 自定義陣形變換後重新渲染 End
 
   // - - - - - - - - - - 自定義陣列 - - - - - - - - - - -
-  // 創建帶有 『 useRef 』的陣列 Start
-  /* 創建11組帶有『 useRef 』的陣列。
-     因『 useRef 』無法直接放在Push方法裡面，所以用物件形式來包裝，在加至陣列裡 */
-  const ref = { ref: useRef(null) };
-  const divRefs = [];
-  for (let i = 0; i < 11; i++) {
-    const _ref = JSON.parse(JSON.stringify(ref));
-    divRefs.push(_ref);
-  }
-  // 創建帶有 『 useRef 』的陣列 End
 
   // 取得元素在父容器的相對位子 Start
   const getPositionHandler = (index) => {
@@ -393,7 +426,7 @@ const TacticalBoard = () => {
         // onStop={dragHandler}
         key={uuid}
         bounds="parent"
-        defaultPosition={{x:0, y:0}}
+        defaultPosition={{ x: 0, y: 0 }}
       >
         <div className={`box--moveable`} ref={ref["ref"]}>
           <FontAwesomeIcon
@@ -416,21 +449,19 @@ const TacticalBoard = () => {
   //   setPositionRecord(customPosition);
   // }
 
-  function SetCircleStyle () {
+  function SetCircleStyle() {
     if (!bSetPostionFlag) {
       bSetPostionFlag = true;
       setBoxStyle(YellowBorderClassName);
       setPositionLabel("儲存球員站位");
-    }else{
+    } else {
       bSetPostionFlag = false;
-      setBoxStyle('');
+      setBoxStyle("");
       setPositionLabel("設定球員佔位");
+      console.log({ namesRef });
     }
   }
 
-  function SetName(object, name) {
-    console.log('找到object的位置灌入名字', object, name)
-  }
   // WEICHE ADD END
 
   return (

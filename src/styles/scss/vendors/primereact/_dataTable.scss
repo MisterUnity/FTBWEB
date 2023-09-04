@@ -4,3 +4,12 @@
 // .page-add-player .p-datatable > .p-datatable-wrapper {
 //   overflow: initial;
 // }
+
+// 首頁賽程表背景顏色
+.page-forestageHome .p-datatable .p-datatable-tbody > tr {
+  background: linear-gradient(to right, rgb(39, 35, 35), rgb(92, 28, 28));
+}
+.page-forestageHome .p-datatable > thead {
+  background-color: red;
+  // background: linear-gradient(to right, rgb(39, 35, 35), rgb(128, 30, 30));
+}
