@@ -16,7 +16,7 @@ const FTBAPI = axios.create({
 // 回應攔截器 Start
 FTBAPI.interceptors.response.use(
   (response) => {
-    console.log("攔截器 Response", { response });
+    // console.log("攔截器 Response", { response });
     const { ErrorCode, StatusCode, ErrorMessage } = response.data;
     if (
       ErrorCode &&
@@ -24,10 +24,10 @@ FTBAPI.interceptors.response.use(
       ErrorCode.includes("E") &&
       StatusCode === 0
     ) {
-      console.log("攔截器『 throw response 』", response);
+      // console.log("攔截器『 throw response 』", response);
       throw response;
     }
-    console.log("攔截器『 return response 』", response);
+    // console.log("攔截器『 return response 』", response);
     return response;
   },
   (error) => {

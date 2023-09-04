@@ -67,6 +67,11 @@ const GlobalContextProvider = ({ children }) => {
     onSetSubmitStatus: submitStatusHandler,
   };
   // 表單發送狀態處理 End
+  
+  // 預置主題選擇功能(開發中) Start
+  const [currentTheme, setTheme] = useState('default');
+  const themeContext = { currentTheme, setTheme };
+  // 預置主題選擇功能 End
 
   return (
     <GlobalStoreContext.Provider
@@ -74,11 +79,12 @@ const GlobalContextProvider = ({ children }) => {
         userContext,
         authContext,
         submitContext,
+        themeContext,
         showToast,
       }}
     >
       {children}
-      <Toast ref={toast}></Toast>
+      <Toast data-theme={`${currentTheme}`} ref={toast}></Toast>
     </GlobalStoreContext.Provider>
   );
 };
