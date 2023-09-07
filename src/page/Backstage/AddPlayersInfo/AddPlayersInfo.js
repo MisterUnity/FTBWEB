@@ -134,13 +134,6 @@ const AddPlayerInfo = () => {
   };
   // 追加新列處理 End
 
-  // cell-編輯完處理 Start
-  const onCellEditComplete = (e) => {
-    let { rowData, newValue, field, originalEvent: event } = e;
-    rowData[field] = newValue;
-  };
-  // cell-編輯完處理 End
-
   // Column渲染資料準備 Start
   const columnsData = [
     {
@@ -173,7 +166,10 @@ const AddPlayerInfo = () => {
 
         return (
           <Fragment>
-            <Tooltip target={`.custom-tooltip-btn-${context.rowIndex}`} autoHide={false}>
+            <Tooltip
+              target={`.custom-tooltip-btn-${context.rowIndex}`}
+              autoHide={false}
+            >
               {strLocalImageUrl ? (
                 <img
                   alt="logo"
@@ -201,7 +197,10 @@ const AddPlayerInfo = () => {
             <InputText
               type="text"
               value={options.value}
-              onChange={(e) => options.editorCallback(e.target.value)}
+              onChange={(e) => {
+                playersInfo[options.rowIndex][options.field] = e.target.value;
+                return options.editorCallback(e.target.value);
+              }}
             />
           </div>
         );
@@ -215,10 +214,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={gender}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Gender"
           />
         );
@@ -232,10 +233,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={age}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Age"
           />
         );
@@ -249,10 +252,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={height}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Height"
           />
         );
@@ -266,10 +271,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={weight}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Weight"
           />
         );
@@ -283,10 +290,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={position}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Position"
           />
         );
@@ -300,10 +309,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={team}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Team"
           />
         );
@@ -321,7 +332,10 @@ const AddPlayerInfo = () => {
     //         <InputText
     //           type="text"
     //           value={options.value}
-    //           onChange={(e) => options.editorCallback(e.target.value)}
+    //           onChange={(e) => {
+    //   playersInfo[options.rowIndex][options.field] = e.target.value;
+    //   return options.editorCallback(e.target.value);
+    // }}
     //         />
     //       </div>
     //     );
@@ -356,7 +370,6 @@ const AddPlayerInfo = () => {
         header={data.header}
         editor={data.editorCallBack}
         body={data.BodyCallBack}
-        onCellEditComplete={onCellEditComplete}
       />
     );
   });

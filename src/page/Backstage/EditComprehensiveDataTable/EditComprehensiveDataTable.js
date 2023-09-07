@@ -97,7 +97,9 @@ const EditComprehensiveDataTable = () => {
             if (StatusCode && StatusMessage.includes("Normal end.")) {
               return [...Result];
             } else {
-              console.log("傳送無錯誤，但沒取得資料 from EditComprehensive Page");
+              console.log(
+                "傳送無錯誤，但沒取得資料 from EditComprehensive Page"
+              );
             }
           })
           .catch((err) => {
@@ -190,7 +192,7 @@ const EditComprehensiveDataTable = () => {
         value={options.value}
         onChange={(e) => {
           gameData[options.rowIndex][options.field] = e.value;
-          return options.editorCallback(e.value);
+          // return options.editorCallback(e.value);
         }}
         mode="decimal"
         showButtons
@@ -206,7 +208,7 @@ const EditComprehensiveDataTable = () => {
     const idx = gameData.findIndex((player) => player.name === value);
     if (idx === -1) {
       gameData[options.rowIndex].name = value;
-      return options.editorCallback(value);
+      // return options.editorCallback(value);
     } else {
       return showToast("選手重複提示", `${value}，已被選取。`, 0);
     }
@@ -261,8 +263,8 @@ const EditComprehensiveDataTable = () => {
 
   // 編輯完處理 Start (可能是一點用也沒有)
   // const onCellEditComplete = (e) => {
-    // let { rowData, newValue, field, originalEvent: event } = e;
-    // rowData[field] = newValue;
+  // let { rowData, newValue, field, originalEvent: event } = e;
+  // rowData[field] = newValue;
   // };
   // 編輯完處理 End
 
@@ -367,9 +369,7 @@ const EditComprehensiveDataTable = () => {
         </div>
         <div className="col-12 md:col-4 md:pl-2">
           <div className="fie">主客場</div>
-          <div className="edt flex">
-            {radioBtnHandler()}
-          </div>
+          <div className="edt flex">{radioBtnHandler()}</div>
         </div>
         <div className="col-12"></div>
         <div className="col-12 md:col-4">
@@ -412,7 +412,12 @@ const EditComprehensiveDataTable = () => {
         <div className="col-12">
           <DataTable
             className="w-full"
-            ref={dataTableRef} value={gameData} editMode="cell" scrollable scrollHeight="350px">
+            ref={dataTableRef}
+            value={gameData}
+            editMode="cell"
+            scrollable
+            scrollHeight="350px"
+          >
             {columns.map(({ field, header }) => {
               return (
                 <Column
@@ -420,7 +425,7 @@ const EditComprehensiveDataTable = () => {
                   field={field}
                   header={header}
                   style={{ width: "7%", whiteSpace: "nowrap" }}
-                  editor={(options)=>cellEditor(options)}
+                  editor={(options) => cellEditor(options)}
                   // onCellEditComplete={onCellEditComplete} //可能是一點用也沒用，超爛
                 />
               );

@@ -20,7 +20,11 @@ import { ListBox } from "primereact/listbox";
 import "./style.scss";
 import { GetPlayersInfo } from "@/API/playerInfo/playerInfo";
 import Draggable from "react-draggable";
-let bSetPostionFlag = false;
+
+// 設定『 球員站位 』的 Flag
+let bSetPositionFlag = false;
+
+// 下拉選單：『 固定陣形 』的選單項目。
 const fixedFormationItem = [
   "4-3-3",
   "4-4-2",
@@ -30,6 +34,10 @@ const fixedFormationItem = [
   "4-5-1",
   "3-5-1",
 ];
+// 下拉選單：『 自定陣形 』的選單項目。（從 『 LocalStorage 』裡獲取。）
+const customFormationItem = [];
+
+// 下拉選單：『 固定陣形 』的陣形位子數據。
 const fixedFormationPosition = {
   "4-3-3": [
     { left: 0, top: 49 },
@@ -123,11 +131,12 @@ const fixedFormationPosition = {
     { left: 87, top: 46 },
   ],
 };
-const tempCustomPosition = [];
-const customFormationItem = [];
 
-const YellowBorderClassName = "yellow-bdr";
+// 『 ListBox 』裡所需要顯示的『 所有隊伍的球員清單 』
 const ayPlayerList = [];
+
+// 給『 box 』元素用的 className
+const YellowBorderClassName = "yellow-bdr";
 
 //TODO 陣形固定模式，自定義模式（用radio按鈕）
 const TacticalBoard = () => {
@@ -136,35 +145,33 @@ const TacticalBoard = () => {
   const [formation, setFormation] = useState(null);
   const [customPositionData, setCustomPositionData] = useState({});
   const [disabled, setDisabled] = useState(true);
-  const [custom, setCustom] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
   const [fatherContainerInfo, setFatherContainerInfo] = useState(null);
-  const [currentType, setCurrentType] = useState(1);
-  const { authContext, showToast } = useGlobalStore();
-  const navigate = useNavigate();
-  const containerRef = useRef(null);
-  const textRef = useRef(null);
+  const [currentType, setCurrentType] = useState(1); // 1 = 固定陣形，0 = 自定義陣形
   const [boxStyle, setBoxStyle] = useState(null);
   const [positionLabel, setPositionLabel] = useState("設定球員站位");
+  const [labelPosition, setLabelPosition] = useState({});
 
-  // 創建帶有 『 useRef 』的陣列 Start
+  const containerRef = useRef(null);
+  const textRef = useRef(null);
+  const { authContext, showToast } = useGlobalStore();
+  const navigate = useNavigate();
+
+  const ref = { ref: useRef(null) };
+  const divRefs = []; // 陣形站位用
+  const namesRef = []; // 球員名站位用
   /* 創建11組帶有『 useRef 』的陣列。
      因『 useRef 』無法直接放在Push方法裡面，所以用物件形式來包裝，在加至陣列裡 */
-  const ref = { ref: useRef(null) };
-  const divRefs = [];
-  const namesRef = [];
   for (let i = 0; i < 11; i++) {
     const _ref = JSON.parse(JSON.stringify(ref));
     divRefs.push(_ref);
     namesRef.push(_ref);
   }
 
-  // 創建帶有 『 useRef 』的陣列 End
-
   // 初始處理 Start
   const intiHandler = async () => {
     if (await checkLogin(authContext, navigate)) {
-      //取得球員清單
-      const res = await GetPlayersInfo()
+      const res = await GetPlayersInfo() // 取得所有隊伍的球員清單
         .then((res) => {
           const { Result } = res.data;
           Result.forEach((ele) => {
@@ -172,45 +179,60 @@ const TacticalBoard = () => {
               name: ele.Name,
             });
           });
+          return true;
         })
         .catch((err) => {
           showToast("錯誤", "獲取球員清單發生不明原因錯誤。", 0);
+          return false;
         });
 
       if (!res) return false;
 
-      // 取得目前父元素視窗大小
-      handleResize();
+      handleResize(); // 取得目前父元素視窗大小
 
-      // 優先顯示固定陣形的第一筆數據。
+      // - - - 初始化時，優先顯示固定陣形的第一筆數據。 - - -
       // 單位轉換『 百分比 』to 『 px 』
       const firstData = pctConvertPx(fixedFormationPosition[formationType]);
-      setFormation(formationRenderHandler(firstData));
+      // 陣形渲染處理
+      const firstRenderData = formationRenderHandler(firstData);
+      // 設置陣形
+      setFormation(firstRenderData);
 
-      // 獲取『 Local Storage 』已儲存的自訂義陣型數據。
+      // - - - 從『 LocalStorage 』獲取球員名站位數據。 - - -
+      const _labelPosition = localStorage.getItem("labelPosition");
+      if (_labelPosition) {
+        setLabelPosition(JSON.parse(_labelPosition));
+      } else {
+        console.log("無球員名站位數據");
+      }
+
+      // 從『 Local Storage 』獲取自訂義陣型數據。
       const customFormation = localStorage.getItem("customFormation");
       if (customFormation) {
         // 數據解析
         const customData = JSON.parse(customFormation);
 
-        // 深度複製數據（物件裡各屬性包著陣列類型的數據）。
-        const _customFormation = JSON.parse(JSON.stringify(customData));
-
         // 『 自定義陣形 』的下拉選單項目初始化。
         customFormationItem.length = 0;
 
         // 追加『 自定義陣形 』下拉選單項目。
-        for (const props in _customFormation) {
-          if (_customFormation.hasOwnProperty.call(_customFormation, props)) {
+        for (const props in customData) {
+          if (customData.hasOwnProperty.call(customData, props)) {
             customFormationItem.push(props);
           }
         }
-
-        // 儲存從『 LocalStorage 』裡取得的所有自定義陣形位子數據。
-        setCustomPositionData(_customFormation);
+        // 設置從『 LocalStorage 』裡取得的所有自定義陣形位子數據。
+        setCustomPositionData(customData);
       } else {
-        console.log("無自定義陣型資料");
+        console.log("無自定義陣型數據");
       }
+      // 添加視窗事件监听
+      window.addEventListener("resize", handleResize);
+
+      // 在组件卸载时移除事件监听
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
     }
   };
   useEffect(() => {
@@ -220,41 +242,110 @@ const TacticalBoard = () => {
 
   // 單位轉換 『 百分比 』轉換成『 px 』並返回一個陣列 Start
   const pctConvertPx = (objectArray) => {
-    // 渲染因素最初 『 fatherContainerInfo 』會為空。
-    const containerSizeInfo = fatherContainerInfo
+    // 渲染時差因素，導致父元素容器還未被渲染出來，所以最初 『 fatherContainerInfo 』會為空。
+    const contSizeInfo = fatherContainerInfo
       ? fatherContainerInfo
       : containerRef.current.getBoundingClientRect();
-    const position = [];
-    // 把數據單位從『 百分比 』轉換成『 px 』
 
+    // 把數據單位從『 百分比 』轉換成『 px 』
+    const arrElemsPosition = [];
     objectArray.forEach((object, index) => {
-      position.push({
-        left: Math.round((object["left"] / 100) * containerSizeInfo.width),
-        top: Math.round((object["top"] / 100) * containerSizeInfo.height),
-        nameRef: namesRef[index],
+      arrElemsPosition.push({
+        left: Math.round((object["left"] / 100) * contSizeInfo.width),
+        top: Math.round((object["top"] / 100) * contSizeInfo.height),
+        nameRef: namesRef[index], // 球員名站位用。
+        labelPosition: object["left"], // 依據這筆資料來判斷，球員名站位的位子。
       });
     });
     // 返回一個新『 objectArray 』陣列類型數據。
-    return position;
+    return arrElemsPosition;
   };
   // 單位轉換 『 百分比 』轉換成『 px 』 並返回一個陣列 End
 
-  // 設置站位的球員姓名。 Start
-  function SetName(index, name) {
-    // 重複確認
-    let result = true;
+  // 設置球員姓名站位。 Start
+  function SetName(index, name, position) {
+    // 姓名站位重複確認
+    let bDupConfResult = false;
     namesRef.forEach((object) => {
       if (object["ref"]["current"]["innerText"] === name) {
         showToast("訊息", `${name}已被選取。`, 3);
-        result = false;
+        bDupConfResult = true;
       }
     });
 
-    if (result) {
+    if (!bDupConfResult) {
+      // 設置站位球員姓名。
       namesRef[index]["ref"].current.innerText = name;
+      // 設置各陣形，各站位的球員名數據
+      setLabelPosition((prevLabelPosition) => {
+        const _labelPosition = JSON.parse(JSON.stringify(prevLabelPosition));
+
+        // 確認目前所顯示的陣形是『 固定 or 自定義 』，並返回相對應的陣形名稱。
+        const currentFormationType =
+          currentType === 1 ? formationType : customFormationType;
+
+        // 確認是否有此陣形的站位名數據。
+        if (_labelPosition[currentFormationType]) {
+          // 確認此陣形數據裡是否已有儲存，此球員名站位的位子數據。
+          const objResult = _labelPosition[currentFormationType].find(
+            (object) => object["labelPosition"] === position
+          );
+          if (objResult) {
+            // 覆蓋之前的球員名
+            objResult["name"] = name;
+          } else {
+            // 在此陣形數據裡，新增一筆球員站位數據資料。
+            _labelPosition[currentFormationType].push({
+              name: name,
+              labelPosition: position,
+            });
+          }
+        } else {
+          // 新增一筆新的陣形站位數據，內包含球員名站位數據。
+          _labelPosition[currentFormationType] = [
+            { name: name, labelPosition: position },
+          ];
+        }
+        return _labelPosition;
+      });
     }
   }
   // 設置站位的球員姓名。 End
+
+  // 設置『 設定球員佔位 』and 『 儲存球員站位 』模式時的組件樣式。
+  function SetCircleStyle() {
+    if (!bSetPositionFlag) {
+      bSetPositionFlag = true;
+      setBoxStyle(YellowBorderClassName);
+      setPositionLabel("儲存球員站位");
+    } else {
+      bSetPositionFlag = false;
+      setBoxStyle("");
+      setPositionLabel("設定球員佔位");
+      // 儲存各陣形的球員站位數據資料。
+      localStorage.setItem("labelPosition", JSON.stringify(labelPosition));
+    }
+  }
+
+  // 獲取站位球員名 Start
+  const getLabelNameHandler = (_labelPosition) => {
+    // 確認目前所顯示的陣形是『 固定 or 自定義 』，並返回相對應的陣形名稱。
+    const _currentType =
+      currentType === 1 ? formationType : customFormationType;
+
+    // 確認是否有此陣形的站位名數據。
+    if (labelPosition[_currentType]) {
+      // 確認此陣形數據裡是否已有儲存，此球員名站位的位子數據。
+      const objResult = labelPosition[_currentType].find(
+        (object) => object["labelPosition"] === _labelPosition
+      );
+      // 有數據的話，返回站位的球員姓名，不然返回提示字串
+      return objResult ? objResult["name"] : "名字放這裡";
+    } else {
+      return "名字放這裡";
+    }
+  };
+  // 獲取站位球員名 End
 
   // 陣形渲染處理 Start
   const formationRenderHandler = (objectArray) => {
@@ -273,18 +364,24 @@ const TacticalBoard = () => {
           >
             <FontAwesomeIcon
               icon={faShirt}
-              size="2xl"
+              size="xl"
               style={{ color: "#ffffff" }}
             />
             <div ref={object["nameRef"]["ref"]} className={"box--playerName"}>
-              名字放這裡
+              {getLabelNameHandler(objectArray[index]["labelPosition"])}
             </div>
           </div>
-          {bSetPostionFlag ? (
+          {bSetPositionFlag ? (
             <Tooltip target={`.row-${index}`} autoHide={false}>
               <ListBox
                 filter
-                onChange={(e) => SetName(index, e.value.name)}
+                onChange={(e) =>
+                  SetName(
+                    index,
+                    e.value.name,
+                    objectArray[index]["labelPosition"]
+                  )
+                }
                 options={ayPlayerList}
                 optionLabel="name"
                 className="w-full md:w-14rem"
@@ -303,131 +400,112 @@ const TacticalBoard = () => {
 
   // 取得父元素視窗大小 Start
   const handleResize = () => {
-    const container = containerRef.current.getBoundingClientRect();
-    setFatherContainerInfo(container);
+    const containerInfo = containerRef.current.getBoundingClientRect();
+    setFatherContainerInfo(containerInfo);
   };
   // 取得父元素視窗大小 End
 
-  // 監聽父元素視窗變動 Start
-  useEffect(() => {
-    // 添加事件监听
-    window.addEventListener("resize", handleResize);
-
-    // 在组件卸载时移除事件监听
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-  // 監聽父元素視窗變動 End
+  // 獲取待渲染數據 Start
+  const getRenderData = () => {
+    // 1 = 固定陣形，0 = 自定義陣形
+    let renderData;
+    // 根據目前顯示的陣形『 固定 or 自定義』返回已單位轉換完的數據。
+    if (currentType === 1) {
+      renderData = pctConvertPx(fixedFormationPosition[formationType]);
+    } else {
+      renderData = pctConvertPx(customPositionData[customFormationType]);
+    }
+    return renderData;
+  };
+  // 獲取待渲染數據 End
 
   // 父元素的視窗大小變動後所做處理 Start
   useEffect(() => {
-    // 1 = 固定陣形，0 = 自定義陣形
-    let firstData;
-    if (currentType === 1) {
-      firstData = pctConvertPx(fixedFormationPosition[formationType]);
-    } else {
-      firstData = pctConvertPx(customPositionData[customFormationType]);
-    }
-    setFormation(formationRenderHandler(firstData));
+    const data = getRenderData(); // 獲取待渲染數據
+    const renderedData = formationRenderHandler(data); // 渲染處理
+    setFormation(renderedData); // 重新設置陣形
   }, [fatherContainerInfo]);
   // 父元素的視窗大小變動後所做處理 End
 
   // 固定陣形變換後重新渲染 Start
   useEffect(() => {
-    // 獲取指定自定義陣形數據
-    const positionsData = fixedFormationPosition[formationType];
-    // 單位轉換 『 百分比 』to『 px 』
-    const position = pctConvertPx(positionsData);
-    setFormation(formationRenderHandler(position));
-  }, [formationType, boxStyle]);
+    const data = getRenderData(); // 獲取待渲染數據
+    const renderedData = formationRenderHandler(data); // 渲染處理
+    setFormation(renderedData); // 設置陣形
+  }, [formationType, customFormationType, currentType, boxStyle]);
   // 陣形變換後重新渲染 End
 
-  // 自定義陣形變換後重新渲染 Start
-  useEffect(() => {
-    if (customFormationType) {
-      // 獲取指定自定義陣形數據
-      const positionsData = customPositionData[customFormationType];
-
-      // 單位轉換 『 百分比 』to『 px 』
-      const position = pctConvertPx(positionsData);
-      setFormation(formationRenderHandler(position));
-    }
-  }, [customFormationType]);
-  // 自定義陣形變換後重新渲染 End
-
-  // - - - - - - - - - - 自定義陣列 - - - - - - - - - - -
-
-  // 取得元素在父容器的相對位子 Start
-  const getPositionHandler = (index) => {
-    const element = divRefs[index]["ref"].current.getBoundingClientRect();
+  // 取得陣形站位元素在父容器的相對位子 Start
+  const getElemsPosition = (index) => {
+    const elementInfo = divRefs[index]["ref"].current.getBoundingClientRect();
 
     // 取得元素在父容器的相對位子，並把單位『 px 』轉換成『 百分比 』
-    const position = {
+    const objElemsPositionData = {
       left: Math.round(
-        ((element.left - fatherContainerInfo.left) /
+        ((elementInfo.left - fatherContainerInfo.left) /
           fatherContainerInfo.width) *
           100
       ),
       top: Math.round(
-        ((element.top - fatherContainerInfo.top) / fatherContainerInfo.height) *
+        ((elementInfo.top - fatherContainerInfo.top) /
+          fatherContainerInfo.height) *
           100
       ),
     };
-    return position;
+    return objElemsPositionData;
   };
-  // 取得元素在父容器的相對位子  End
+  // 取得陣形站位元素在父容器的相對位子  End
 
   // 取得自訂義元素位子數據 Start
-  const getCustomPosition = () => {
-    // 取得元素位子數據
-    const customPosition = [];
+  const getCustomElemsPosition = () => {
+    // 取得所有元素站位數據
+    const arrCustomFormationPositionData = [];
     divRefs.forEach((ref, index) => {
-      customPosition.push(getPositionHandler(index));
+      const objElemsPosition = getElemsPosition(index);
+      arrCustomFormationPositionData.push(objElemsPosition);
     });
 
-    //  深度複製舊資料，並追加新的屬性數據。(為了不去動到『 址類型 』的原始資料。)
-    let customFormation = JSON.parse(JSON.stringify(customPositionData));
-    const formationName = textRef.current.value;
+    //  深度複製舊自定義站位數據，並追加新的屬性數據。(為了不去動到『 址類型 』的原始資料。)
+    let objCustomFormation = JSON.parse(JSON.stringify(customPositionData));
+    const customFormationName = textRef.current.value;
 
-    console.log(formationName.trim());
-    console.log(customFormation.hasOwnProperty(formationName));
+    // 檢查去除空格後是否為空，以及自定義陣形數據裡是否已有此陣形名稱。
+    if (
+      customFormationName.trim() &&
+      !objCustomFormation[customFormationName]
+    ) {
+      // 新增此『 自定義陣形 』站位資料。
+      objCustomFormation[customFormationName] = arrCustomFormationPositionData;
 
-    if (formationName.trim() && !customFormation[formationName]) {
-      customFormation[formationName] = customPosition;
       // 更新 『 localStorage 』資料。
-      localStorage.setItem("customFormation", JSON.stringify(customFormation));
+      localStorage.setItem(
+        "customFormation",
+        JSON.stringify(objCustomFormation)
+      );
 
-      // 更新 『 本地State 』狀態。
-      setCustomPositionData(customFormation);
+      // 更新 『 自定義陣形 』站位資料。
+      setCustomPositionData(objCustomFormation);
 
-      // 追加下拉選單 『 自定義陣形 』選單項目。
-      customFormationItem.push(formationName);
+      // 追加下拉選單： 『 自定義陣形 』的選單項目。
+      customFormationItem.push(customFormationName);
+      showToast("訊息", `${customFormationName}陣形儲存成功`, 1);
 
-      showToast("訊息", `${formationName}陣形儲存成功`, 1);
       // 自定義陣形名稱初始化
       textRef.current.value = "";
-      // 關閉『 自定義陣形模式 』，以及開啟『 Disabled 』
-      setCustom(false);
+      // 關閉『 自定義陣形模式 』，以及開啟在『 自定義陣形模式 』時會啟用的相關組件的『 Disabled 』
+      setIsCustom(false);
       setDisabled(true);
-      console.log({ tempCustomPosition });
     } else {
       showToast("訊息", "陣形名稱不可為空 or 陣形名稱重複", 0);
     }
   };
   // 取得自訂義元素位子數據 End
 
-  // 創建在『 自定義模式 』下可隨意拉動的元素 Start
+  // 渲染在『 自定義陣形模式 』下可隨意拉動的元素 Start
   const customFormationRenderHandler = divRefs.map((ref, index) => {
     const uuid = uuidv4();
     return (
-      <Draggable
-        // onDrag={dragHandler}
-        // onStop={dragHandler}
-        key={uuid}
-        bounds="parent"
-        defaultPosition={{ x: 0, y: 0 }}
-      >
+      <Draggable key={uuid} bounds="parent" defaultPosition={{ x: 0, y: 0 }}>
         <div className={`box--moveable`} ref={ref["ref"]}>
           <FontAwesomeIcon
             icon={faShirt}
@@ -438,31 +516,7 @@ const TacticalBoard = () => {
       </Draggable>
     );
   });
-  // 創建在『 自定義模式 』下可隨意拉動的元素 End
-
-  // WEICHE ADD START
-  // function dragHandler () {
-  //   const customPosition = [];
-  //   divRefs.forEach((ref, index) => {
-  //     customPosition.push(getPositionHandler(index));
-  //   });
-  //   setPositionRecord(customPosition);
-  // }
-
-  function SetCircleStyle() {
-    if (!bSetPostionFlag) {
-      bSetPostionFlag = true;
-      setBoxStyle(YellowBorderClassName);
-      setPositionLabel("儲存球員站位");
-    } else {
-      bSetPostionFlag = false;
-      setBoxStyle("");
-      setPositionLabel("設定球員佔位");
-      console.log({ namesRef });
-    }
-  }
-
-  // WEICHE ADD END
+  // 渲染在『 自定義陣形模式 』下可隨意拉動的元素 End
 
   return (
     <Fragment>
@@ -472,7 +526,7 @@ const TacticalBoard = () => {
             ref={containerRef}
             className={`${classes.bg} absolute w-full h-full flex`}
           >
-            {custom ? customFormationRenderHandler : formation}
+            {isCustom ? customFormationRenderHandler : formation}
           </div>
         </div>
 
@@ -482,7 +536,7 @@ const TacticalBoard = () => {
               <p className="m-2 text-xl ">請選擇陣型</p>
               <Dropdown
                 className="w-16rem m-2"
-                disabled={custom}
+                disabled={isCustom}
                 value={formationType}
                 options={fixedFormationItem}
                 onChange={(e) => {
@@ -495,7 +549,7 @@ const TacticalBoard = () => {
               <p className="m-2 text-xl">已儲存陣型</p>
               <Dropdown
                 className="w-16rem m-2"
-                disabled={custom}
+                disabled={isCustom}
                 value={customFormationType}
                 options={customFormationItem}
                 onChange={(e) => {
@@ -511,7 +565,7 @@ const TacticalBoard = () => {
               className="ml-2"
               label="自定義陣形"
               onClick={() => {
-                setCustom(true);
+                setIsCustom(true);
                 setDisabled(false);
               }}
             />
@@ -519,14 +573,14 @@ const TacticalBoard = () => {
               className="ml-2"
               disabled={disabled}
               label="儲存陣形"
-              onClick={() => getCustomPosition()}
+              onClick={() => getCustomElemsPosition()}
             />
             <Button
               className="ml-2"
               disabled={disabled}
               label="返回"
               onClick={() => {
-                setCustom(false);
+                setIsCustom(false);
                 setDisabled(true);
               }}
             />

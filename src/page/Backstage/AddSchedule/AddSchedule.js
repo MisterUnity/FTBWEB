@@ -65,8 +65,8 @@ const AddSchedule = (props) => {
 
   // cell-編輯完處理 Start
   const onCellEditComplete = (e) => {
-    let { rowData, newValue, field } = e;
-    rowData[field] = newValue;
+    // let { rowData, newValue, field } = e;
+    // rowData[field] = newValue;
   };
   // cell-編輯完處理 End
 
@@ -109,10 +109,15 @@ const AddSchedule = (props) => {
       width: "20",
       editorCallBack: (options) => {
         return (
-          <div className="w-8rem">
+          <div className="w-10rem">
             <Calendar
               value={options.value}
-              onChange={(e) => options.editorCallback(dateConvert(e.value))}
+              onChange={(e) => {
+                schedule[options.rowIndex][options.field] = dateConvert(
+                  e.value
+                );
+                return options.editorCallback(dateConvert(e.value));
+              }}
               showIcon
               dateFormat="yy-mm-dd"
             />
@@ -128,14 +133,14 @@ const AddSchedule = (props) => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={teamInit}
-            onChange={(e) =>
-              options.editorCallback(
+            onChange={(e) => {
+              schedule[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(
                 duplicatePreventionHandler(options, e.value)
-              )
-            }
+              );
+            }}
             placeholder="Select a opponent"
           />
         );
@@ -149,14 +154,14 @@ const AddSchedule = (props) => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={teamInit}
-            onChange={(e) =>
-              options.editorCallback(
+            onChange={(e) => {
+              schedule[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(
                 duplicatePreventionHandler(options, e.value)
-              )
-            }
+              );
+            }}
             placeholder="Select a opponent"
           />
         );
@@ -173,7 +178,10 @@ const AddSchedule = (props) => {
             <InputText
               type="text"
               value={options.value}
-              onChange={(e) => options.editorCallback(e.target.value)}
+              onChange={(e) => {
+                schedule[options.rowIndex][options.field] = e.target.value;
+                return options.editorCallback(e.target.value);
+              }}
             />
           </div>
         );
@@ -208,7 +216,6 @@ const AddSchedule = (props) => {
         header={data.header}
         editor={data.editorCallBack}
         body={data.BodyCallBack}
-        onCellEditComplete={onCellEditComplete}
       />
     );
   });
@@ -249,7 +256,8 @@ const AddSchedule = (props) => {
                   showToast("訊息", `第${index + 1}行，場地不可為空`, 3);
                   submitContext.onSetSubmitStatus(false);
                   return;
-                default: break;
+                default:
+                  break;
               }
             }
           }

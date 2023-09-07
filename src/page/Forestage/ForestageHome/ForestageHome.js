@@ -68,7 +68,7 @@ const ForestageHome = (props) => {
   // 確認登入狀態 Start
   useEffect(() => {
     const initHandler = async () => {
-      const loginResult = await CheckLogin()
+      await CheckLogin()
         .then((res) => {
           // setController(true); //真正決定顯示的時機在確認登入完之後
           authContext.onSetSignInStatus(true);
@@ -85,19 +85,18 @@ const ForestageHome = (props) => {
             return false;
           }
         });
-      if (loginResult) {
-        await GetSchedule()
-          .then((res) => {
-            const { StatusCode, StatusMessage, Result } = res.data;
-            if (StatusCode && StatusMessage.includes("Normal end.")) {
-              setSchedule(Result);
-              setDataTableValue(scheduleHandler(Result, team));
-            }
-          })
-          .catch((err) => {
-            showToast("錯誤", `${err}`, 0);
-          });
-      }
+
+      await GetSchedule()
+        .then((res) => {
+          const { StatusCode, StatusMessage, Result } = res.data;
+          if (StatusCode && StatusMessage.includes("Normal end.")) {
+            setSchedule(Result);
+            setDataTableValue(scheduleHandler(Result, team));
+          }
+        })
+        .catch((err) => {
+          showToast("錯誤", `${err}`, 0);
+        });
     };
     initHandler();
   }, []);
@@ -126,7 +125,8 @@ const ForestageHome = (props) => {
         return Hualien;
       case "戰神女足":
         return Taoyuan;
-      default: break;
+      default:
+        break;
     }
   };
   //  各隊隊徽處理 End
