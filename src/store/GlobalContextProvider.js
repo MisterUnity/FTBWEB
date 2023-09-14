@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { createContext, useContext, useState } from "react";
 import { Toast } from "primereact/toast";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { BlockUI } from "primereact/blockui";
 
 const GlobalStoreContext = createContext();
 const GlobalContextProvider = ({ children }) => {
@@ -107,6 +108,8 @@ const GlobalContextProvider = ({ children }) => {
     return false;
   };
 
+  const [blocked, SetGlobalBlock] = useState(false);
+
   return (
     <GlobalStoreContext.Provider
       value={{
@@ -119,11 +122,14 @@ const GlobalContextProvider = ({ children }) => {
         dialogResultHandler,
         errorHandler,
         confirmDialog,
+        SetGlobalBlock,
       }}
     >
-      {children}
-      <Toast data-theme={`${currentTheme}`} ref={toast}></Toast>
-      <ConfirmDialog />
+      <BlockUI blocked={blocked} containerClassName="h-full">
+        {children}
+        <Toast data-theme={`${currentTheme}`} ref={toast}></Toast>
+        <ConfirmDialog />
+      </BlockUI>
     </GlobalStoreContext.Provider>
   );
 };
