@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import { createContext, useContext, useState } from "react";
 import { Toast } from "primereact/toast";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+
 const GlobalStoreContext = createContext();
 const GlobalContextProvider = ({ children }) => {
   // 設置目前使用者姓名 Start
@@ -116,10 +118,12 @@ const GlobalContextProvider = ({ children }) => {
         dialogResult,
         dialogResultHandler,
         errorHandler,
+        confirmDialog,
       }}
     >
       {children}
       <Toast data-theme={`${currentTheme}`} ref={toast}></Toast>
+      <ConfirmDialog />
     </GlobalStoreContext.Provider>
   );
 };

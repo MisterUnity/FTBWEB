@@ -51,7 +51,7 @@ const dropdownItem = [
 // };
 
 const ForestageHome = (props) => {
-  const { authContext, showToast, dialogResult, errorHandler } =
+  const { authContext, showToast, dialogResult, errorHandler, confirmDialog } =
     useGlobalStore();
   const navigate = useNavigate();
   // 項目狀態 Start
@@ -207,7 +207,23 @@ const ForestageHome = (props) => {
         {authContext.signInStatus.toString()}
       </header>
       <main className="flex-grow-1">
-        <Button label="測試" onClick={() => dialogHandler()} />
+        <Button
+          label="測試"
+          onClick={() =>
+            confirmDialog({
+              message: "測試訊息",
+              header: "Header",
+              icon: "pi pi-info-circle",
+              acceptClassName: "p-button-danger",
+              accept: function () {
+                console.log(true);
+              },
+              reject: function () {
+                console.log(false);
+              },
+            })
+          }
+        />
         <CustomDialog
           visible={dialogVisible}
           onHide={() => setDialogVisible(false)}
