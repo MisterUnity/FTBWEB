@@ -5,7 +5,6 @@ import React, {
   // useContext,
   useRef,
 } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShirt } from "@fortawesome/free-solid-svg-icons";
 import { Dropdown } from "primereact/dropdown";
 import { v4 as uuidv4 } from "uuid";
@@ -13,14 +12,16 @@ import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
-import classes from "./TacticalBoard.module.css";
 import { Tooltip } from "primereact/tooltip";
 import { ListBox } from "primereact/listbox";
-import "./style.scss";
 import { GetPlayersInfo } from "@/API/playerInfo/playerInfo";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
+import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import Draggable from "react-draggable";
-
+import "./style.scss";
+import background from "../../../assets/tactical_board.png";
 // 設定『 球員站位 』的 Flag
 let bSetPositionFlag = false;
 
@@ -138,7 +139,6 @@ const ayPlayerList = [];
 // 給『 box 』元素用的 className
 const YellowBorderClassName = "yellow-bdr";
 
-//TODO 陣形固定模式，自定義模式（用radio按鈕）
 const TacticalBoard = () => {
   const [formationType, setFormationType] = useState("4-3-3");
   const [customFormationType, setCustomFormationType] = useState("");
@@ -154,7 +154,7 @@ const TacticalBoard = () => {
 
   const containerRef = useRef(null);
   const textRef = useRef(null);
-  const { authContext, showToast } = useGlobalStore();
+  const { authContext, showToast, errorHandler } = useGlobalStore();
   const navigate = useNavigate();
 
   const ref = { ref: useRef(null) };
@@ -182,7 +182,7 @@ const TacticalBoard = () => {
           return true;
         })
         .catch((err) => {
-          showToast("錯誤", "獲取球員清單發生不明原因錯誤。", 0);
+          errorHandler(err);
           return false;
         });
 
@@ -518,16 +518,84 @@ const TacticalBoard = () => {
   });
   // 渲染在『 自定義陣形模式 』下可隨意拉動的元素 End
 
+  // 點擊『 確認刪除 』後處理動作 Start
+  const accept = () => {
+    const index = customFormationItem.indexOf(customFormationType);
+    if (index != -1) {
+      // 刪除『 自定義陣形 』下拉選單項目
+      customFormationItem.splice(index, 1);
+
+      // 刪除『 自定義陣形 』指定陣形的陣形位子數據。
+      let newCustomPositionData = JSON.parse(
+        JSON.stringify(customPositionData)
+      );
+      delete newCustomPositionData[customFormationType];
+      setCustomPositionData(newCustomPositionData);
+
+      // 刪除匹配的球員站位資料
+      let newLabelPosition = JSON.parse(JSON.stringify(labelPosition));
+      // 球員名站位資料不像陣形資料是一每個陣形都有一定有一比數據，所以要追加判斷。
+      if (newLabelPosition[customFormationType]) {
+        delete newLabelPosition[customFormationType];
+        setLabelPosition(newLabelPosition);
+      }
+
+      // 當『 customFormationItem 』陣列為空的時候，刪除『 localStorage 』的『 customFormation 』項目。
+      if (customFormationItem.length === 0) {
+        console.log("刪除customFormation");
+        localStorage.removeItem("customFormation");
+        setCustomFormationType("");
+      }
+      // 更新『 localStorage 』的『 customFormation 』的項目資料。
+      else {
+        console.log("更新customFormation");
+        localStorage.setItem(
+          "customFormation",
+          JSON.stringify(newCustomPositionData)
+        );
+      }
+
+      // 固定陣形都沒有儲存球員站位資料，只有自定義陣形有球員站位資料時，條件才會成立。
+      if (Object.keys(newLabelPosition).length === 0) {
+        console.log("刪除球員站位");
+        localStorage.removeItem("labelPosition");
+      } else if (newLabelPosition) {
+        console.log("更新球員站位");
+        localStorage.setItem("labelPosition", JSON.stringify(newLabelPosition));
+      }
+
+      // 刪除完後都會顯示回固定陣形第一筆資料
+      setCurrentType(1);
+      setFormationType("4-3-3");
+      showToast("訊息", `刪除『 ${customFormationType} 』陣形成功`, 1);
+    }
+  };
+  // 點擊『 確認刪除 』後處理動作 End
+
+  const reject = () => {};
+  // 點擊『 刪除按鈕 』時顯示的提示訊息 Start
+  const deleteConfirm = () => {
+    // 提示訊息顯示位子，在指定元素之下。
+    const elems = document.querySelector(".cus");
+    confirmPopup({
+      target: elems,
+      message: `確定要刪除『 ${customFormationType} 』陣形嗎？`,
+      icon: "pi pi-info-circle",
+      acceptClassName: "p-button-danger",
+      accept,
+      reject,
+    });
+  };
+  // 點擊『 刪除按鈕 』時顯示的提示訊息 End
+
   return (
     <Fragment>
       <div className="absolute w-full h-full flex TaticalBoard">
-        <div className="relative w-11 h-full bg-primary-700 flex-grow-1">
-          <div
-            ref={containerRef}
-            className={`${classes.bg} absolute w-full h-full flex`}
-          >
+        <div className={` relative w-11 h-full  flex-grow-1`}>
+          <div ref={containerRef} className="absolute w-full h-full flex">
             {isCustom ? customFormationRenderHandler : formation}
           </div>
+          <img className="w-full h-full" src={background} alt="background" />
         </div>
 
         <div className="flex-grow-0">
@@ -548,7 +616,7 @@ const TacticalBoard = () => {
             <div>
               <p className="m-2 text-xl">已儲存陣型</p>
               <Dropdown
-                className="w-16rem m-2"
+                className="cus w-16rem m-2"
                 disabled={isCustom}
                 value={customFormationType}
                 options={customFormationItem}
@@ -558,6 +626,19 @@ const TacticalBoard = () => {
                 }}
                 placeholder="請選擇陣形"
               />
+              <ConfirmPopup />
+              {customFormationItem.length > 0 ? (
+                <i>
+                  <FontAwesomeIcon
+                    className="cursor-pointer"
+                    icon={faTrashCan}
+                    size="xl"
+                    onClick={() => deleteConfirm()}
+                  />
+                </i>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
           <div className="m-2">

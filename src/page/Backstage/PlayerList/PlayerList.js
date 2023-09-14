@@ -29,7 +29,8 @@ const allTeamName = [
   "戰神女足",
 ];
 const PlayerList = () => {
-  const { authContext, showToast, submitContext } = useGlobalStore();
+  const { authContext, showToast, submitContext, errorHandler } =
+    useGlobalStore();
   const navigate = useNavigate();
 
   // 項目狀態 Start
@@ -53,13 +54,10 @@ const PlayerList = () => {
           if (StatusCode && StatusMessage.includes("Normal end.")) {
             setHavePlayerList(true);
             return [...Result];
-          } else {
-            showToast("錯誤", "獲取球員清單發生不明原因錯誤。", 0);
-            return false;
           }
         })
         .catch((err) => {
-          showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
+          errorHandler(err);
           return false;
         });
 
@@ -75,12 +73,10 @@ const PlayerList = () => {
           if (StatusCode && StatusMessage.includes("Normal end.")) {
             setPlayerDetailedInfo(Result);
             setIsLoad(false);
-          } else {
-            showToast("錯誤", "獲取球員詳細資料發生不明原因錯誤。", 0);
           }
         })
         .catch((err) => {
-          showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
+          errorHandler(err);
         });
     }
   };
@@ -136,12 +132,10 @@ const PlayerList = () => {
           const { StatusCode, StatusMessage, Result } = res.data;
           if (StatusCode && StatusMessage.includes("Normal end.")) {
             setPlayerDetailedInfo(Result);
-          } else {
-            showToast("錯誤", "獲取球員詳細資料，發生不明原因錯誤。", 0);
           }
         })
         .catch((err) => {
-          showToast("錯誤", `錯誤訊息：${err}`, 0);
+          errorHandler(err);
         });
     },
     [playerDetailedInfo]
@@ -158,14 +152,11 @@ const PlayerList = () => {
           setPlayerDetailedInfo(Result);
           showToast("成功", "成功取得最新資料", 1);
           return true;
-        } else {
-          showToast("錯誤", "取得最新選手資料，發生不明原因錯誤", 0);
-          return false;
         }
       })
       .catch((err) => {
         submitContext.onSetSubmitStatus(false);
-        showToast("錯誤", `錯誤訊息：${err}`, 0);
+        errorHandler(err);
         return false;
       });
     if (!result) return;
@@ -212,12 +203,10 @@ const PlayerList = () => {
         const { StatusCode, StatusMessage, Result } = res.data;
         if (StatusCode && StatusMessage.includes("Normal end.")) {
           setPlayerDetailedInfo(Result);
-        } else {
-          showToast("錯誤訊息", "出現不明原因錯誤", 0);
         }
       })
       .catch((err) => {
-        showToast("錯誤訊息", `錯誤訊息：${err}`, 0);
+        errorHandler(err);
       });
   };
   // 刪除選手資料處理 End
@@ -237,11 +226,7 @@ const PlayerList = () => {
         return true;
       })
       .catch((err) => {
-        showToast(
-          "狀態提示",
-          `錯誤消息：${err?.data?.ErrorMessage ? err.data.ErrorMessage : err}`,
-          0
-        );
+        errorHandler(err);
         return false;
       });
 
@@ -256,12 +241,10 @@ const PlayerList = () => {
         if (StatusCode && StatusMessage.includes("Normal end.")) {
           setPlayerDetailedInfo(Result);
           showToast("狀態提示", "成功更新比賽數據", 1);
-        } else {
-          showToast("錯誤", "更新比賽數據發生不明原因錯誤", 0);
         }
       })
       .catch((err) => {
-        showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
+        errorHandler(err);
       });
   };
 

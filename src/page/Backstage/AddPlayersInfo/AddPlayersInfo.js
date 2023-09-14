@@ -20,7 +20,8 @@ import "primeicons/primeicons.css";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
-  const { authContext, submitContext, showToast } = useGlobalStore();
+  const { authContext, submitContext, showToast, errorHandler } =
+    useGlobalStore();
   // 下拉式表單選項處理 Start
   const genderItem = ["男", "女", "其他"];
   const ageItem = useDropdownItem(1, 41, "歲");
@@ -441,7 +442,7 @@ const AddPlayerInfo = () => {
             }
           })
           .catch((err) => {
-            showToast("錯誤", `錯誤訊息：${err}`, 0);
+            errorHandler(err);
             setBlocked(false);
             submitContext.onSetSubmitStatus(false);
           });

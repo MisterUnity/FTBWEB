@@ -41,7 +41,10 @@ const ComprehensiveDataTable = React.memo(
       return (
         <InputNumber
           value={options.value}
-          onChange={(e) => options.editorCallback(e.value)}
+          onChange={(e) => {
+            tableData[options.rowIndex][options.field] = e.value;
+            return options.editorCallback(e.value);
+          }}
           mode="decimal"
           showButtons
           min={0}
@@ -67,19 +70,11 @@ const ComprehensiveDataTable = React.memo(
             field={data.Field}
             header={data.Header}
             editor={cellEditor}
-            onCellEditComplete={onCellEditComplete}
           />
         );
       });
     };
     // 列渲染 End
-
-    // 編輯完成時所做處理 Start
-    const onCellEditComplete = (e) => {
-      let { rowData, newValue, field, originalEvent: event } = e;
-      rowData[field] = newValue;
-    };
-    // 編輯完成時所做處理 End
 
     const editCompleted = () => {
       const data = {
@@ -95,7 +90,6 @@ const ComprehensiveDataTable = React.memo(
         }
       }
       UpdateGameRecord(data);
-      // TODO 更改的欄位，以及選手ID，對戰隊伍，日期。
       setEditMode(false);
     };
 

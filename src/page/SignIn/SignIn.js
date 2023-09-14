@@ -3,19 +3,17 @@ import { Login, Register } from "../../API/Auth/userInfo/userInfo";
 import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from "../../store/GlobalContextProvider";
 import SignInCard from "./SignInCard";
-// import EnterErrCard from "./EnterErrorCard";
 import MsgSlice from "@/components/UI/MsgSlice/MsgSlice";
 import backDrop from "../../assets/Background.jpg";
 import classes from "./signIn.module.css";
 
 const SignIn = React.memo((props) => {
-  const { userContext, authContext, showToast } = useGlobalStore();
+  const { userContext, authContext, errorHandler } = useGlobalStore();
   const navigate = useNavigate();
 
   // 項目狀態 Start
   const [strTitle, setTitle] = useState("Sign In");
   const [strSignInOrRegis, setTitle2] = useState("Create an account");
-  // const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   // 項目狀態 End
 
@@ -42,9 +40,8 @@ const SignIn = React.memo((props) => {
         setIsLoad(false);
       })
       .catch((err) => {
-        console.log({ err });
         setIsLoad(false);
-        showToast("錯誤", err.message, 0);
+        errorHandler(err);
       });
   };
   // 登入處理 End
@@ -54,6 +51,7 @@ const SignIn = React.memo((props) => {
     if (strTitle === "Sign In") {
       DoLogin(userData);
     } else {
+      //TODO 創建帳號時沒有再次確認是否有同樣的
       Register(userData)
         .then((res) => {
           authContext.onSetSignInStatus(true);
@@ -63,16 +61,10 @@ const SignIn = React.memo((props) => {
         })
         .catch((err) => {
           setIsLoad(false);
-          showToast("錯誤", err.data.ErrorMessage, 0);
+          errorHandler(err);
         });
     }
   };
-
-  // // 是否顯示錯誤訊息處理 Start
-  // const hideErrorMsgHandler = () => {
-  //   setErrorMsgIsShown(false);
-  // };
-  // // 是否顯示錯誤訊息處理 End
 
   const showNewToHere =
     strTitle === "Sign In" ? (
@@ -87,9 +79,6 @@ const SignIn = React.memo((props) => {
         <img className="w-full h-full" src={backDrop} alt="Backdrop" />
       </div>
       <div className={classes.signIn}>
-        {/* {errorMsgIsShown && (
-          <EnterErrCard onHideErrorMsg={hideErrorMsgHandler} />
-        )} */}
         <SignInCard
           onSendUserInfo={sendUserInfoHandler}
           isLoad={isLoad}

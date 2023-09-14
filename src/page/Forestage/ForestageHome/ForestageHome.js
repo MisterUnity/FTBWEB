@@ -8,6 +8,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { v4 as uuidv4 } from "uuid";
 import { GetSchedule } from "../../../API/schedule/schedule";
+import CustomDialog from "../../../components/CustomDialog/CustomDialog";
 import ForestageMenu from "../../../components/UI/Forestage/ForestageMenu/ForestageMenu";
 import Taipei from "../../../assets/台北熊讚.png";
 import newTaipei from "../../../assets/新北航源.png";
@@ -50,7 +51,8 @@ const dropdownItem = [
 // };
 
 const ForestageHome = (props) => {
-  const { authContext, showToast } = useGlobalStore();
+  const { authContext, showToast, dialogResult, errorHandler } =
+    useGlobalStore();
   const navigate = useNavigate();
   // 項目狀態 Start
   // const [bShowAuthController, setController] = useState(false);
@@ -78,12 +80,8 @@ const ForestageHome = (props) => {
         .catch((err) => {
           // setController(true); //真正決定顯示的時機在確認登入完之後
           authContext.onSetSignInStatus(false);
-          // 只顯示未登入以外發生的錯誤
-          console.log({ err });
-          if (err.data.ErrorCode !== "E0004") {
-            showToast("Error", `${err}`, 0);
-            return false;
-          }
+          const Error = errorHandler(err);
+          if (!Error) return false;
         });
 
       await GetSchedule()
@@ -95,7 +93,8 @@ const ForestageHome = (props) => {
           }
         })
         .catch((err) => {
-          showToast("錯誤", `${err}`, 0);
+          const Error = errorHandler(err);
+          if (!Error) return false;
         });
     };
     initHandler();
@@ -194,7 +193,12 @@ const ForestageHome = (props) => {
       return <Column key={uuidv4()} field={item.filed} header={item.header} />;
     });
   };
-
+  const dialogHandler = async () => {
+    setDialogVisible(true);
+    const res = await dialogResult();
+    console.log({ res });
+  };
+  const [dialogVisible, setDialogVisible] = useState(false);
   return (
     <Fragment>
       <header className="homepage-header surface-600 text-100">
@@ -203,6 +207,16 @@ const ForestageHome = (props) => {
         {authContext.signInStatus.toString()}
       </header>
       <main className="flex-grow-1">
+        <Button label="測試" onClick={() => dialogHandler()} />
+        <CustomDialog
+          visible={dialogVisible}
+          onHide={() => setDialogVisible(false)}
+          header="測試"
+          ConfirmButton={true}
+          overwriteMode={true}
+        >
+          <div>測試</div>
+        </CustomDialog>
         <div className="page-forestageHome">
           <Dropdown
             className="m-2 w-full md:w-14rem"

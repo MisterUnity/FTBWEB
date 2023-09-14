@@ -73,7 +73,8 @@ const teamItem = [
 let allPlayerList = [];
 
 const EditComprehensiveDataTable = () => {
-  const { authContext, submitContext, showToast } = useGlobalStore();
+  const { authContext, submitContext, showToast, errorHandler } =
+    useGlobalStore();
   const navigate = useNavigate();
   const dataTableRef = useRef();
 
@@ -96,14 +97,10 @@ const EditComprehensiveDataTable = () => {
             const { StatusCode, StatusMessage, Result } = res.data;
             if (StatusCode && StatusMessage.includes("Normal end.")) {
               return [...Result];
-            } else {
-              console.log(
-                "傳送無錯誤，但沒取得資料 from EditComprehensive Page"
-              );
             }
           })
           .catch((err) => {
-            alert(err);
+            errorHandler(err);
             return false;
           });
         if (!leaguePlayerList) return false;
@@ -192,7 +189,7 @@ const EditComprehensiveDataTable = () => {
         value={options.value}
         onChange={(e) => {
           gameData[options.rowIndex][options.field] = e.value;
-          // return options.editorCallback(e.value);
+          return options.editorCallback(e.value);
         }}
         mode="decimal"
         showButtons
@@ -208,7 +205,7 @@ const EditComprehensiveDataTable = () => {
     const idx = gameData.findIndex((player) => player.name === value);
     if (idx === -1) {
       gameData[options.rowIndex].name = value;
-      // return options.editorCallback(value);
+      return options.editorCallback(value);
     } else {
       return showToast("選手重複提示", `${value}，已被選取。`, 0);
     }
@@ -339,12 +336,10 @@ const EditComprehensiveDataTable = () => {
           if (StatusCode && StatusMessage.includes("Normal end.")) {
             showToast("狀態提示", "資料追加成功", 1);
             submitContext.onSetSubmitStatus(false);
-          } else {
-            showToast("狀態提示", "資料傳送失敗，出現未知問題", 0);
           }
         })
         .catch((err) => {
-          showToast("狀態提示", `錯誤訊息：${err}`, 0);
+          errorHandler(err);
           submitContext.onSetSubmitStatus(false);
         });
       submitContext.onSetSubmitStatus(false);

@@ -11,12 +11,17 @@ const checkLogin = async (authCtx, navigate) => {
       }
     })
     .catch((err) => {
-      if ((err.data.ErrorCode = "E0004")) {
-        alert("登入逾時，返回至首頁");
-        navigate("/");
+      if (err.data.ErrorCode) {
+        if ((err.data.ErrorCode = "E0004")) {
+          alert("登入逾時，返回至首頁");
+          navigate("/");
+        } else {
+          alert(err.data.ErrorMessage);
+        }
       } else {
-        alert(err.data.ErrorMessage);
+        alert(err.message);
       }
+
       authCtx.onSetSignInStatus(false);
       result = false;
     });

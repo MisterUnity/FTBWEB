@@ -24,7 +24,8 @@ const teamInit = [
 ];
 
 const AddSchedule = (props) => {
-  const { authContext, submitContext, showToast } = useGlobalStore();
+  const { authContext, submitContext, showToast, errorHandler } =
+    useGlobalStore();
   const navigate = useNavigate();
 
   const [schedule, setSchedule] = useState([]);
@@ -228,7 +229,6 @@ const AddSchedule = (props) => {
         submitContext.onSetSubmitStatus(true);
         let scheduleData = {};
         scheduleData = schedule.map((item) => ({ ...item }));
-        console.log({ scheduleData });
         if (scheduleData.length <= 0) {
           showToast("警告", "資料不可為空", 3);
           submitContext.onSetSubmitStatus(false);
@@ -274,7 +274,7 @@ const AddSchedule = (props) => {
             }
           })
           .catch((err) => {
-            showToast("錯誤", `錯誤訊息：${err}`, 0);
+            errorHandler(err);
             setBlocked(false);
             submitContext.onSetSubmitStatus(false);
           });

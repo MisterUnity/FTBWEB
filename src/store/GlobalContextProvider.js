@@ -1,9 +1,7 @@
 import React, { useRef } from "react";
 import { createContext, useContext, useState } from "react";
 import { Toast } from "primereact/toast";
-
 const GlobalStoreContext = createContext();
-
 const GlobalContextProvider = ({ children }) => {
   // 設置目前使用者姓名 Start
   const [userName, setUserName] = useState("");
@@ -67,11 +65,45 @@ const GlobalContextProvider = ({ children }) => {
     onSetSubmitStatus: submitStatusHandler,
   };
   // 表單發送狀態處理 End
-  
+
   // 預置主題選擇功能(開發中) Start
-  const [currentTheme, setTheme] = useState('default');
+  const [currentTheme, setTheme] = useState("default");
   const themeContext = { currentTheme, setTheme };
   // 預置主題選擇功能 End
+
+  let dialogResultStatus = undefined;
+  const dialogResult = async () => {
+    if (dialogResultStatus === undefined || dialogResultStatus === null) {
+      return new Promise((res, rej) => {
+        let timeoutId;
+        const checkStatus = () => {
+          if (dialogResultStatus !== undefined && dialogResultStatus !== null) {
+            res(dialogResultStatus);
+            dialogResultStatus = undefined;
+          } else {
+            timeoutId = setTimeout(checkStatus, 100);
+          }
+        };
+        checkStatus();
+
+        return () => {
+          clearTimeout(timeoutId);
+        };
+      });
+    }
+  };
+
+  const dialogResultHandler = (boolean) => {
+    dialogResultStatus = boolean;
+  };
+
+  const errorHandler = (objError) => {
+    const errorMsg = objError?.data?.ErrorMessage
+      ? objError.data.ErrorMessage
+      : objError.message;
+    showToast("Error", `錯誤訊息：${errorMsg}`, 0);
+    return false;
+  };
 
   return (
     <GlobalStoreContext.Provider
@@ -81,6 +113,9 @@ const GlobalContextProvider = ({ children }) => {
         submitContext,
         themeContext,
         showToast,
+        dialogResult,
+        dialogResultHandler,
+        errorHandler,
       }}
     >
       {children}
