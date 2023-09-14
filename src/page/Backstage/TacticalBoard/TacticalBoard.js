@@ -228,15 +228,15 @@ const TacticalBoard = () => {
       }
       // 添加視窗事件监听
       window.addEventListener("resize", handleResize);
-
-      // 在组件卸载时移除事件监听
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
     }
   };
   useEffect(() => {
     intiHandler();
+    // 在组件卸载时移除事件监听
+    return () => {
+      console.log("remove");
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
   // 初始處理 End
 
