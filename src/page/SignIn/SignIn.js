@@ -51,7 +51,6 @@ const SignIn = React.memo((props) => {
     if (strTitle === "Sign In") {
       DoLogin(userData);
     } else {
-      //TODO 創建帳號時沒有再次確認是否有同樣的
       Register(userData)
         .then((res) => {
           authContext.onSetSignInStatus(true);

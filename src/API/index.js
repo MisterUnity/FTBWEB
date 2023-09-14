@@ -18,12 +18,7 @@ FTBAPI.interceptors.response.use(
   (response) => {
     // console.log("攔截器 Response", { response });
     const { ErrorCode, StatusCode, ErrorMessage } = response.data;
-    if (
-      ErrorCode &&
-      ErrorCode !== "E0002" &&
-      ErrorCode.includes("E") &&
-      StatusCode === 0
-    ) {
+    if (ErrorCode && ErrorCode.includes("E") && StatusCode === 0) {
       // console.log("攔截器『 throw response 』", response);
       throw response;
     }
