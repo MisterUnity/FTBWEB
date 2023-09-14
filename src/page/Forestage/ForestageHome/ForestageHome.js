@@ -138,7 +138,7 @@ const ForestageHome = (props) => {
       return result.map((object) => {
         return {
           schedule: (
-            <div key={uuidv4()} className=" col-12 flex ">
+            <div key={uuidv4()} className="grid grid-nogutter">
               <div className="col-4">
                 <div className="flex flex-column align-items-center ">
                   <div className="w-7rem h-7rem">
@@ -147,23 +147,27 @@ const ForestageHome = (props) => {
                       src={logoHandler(object["Team1"])}
                     />
                   </div>
-                  <div className="mt-3 text-green-50">{object["Team1"]}</div>
+                  <div className="text-green-50">{object["Team1"]}</div>
                 </div>
               </div>
               <div className="col-4 flex flex-column justify-content-center align-items-center">
-                <div className="my-4 text-xl text-green-50">
+                <div className="text-xl text-green-50">
                   {object["Date"].split("T")[0]}
                 </div>
                 <div className="text-2xl text-green-50">{object["Field"]}</div>
               </div>
-              <div className="col-4 flex flex-column align-items-center">
-                <div className="w-7rem h-7rem">
-                  <img
-                    className="w-full h-full"
-                    src={logoHandler(object["Team2"])}
-                  />
+              <div className="col-4 flex flex-column align-items-end">
+                <div>
+                  <div className="w-7rem h-7rem">
+                    <img
+                      className="w-full h-full"
+                      src={logoHandler(object["Team2"])}
+                    />
+                  </div>
+                  <div className="text-green-50 text-center">
+                    {object["Team2"]}
+                  </div>
                 </div>
-                <div className="mt-3 text-green-50">{object["Team2"]}</div>
               </div>
             </div>
           ),
