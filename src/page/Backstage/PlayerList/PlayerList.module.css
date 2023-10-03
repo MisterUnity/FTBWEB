@@ -1,7 +1,3 @@
-.bg {
-  background-image: url("../../../assets/playerList_BG.jpg");
-  background-size: cover;
-}
 .infoBG {
   opacity: 85%;
   background: linear-gradient(10deg, rgb(0, 183, 255), rgb(3, 32, 44));

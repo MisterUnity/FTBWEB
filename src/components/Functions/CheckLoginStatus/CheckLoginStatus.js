@@ -1,4 +1,5 @@
 import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
+import { Toast } from "primereact/toast";
 
 const checkLogin = async (authCtx, navigate) => {
   let result = true;
@@ -11,8 +12,8 @@ const checkLogin = async (authCtx, navigate) => {
       }
     })
     .catch((err) => {
-      if (err.data.ErrorCode) {
-        if ((err.data.ErrorCode = "E0004")) {
+      if (err?.data) {
+        if (err.data.ErrorCode === "E0004") {
           alert("登入逾時，返回至首頁");
           navigate("/");
         } else {

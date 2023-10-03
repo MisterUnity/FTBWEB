@@ -188,7 +188,9 @@ const TacticalBoard = () => {
 
       if (!res) return false;
 
-      handleResize(); // 取得目前父元素視窗大小
+      // 組件還在渲染階段，切至另頁面（組件）時，因元素還未渲染完成會造成錯誤。
+      const elemsInfoResult = handleResize(); // 取得目前父元素視窗大小
+      if (!elemsInfoResult) return;
 
       // - - - 初始化時，優先顯示固定陣形的第一筆數據。 - - -
       // 單位轉換『 百分比 』to 『 px 』
@@ -226,12 +228,14 @@ const TacticalBoard = () => {
       } else {
         console.log("無自定義陣型數據");
       }
-      // 添加視窗事件监听
-      window.addEventListener("resize", handleResize);
     }
   };
   useEffect(() => {
     intiHandler();
+
+    // 添加視窗事件监听
+    window.addEventListener("resize", handleResize);
+
     // 在组件卸载时移除事件监听
     return () => {
       console.log("remove");
@@ -243,6 +247,7 @@ const TacticalBoard = () => {
   // 單位轉換 『 百分比 』轉換成『 px 』並返回一個陣列 Start
   const pctConvertPx = (objectArray) => {
     // 渲染時差因素，導致父元素容器還未被渲染出來，所以最初 『 fatherContainerInfo 』會為空。
+
     const contSizeInfo = fatherContainerInfo
       ? fatherContainerInfo
       : containerRef.current.getBoundingClientRect();
@@ -400,8 +405,11 @@ const TacticalBoard = () => {
 
   // 取得父元素視窗大小 Start
   const handleResize = () => {
-    const containerInfo = containerRef.current.getBoundingClientRect();
-    setFatherContainerInfo(containerInfo);
+    if (containerRef?.current) {
+      const containerInfo = containerRef.current.getBoundingClientRect();
+      setFatherContainerInfo(containerInfo);
+      return true;
+    } else return false;
   };
   // 取得父元素視窗大小 End
 

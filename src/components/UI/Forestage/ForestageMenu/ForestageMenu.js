@@ -51,8 +51,8 @@ const ForestageMenu = React.memo(() => {
         popupAlignment="right"
       />
       <Button
-        label={<FontAwesomeIcon icon={faBars} />}
-        className="mr-2"
+        label={<FontAwesomeIcon icon={faBars} style={{ color: "#ffffff" }} />}
+        className="mr-2 border-none bg-green-300"
         onClick={(event) => menuRight.current.toggle(event)}
         aria-controls="popup_menu_right"
         aria-haspopup

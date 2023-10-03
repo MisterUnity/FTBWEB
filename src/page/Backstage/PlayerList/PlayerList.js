@@ -6,6 +6,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import { Button } from "primereact/button";
 import { UpdateGameData } from "../../../API/playerInfo/playerInfo";
+import BlockFullPage from "../../../components/Functions/BlockFullPage/BlockFullPage";
 import CSDialog from "../../../cs_components/CSDialog";
 import GameHistoryDataTable from "../../../components/UI/Backstage/GameHistoryDataTable/GameHistoryDataTable";
 import PlayerInfo from "../../../components/UI/Backstage/PlayersInfo/PlayersInfo";
@@ -148,7 +149,6 @@ const PlayerList = () => {
       .then((res) => {
         const { StatusCode, StatusMessage, Result } = res.data;
         if (StatusCode && StatusMessage.includes("Normal end.")) {
-          console.log({ Result });
           setPlayerDetailedInfo(Result);
           showToast("成功", "成功取得最新資料", 1);
           return true;
@@ -160,6 +160,7 @@ const PlayerList = () => {
         return false;
       });
     if (!result) return;
+    console.log({ teamName });
     // 隊徽切換處理
     let logo = "";
     switch (teamName) {
@@ -215,6 +216,7 @@ const PlayerList = () => {
     //追加ID資料
     const id = playerDetailedInfo["ID"];
     dataInfo["ID"] = id;
+    console.log({ dataInfo });
     // 送要更新的資料
     if (Object.keys(dataInfo).length <= 3) {
       showToast("訊息", "無資料待更新", 2);
@@ -258,34 +260,31 @@ const PlayerList = () => {
           <ProgressSpinner />
         </div>
       ) : havePlayerList ? (
-        <div className="w-full h-full flex absolute">
+        //TODO
+        <BlockFullPage
+          blocked={submitContext.submitStatus}
+          className="w-full h-full flex absolute"
+        >
           {/*主要資料顯示區塊 */}
-          <div
-            className={`${classes.bg} flex flex-column align-items-center w-full `}
-          >
+          <div className="flex flex-column align-items-center w-full">
             {/*個人資訊顯示部分 */}
             <div className="flex justify-content-center align-items-center w-full h-25rem ">
               {/*個人資訊背景設定 */}
-              <div
-                className={`${classes.infoBG} w-11 h-21rem flex justify-content-center 
-                                              align-items-center`}
-              >
-                {/*個人資訊 */}
-                {
-                  <PlayerInfo
-                    className={`${classes.info}  h-19rem bg-gray-50`}
-                    playerDetailedInfo={playerDetailedInfo}
-                    onDisabled={disabledHandler}
-                    onLocalUpdate={getPlayerDataHandler}
-                    onDelete={deleteHandler}
-                    Logo={logo}
-                  />
-                }
-              </div>
+
+              {/*個人資訊 */}
+              {
+                <PlayerInfo
+                  playerDetailedInfo={playerDetailedInfo}
+                  onDisabled={disabledHandler}
+                  onLocalUpdate={getPlayerDataHandler}
+                  onDelete={deleteHandler}
+                  Logo={logo}
+                />
+              }
             </div>
 
             {/*對戰紀錄表 */}
-            <div className=" w-11 h-25rem">
+            <div className="m-2 w-11 h-25rem">
               {
                 <GameHistoryDataTable
                   gameRecord={playerDetailedInfo.GameHistory}
@@ -310,7 +309,7 @@ const PlayerList = () => {
               onSwitchTeam={getPlayerDataHandler}
             />
           </CollapseSideBar>
-        </div>
+        </BlockFullPage>
       ) : (
         <div className=" w-full h-full bg-bluegray-200 opacity-70">
           <CSDialog

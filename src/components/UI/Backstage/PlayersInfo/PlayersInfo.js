@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, Fragment } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -16,7 +16,7 @@ import { DeletePlayerInfo } from "../../../../API/playerInfo/playerInfo";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import PhotoCropper from "../../../Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../../Hook/useDropdownItem/useDropdownItem";
-
+import "./PlayersInfo.scss";
 const PlayersInfo = React.memo(
   ({
     className,
@@ -63,96 +63,109 @@ const PlayersInfo = React.memo(
       "進攻型中場",
       "守門員",
     ];
-    const teamItem = ["1隊", "2隊"];
+    const teamItem = [
+      "台北熊讚",
+      "新北航源",
+      "台中藍鯨",
+      "高雄陽信",
+      "花蓮",
+      "戰神女足",
+    ];
     // 下拉式表單選項處理 End
 
     // 個人資訊欄渲染用資料 Start
-    const firstRowInfo = [
-      {
-        id: "position",
-        header: "位置",
-        placeholder: playerInfo["Position"],
-        readingMode: playerInfo["Position"],
-        editMode: {
-          type: "dropdown",
-          dropdownItem: positionItem,
-          value: position,
-          callBack: (newValue) => setPosition(newValue),
+    const renderData = [
+      [
+        {
+          id: "position",
+          header: "位置",
+          placeholder: playerInfo["Position"],
+          readingMode: playerInfo["Position"],
+          editMode: {
+            type: "dropdown",
+            dropdownItem: positionItem,
+            value: position,
+            callBack: (newValue) => setPosition(newValue),
+          },
         },
-      },
-      {
-        id: "height",
-        header: "身高",
-        placeholder: playerInfo["Height"],
-        readingMode: playerInfo["Height"],
-        editMode: {
-          type: "dropdown",
-          dropdownItem: heightItem,
-          value: height,
-          callBack: (newValue) => setHeight(newValue),
+        {
+          id: "height",
+          header: "身高",
+          placeholder: playerInfo["Height"],
+          readingMode: playerInfo["Height"],
+          editMode: {
+            type: "dropdown",
+            dropdownItem: heightItem,
+            value: height,
+            callBack: (newValue) => setHeight(newValue),
+          },
         },
-      },
-      {
-        id: "weight",
-        header: "體重",
-        placeholder: playerInfo["Weight"],
-        readingMode: playerInfo["Weight"],
-        editMode: {
-          type: "dropdown",
-          dropdownItem: weightItem,
-          value: weight,
-          callBack: (newValue) => setWeight(newValue),
+      ],
+      [
+        {
+          id: "weight",
+          header: "體重",
+          placeholder: playerInfo["Weight"],
+          readingMode: playerInfo["Weight"],
+          editMode: {
+            type: "dropdown",
+            dropdownItem: weightItem,
+            value: weight,
+            callBack: (newValue) => setWeight(newValue),
+          },
         },
-      },
-      {
-        id: "age",
-        header: "年齡",
-        placeholder: playerInfo["Age"],
-        readingMode: playerInfo["Age"],
-        editMode: {
-          type: "dropdown",
-          dropdownItem: ageItem,
-          value: age,
-          callBack: (newValue) => setAge(newValue),
+        {
+          id: "age",
+          header: "年齡",
+          placeholder: playerInfo["Age"],
+          readingMode: playerInfo["Age"],
+          editMode: {
+            type: "dropdown",
+            dropdownItem: ageItem,
+            value: age,
+            callBack: (newValue) => setAge(newValue),
+          },
         },
-      },
-      {
-        id: "gender",
-        header: "性別",
-        placeholder: playerInfo["Gender"],
-        readingMode: playerInfo["Gender"],
-        editMode: {
-          type: "dropdown",
-          dropdownItem: genderItem,
-          value: gender,
-          callBack: (newValue) => setGender(newValue),
+      ],
+      [
+        {
+          id: "gender",
+          header: "性別",
+          placeholder: playerInfo["Gender"],
+          readingMode: playerInfo["Gender"],
+          editMode: {
+            type: "dropdown",
+            dropdownItem: genderItem,
+            value: gender,
+            callBack: (newValue) => setGender(newValue),
+          },
         },
-      },
-      {
-        id: "team",
-        header: "隊伍",
-        placeholder: playerInfo["Team"],
-        readingMode: playerInfo["Team"],
-        editMode: {
-          type: "dropdown",
-          dropdownItem: teamItem,
-          value: team,
-          callBack: (newValue) => setTeam(newValue),
+        {
+          id: "team",
+          header: "隊伍",
+          placeholder: playerInfo["Team"],
+          readingMode: playerInfo["Team"],
+          editMode: {
+            type: "dropdown",
+            dropdownItem: teamItem,
+            value: team,
+            callBack: (newValue) => setTeam(newValue),
+          },
         },
-      },
-    ];
-    const secondRowInfo = [
-      {
-        id: "description",
-        header: "概述",
-        placeholder: playerInfo["Description"],
-        readingMode: playerInfo["Description"],
-        editMode: {
-          type: "text",
-          value: description,
-          callBack: (newValue) => setDescription(newValue),
+      ],
+      [
+        {
+          id: "description",
+          header: "概述",
+          placeholder: playerInfo["Description"],
+          readingMode: playerInfo["Description"],
+          editMode: {
+            type: "text",
+            value: description,
+            callBack: (newValue) => setDescription(newValue),
+          },
         },
-      },
+      ],
     ];
     // 個人資訊欄渲染用資料 End
 
@@ -234,14 +247,31 @@ const PlayersInfo = React.memo(
                 : playerInfo[propName]
               : playerInfo[propName];
           };
-
+          console.log("age", strEmptyCheck(age, "Age"));
           let sendName = strEmptyCheck(name, "Name");
-
+          console.log({ sendName });
           // 組件 『 Form-Data』類型資料
           const ID = playerInfo["ID"];
+
+          let photoResource = null;
+
           // const blob = new Blob([playerInfo.Photo], { type: "image/jpeg" });
+
+          if (!photo.blob) {
+            await fetch(playerInfo.Photo, {
+              mode: "cors",
+              method: "GET",
+              headers: {
+                "Content-type": "image/jpeg",
+              },
+            })
+              .then((res) => res.blob())
+              .then((blob) => (photoResource = blob));
+          } else {
+            photoResource = photo.blob;
+          }
           const formData = new FormData();
-          // formData.append("photo", photo.blob ? photo.blob : playerInfo.Photo);
+          formData.append("photo", photoResource, sendName);
           formData.append("id", ID);
           formData.append("name", sendName);
           formData.append(
@@ -252,26 +282,34 @@ const PlayersInfo = React.memo(
           formData.append("weight", strEmptyCheck(weight, "Weight"));
           formData.append("position", strEmptyCheck(position, "Position"));
           // formData.append("photo", blob);
-          formData.append("photo", photo.blob, sendName);
+          //TODO  photo這邊如果是空會報錯
+          //TODO  更改名字或者年齡後API會丟error：查無資料
+          //TODO 隊伍更改右側清單還是原隊伍
+          console.log("photo.blob", photo.blob);
+          console.log({ sendName });
+          // formData.append("photo", photo.blob, sendName);
           formData.append("age", strEmptyCheck(age, "Age"));
+          console.log({ team });
+
           formData.append("team", strEmptyCheck(team, "Team"));
+
           formData.append(
             "description",
             strEmptyCheck(description, "Description")
           );
+
+          //TODO 資料送出後，會報錯：查無資料。送出的ID直接去DB裡查詢是可以找得到的。
           const putResult = await PutPlayerPersonalInfo(ID, formData)
             .then((res) => {
               const { StatusCode, StatusMessage, Result } = res.data;
               if (StatusCode && StatusMessage.includes("Normal end.")) {
                 showToast("success", "資料更新成功", 1);
                 return true;
-              } else {
-                showToast("錯誤", "資料更新，發生不明原因錯誤", 0);
-                return false;
               }
             })
             .catch((err) => {
-              showToast("錯誤", `錯誤訊息：${err.data.ErrorMessage}`, 0);
+              console.log("ss");
+              errorHandler(err);
               submitContext.onSetSubmitStatus(false);
               return false;
             });
@@ -280,7 +318,8 @@ const PlayersInfo = React.memo(
             submitContext.onSetSubmitStatus(false);
             return false;
           }
-          onLocalUpdate(ID);
+          console.log(playerInfo);
+          onLocalUpdate(ID, strEmptyCheck(team, "Team")); //TODO 隊伍名目前為空，待處理。
           onDisabled();
           dataRest();
           setEditModel(false);
@@ -379,68 +418,81 @@ const PlayersInfo = React.memo(
     // 相片欄處理器 End
 
     // 資料渲染處理 Start
-    const rowInfoHandler = (rowInfo) => {
-      return rowInfo.map((item) => {
+    const renderHandler = () => {
+      return renderData.map((arr) => {
         return (
-          <div key={item.id} className="col-2 border-gray-300 border-left-2">
-            <div className="text-sm text-bluegray-400">{item.header}</div>
-            {editModel ? (
-              <div>
-                {item.editMode.type === "dropdown" ? (
-                  <Dropdown
-                    className="w-full h-full"
-                    placeholder={item.placeholder}
-                    options={item.editMode.dropdownItem}
-                    value={item.editMode.value}
-                    onChange={(e) => {
-                      item.editMode.callBack(e.target.value);
-                    }}
-                  />
-                ) : (
-                  <InputTextarea
-                    value={item.editMode.value}
-                    onChange={(e) => item.editMode.callBack(e.target.value)}
-                    rows={2}
-                    cols={30}
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="text-xl">{item.readingMode}</div>
-            )}
+          <div className="info-block2-playerInfo">
+            {arr.map((obj) => {
+              return (
+                <div className="container">
+                  <div
+                    className={
+                      editModel ? "text-yellow-500" : "text-yellow-500 m-2"
+                    }
+                  >
+                    {obj.header}
+                  </div>
+                  <div>
+                    {editModel ? (
+                      <Fragment>
+                        {obj.editMode.type === "dropdown" ? (
+                          <Dropdown
+                            className="w-full h-full"
+                            placeholder={obj.placeholder}
+                            options={obj.editMode.dropdownItem}
+                            value={obj.editMode.value}
+                            onChange={(e) => {
+                              obj.editMode.callBack(e.target.value);
+                            }}
+                          />
+                        ) : (
+                          <InputTextarea
+                            value={obj.editMode.value}
+                            onChange={(e) =>
+                              obj.editMode.callBack(e.target.value)
+                            }
+                            rows={2}
+                            cols={30}
+                          />
+                        )}
+                      </Fragment>
+                    ) : (
+                      <Fragment>{obj.readingMode}</Fragment>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         );
       });
     };
     // 資料渲染處理 End
-
     return (
-      <div className={`${className} flex align-items-center`}>
-        <div className="col-2 h-18rem flex justify-content-center align-items-center">
-          {photoElementHandler()}
-          <PhotoCropper
-            visible={cropperVisible}
-            onHide={() => setCropperVisible(false)}
-            onGetImageBlob={imagePreviewHandler}
-            header="請選擇並剪取您的相片"
-          />
-        </div>
-        <div className="col-8 h-18rem flex flex-column ">
-          <div className="col-12 flex justify-content-between align-items-center">
-            <div className="text-5xl">{nameElementHandler}</div>
-            <ConfirmDialog />
-            <div>{btnTypeHandler()}</div>
+      <div className="playersInfo ">
+        <div className="info-block1 grid grid-nogutter ">
+          <div className="info-block1-main1 col-6 ">
+            <div className="info-block1-img">{photoElementHandler()}</div>
+            <div className="info-block1-name">{nameElementHandler}</div>
           </div>
-          <div className="my-4 ml-4 flex  justify-content-start">
-            {rowInfoHandler(firstRowInfo)}
-          </div>
-          <div className="my-2 ml-4 flex justify-content-start">
-            {rowInfoHandler(secondRowInfo)}
+          <div className="info-block1-main2 col-6 ">
+            <div className="info-block2-logo">
+              <img className="logo" src={Logo} alt="隊徽" />
+            </div>
           </div>
         </div>
-        <div className="col-2">
-          <img className="w-full h-full" src={Logo} alt="隊徽" />
+        <div className="info-block2 grid grid-nogutter">
+          {renderHandler()}
+          <div className="info-block2-edit"></div>
+          <div className="">{btnTypeHandler()}</div>
         </div>
+        <PhotoCropper
+          visible={cropperVisible}
+          onHide={() => setCropperVisible(false)}
+          onGetImageBlob={imagePreviewHandler}
+          header="請選擇並剪取您的相片"
+        />
+        <ConfirmDialog />
       </div>
     );
   }
