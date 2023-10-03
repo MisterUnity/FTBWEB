@@ -1,5 +1,6 @@
+import React from "react";
 import { ProgressSpinner } from "primereact/progressspinner";
-const LoadingFullPage = (props) => {
+const LoadingFullPage = React.memo((props) => {
   return (
     <div
       className="w-screen h-screen flex flex-column align-items-center justify-content-center"
@@ -14,5 +15,5 @@ const LoadingFullPage = (props) => {
       <div className="mt-2 text-xs">Loading</div>
     </div>
   );
-};
+});
 export default LoadingFullPage;

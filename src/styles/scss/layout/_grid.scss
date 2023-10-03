@@ -1,0 +1,28 @@
+@mixin col-base {
+    display: flex;
+    align-items: center;
+    margin-top: calc($margin-base - 0.35rem);
+    .fie, .edt, .val {
+        white-space: nowrap;
+        // overflow: auto;
+    }
+    .edt, .val {
+        margin-left: $margin-base;
+        flex-grow: 1;
+    }
+}
+
+.grid {
+    padding-left: .25rem;
+    padding-right: .25rem;
+}
+
+.col {
+    @include col-base();
+}
+
+@for $i from 1 through 12 {
+    .col-#{$i} {
+        @include col-base();
+    }
+}

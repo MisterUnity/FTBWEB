@@ -1,13 +1,14 @@
 .box {
+  position: relative;
   height: 50px;
   width: 50px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgb(220, 198, 198);
+  background-color: rgb(0, 0, 0);
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
 }
 .box:hover {
   cursor: grab;
@@ -16,3 +17,8 @@
 .box:active {
   cursor: grabbing;
 }
+/* .box--playerName {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+} */

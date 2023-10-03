@@ -1,12 +1,14 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import UserNameBa from "../../UserNameBar/UserNameBar";
+import UserNameBar from "../../UserNameBar/UserNameBar";
 import BackstageMenu from "../BackstageMenu/BackstageMenu";
-const SideBar = (props) => {
+const SideBar = React.memo(() => {
+  // 項目狀態 Start
   const [isVisible, setIsVisible] = useState(false);
+  // 項目狀態 End
 
   return (
     <div className="card flex justify-content-center">
@@ -15,7 +17,7 @@ const SideBar = (props) => {
         visible={isVisible}
         onHide={() => setIsVisible(false)}
       >
-        <UserNameBa />
+        <UserNameBar />
         <BackstageMenu />
       </Sidebar>
       <Button
@@ -25,6 +27,6 @@ const SideBar = (props) => {
       />
     </div>
   );
-};
+});
 
 export default SideBar;

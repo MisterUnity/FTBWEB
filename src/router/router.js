@@ -3,7 +3,7 @@ import SignIn from "../page/SignIn/SignIn";
 import Error from "../page/Error/Error";
 import ForestageHome from "../page/Forestage/ForestageHome/ForestageHome";
 import BackstageHome from "../page/Backstage/BackstageHome/BackstageHome";
-import EditSchedule from "../page/Backstage/EditSchedule/EditSchedule";
+import AddSchedule from "../page/Backstage/AddSchedule/AddSchedule";
 import PlayerList from "../page/Backstage/PlayerList/PlayerList";
 import AddPlayersInfo from "../page/Backstage/AddPlayersInfo/AddPlayersInfo";
 import TacticalBoard from "../page/Backstage/TacticalBoard/TacticalBoard";
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
         path: "editComprehensiveDataTable",
         element: <EditComprehensiveDataTable />,
       },
-      { path: "editSchedule", element: <EditSchedule /> },
+      { path: "addSchedule", element: <AddSchedule /> },
     ],
   },
 ]);

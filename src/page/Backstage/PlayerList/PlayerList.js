@@ -1,251 +1,337 @@
-import { useEffect, useState, useContext } from "react";
-import { Dropdown } from "primereact/dropdown";
+import React, { useEffect, useState, useCallback, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { GetPlayersInfo } from "../../../API/playerInfo/playerInfo";
+import { GetPlayerInfo } from "../../../API/playerInfo/playerInfo";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { useGlobalStore } from "../../../store/GlobalContextProvider";
+import { Button } from "primereact/button";
+import { UpdateGameData } from "../../../API/playerInfo/playerInfo";
+import BlockFullPage from "../../../components/Functions/BlockFullPage/BlockFullPage";
+import CSDialog from "../../../cs_components/CSDialog";
+import GameHistoryDataTable from "../../../components/UI/Backstage/GameHistoryDataTable/GameHistoryDataTable";
+import PlayerInfo from "../../../components/UI/Backstage/PlayersInfo/PlayersInfo";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import PlayerListDataTable from "../../../components/UI/Backstage/PlayerListDataTable/PlayerListDataTable";
 import CollapseSideBar from "../../../components/UI/Backstage/CollapseSideBar/CollapseSideBar";
-import ComprehensiveDataTable from "../../../components/UI/Backstage/ComprehensiveDataTable/ComprehensiveDataTable";
 import classes from "./PlayerList.module.css";
-import blueWhaleLogo from "../../../assets/blue_whale_logo.png";
-import AuthContext from "../../../store/AuthContext";
+import Taipei from "../../../assets/台北熊讚.png";
+import newTaipei from "../../../assets/新北航源.png";
+import Taoyuan from "../../../assets/桃園戰神.png";
+import Taichung from "../../../assets/台中藍鯨.png";
+import Kaohsiung from "../../../assets/高雄陽信.png";
+import Hualien from "../../../assets/花蓮女足.png";
 
-const DUMMY_DATA = [];
-for (let i = 0; i < 16; i++) {
-  DUMMY_DATA.push({
-    id: i,
-    name: `中村勇${i}`,
-    photo: `https://picsum.photos/id/${i}/1200/600`,
-    // photo:
-    //   "https://fastly.picsum.photos/id/1/1200/600.jpg?hmac=7xDzyVlLdITHaM66cy-yrgS6i437QYFJJ1PNYcJTO3Y",
-    age: i,
-    height: i,
-    weight: i,
-    position: i,
-    team: i,
-    comprehensiveData: {
-      mixedData: {
-        columnName: [
-          { field: "toShoot", header: "射門次數" },
-          { field: "cornerBall", header: "角球" },
-          { field: "goalKick", header: "球門球" },
-          { field: "header", header: "頭球" },
-          { field: "handBall", header: "手球" },
-          { field: "penaltyKick", header: "點球" },
-          { field: "freeKick", header: "自由球" },
-          { field: "offside", header: "越線" },
-          { field: "yellowCard", header: "黃牌" },
-          { field: "readCard", header: "紅牌" },
-        ],
-        data: [
-          {
-            toShoot: i,
-            cornerBall: i,
-            goalKick: i,
-            header: i,
-            handBall: i,
-            penaltyKick: i,
-            freeKick: i,
-            offside: i,
-            yellowCard: i,
-            readCard: i,
-          },
-        ],
-      },
-      offensiveData: {
-        columnName: [
-          { field: "toShoot", header: "射門次數" },
-          { field: "cornerBall", header: "角球" },
-          { field: "goalKick", header: "球門球" },
-          { field: "header", header: "頭球" },
-          { field: "penaltyKick", header: "點球" },
-          { field: "freeKick", header: "自由球" },
-        ],
-        data: [
-          {
-            toShoot: i,
-            cornerBall: i,
-            goalKick: i,
-            header: i,
-            penaltyKick: i,
-            freeKick: i,
-          },
-        ],
-      },
-      defensiveData: {
-        columnName: [
-          { field: "blockTackle", header: "正面搶截" },
-          { field: "slideTackle", header: "鏟球" },
-          { field: "toIntercept", header: "截球" },
-          { field: "bodyCheck", header: "身體阻擋" },
-          { field: "fairCharge", header: "合理衝撞" },
-        ],
-        data: [
-          {
-            blockTackle: i,
-            slideTackle: i,
-            toIntercept: i,
-            bodyCheck: i,
-            fairCharge: i,
-          },
-        ],
-      },
-    },
-  });
-}
+const allTeamName = [
+  "台北熊讚",
+  "新北航源",
+  "台中藍鯨",
+  "高雄陽信",
+  "花蓮",
+  "戰神女足",
+];
 const PlayerList = () => {
-  const [playerList, setPlayerList] = useState();
-  const [isHide, setIsHide] = useState(true);
-  const [playerDetailedInfo, setPlayerDetailedInfo] = useState();
-  const [photoTransition, setPhotoTransition] = useState(true);
-  const [dataTableType, setDataTableType] = useState();
-  const [dataTableValue, setDataTableValue] = useState();
-  const authCtx = useContext(AuthContext);
+  const { authContext, showToast, submitContext, errorHandler } =
+    useGlobalStore();
   const navigate = useNavigate();
 
-  // ***** 下拉選單選項 *****
-  const dropdownItem = ["總數據", "進攻數據", "防守數據"];
-  // ***
+  // 項目狀態 Start
+  const [playerListData, setPlayerListData] = useState([]);
+  const [playerDetailedInfo, setPlayerDetailedInfo] = useState({});
+  const [currentlyDisplayingTeam, setCurrentlyDisplayingTeam] = useState("");
+  const [isHide, setIsHide] = useState(true);
+  const [isDisabled, setDisabled] = useState(false);
+  const [isLoad, setIsLoad] = useState(true);
+  const [havePlayerList, setHavePlayerList] = useState(false);
+  const [logo, setLogo] = useState("");
+  // 項目狀態 End
 
-  // ***** 控制側邊顯示欄 *****
-  const hideHandler = () => {
-    setIsHide(!isHide);
-  };
-  // ***
-
-  // ***** 初始數據處理 *****
-
-  useEffect(() => {
-    if (checkLogin(authCtx, navigate)) {
-      //TODO取得所有資料
-
-      //組建側邊欄選手名單
-      setPlayerList(
-        DUMMY_DATA.map((data) => {
-          return { id: data.id, name: data.name };
+  // 初始數據處理 Start
+  const InitHandler = async () => {
+    if (await checkLogin(authContext, navigate)) {
+      // 獲取球員清單
+      const listData = await GetPlayersInfo()
+        .then((res) => {
+          const { StatusCode, StatusMessage, Result } = res.data;
+          if (StatusCode && StatusMessage.includes("Normal end.")) {
+            setHavePlayerList(true);
+            return [...Result];
+          }
         })
-      );
+        .catch((err) => {
+          errorHandler(err);
+          return false;
+        });
 
-      // 初始化時，顯示第一筆資料
-      setPlayerDetailedInfo(DUMMY_DATA[0]);
+      // 錯誤的話跳出不繼續執行
+      if (!listData) return false;
+      // 設置球員清單資料
+      setPlayerListData(listData);
 
-      // 初始化時，綜合表顯示-總數據頁面
-      setDataTableType("總數據");
+      // 獲取優先顯示隊伍的，第一筆選手資料
+      GetPlayerInfo(firstDisplayDataHandler(listData))
+        .then((res) => {
+          const { StatusCode, StatusMessage, Result } = res.data;
+          if (StatusCode && StatusMessage.includes("Normal end.")) {
+            setPlayerDetailedInfo(Result);
+            setIsLoad(false);
+          }
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
     }
+  };
+  useEffect(() => {
+    InitHandler();
   }, []);
-  // ***
+  // 初始數據處理 End
 
-  // ***** 圖片過場動畫處理器 *****
-  useEffect(() => {
-    //渲染時間太快會導致動畫無法呈現，要延遲處理
-    const timePhoto = setTimeout(() => {
-      setPhotoTransition(true);
-    }, 300);
+  // 控制側邊顯示欄 Start
+  const hideHandler = useCallback(() => {
+    setIsHide(!isHide);
+  }, [isHide]);
+  // 控制側邊顯示欄 End
 
-    return () => {
-      clearTimeout(timePhoto);
-    };
-  }, [playerDetailedInfo]);
-  // ***
+  // 獲取優先顯示隊伍的第一筆選手資料 Start
+  const firstDisplayDataHandler = (listData) => {
+    // 確認各隊伍是否有球員資料。並返回找到的第一筆球員資料
+    const teamPlayerStatus = allTeamName.map((item) => {
+      return listData.find((playerInfo) => playerInfo["Team"] === item);
+    });
 
-  // ***** 數據表單切換處理器 *****
-  useEffect(() => {
-    if (playerDetailedInfo) {
-      const { comprehensiveData } = playerDetailedInfo;
-      switch (dataTableType) {
-        case "總數據":
-          setDataTableValue(comprehensiveData.mixedData);
-          break;
-        case "進攻數據":
-          setDataTableValue(comprehensiveData.offensiveData);
-          break;
-        case "防守數據":
-          setDataTableValue(comprehensiveData.defensiveData);
-          break;
+    // 根據返回結果，決定隊伍顯示優先順序。
+    let firstTeamName = "";
+    for (const item of teamPlayerStatus) {
+      if (item["Team"]) {
+        firstTeamName = item["Team"];
+        break;
       }
     }
-  }, [dataTableType]);
 
-  // ***** 資料刷新處理器 *****
-  const upDatesHandler = (dataName) => {
-    if (playerDetailedInfo !== undefined) {
-      return playerDetailedInfo[dataName];
-    }
+    // 設置最先顯示的隊伍名
+    setCurrentlyDisplayingTeam(firstTeamName);
+
+    // 取得優先顯示隊伍的球員名單
+    const priorityDisplayPlayList = listData.filter(
+      (item) => item["Team"] === firstTeamName
+    );
+    return priorityDisplayPlayList[0].ID;
   };
-  // ***
+  // 獲取優先顯示隊伍的第一筆選手資料 End
 
-  // ***** 獲取被點擊的選手詳細資訊，及數據表單切換處理 *****
-  const getClickedNameHandler = (playerName) => {
-    const clickedData = DUMMY_DATA.filter((data) => {
-      return data.name === playerName;
-    });
-    setPlayerDetailedInfo(clickedData[0]);
+  // disabled球員清單 Start
+  const disabledHandler = useCallback(() => {
+    setDisabled(!isDisabled);
+  }, [isDisabled]);
+  // disabled球員清單 End
 
-    /* 表單如果切換前顯示的是『總數據』頁面時，只需更換內容。
-       不是的話要切回預設，顯示『總數據』頁面 */
-    if (dataTableType !== "總數據") {
-      setDataTableType("總數據");
-    } else {
-      setDataTableValue(clickedData[0].comprehensiveData.mixedData);
+  // 獲取被點擊的選手個人『 資訊 』及『 比賽數據 』的詳細資料 Start
+  const getPlayerDetails = useCallback(
+    (playerID) => {
+      GetPlayerInfo(playerID)
+        .then((res) => {
+          const { StatusCode, StatusMessage, Result } = res.data;
+          if (StatusCode && StatusMessage.includes("Normal end.")) {
+            setPlayerDetailedInfo(Result);
+          }
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    },
+    [playerDetailedInfo]
+  );
+  // 獲取被點擊的選手個人『 資訊 』及『 比賽數據 』的詳細資料 End
+
+  //
+  const getPlayerDataHandler = async (playerID, teamName) => {
+    const result = await GetPlayerInfo(playerID)
+      .then((res) => {
+        const { StatusCode, StatusMessage, Result } = res.data;
+        if (StatusCode && StatusMessage.includes("Normal end.")) {
+          setPlayerDetailedInfo(Result);
+          showToast("成功", "成功取得最新資料", 1);
+          return true;
+        }
+      })
+      .catch((err) => {
+        submitContext.onSetSubmitStatus(false);
+        errorHandler(err);
+        return false;
+      });
+    if (!result) return;
+    console.log({ teamName });
+    // 隊徽切換處理
+    let logo = "";
+    switch (teamName) {
+      case "台北熊讚":
+        logo = Taipei;
+        break;
+      case "新北航源":
+        logo = newTaipei;
+        break;
+      case "戰神女足":
+        logo = Taoyuan;
+        break;
+      case "台中藍鯨":
+        logo = Taichung;
+        break;
+      case "高雄陽信":
+        logo = Kaohsiung;
+        break;
+      case "花蓮":
+        logo = Hualien;
+        break;
     }
-    setPhotoTransition(false);
+    setLogo(logo);
   };
-  // ***
+
+  // 刪除選手資料處理 Start
+  const deleteHandler = (deleteID) => {
+    const listData = playerListData.map((item) => ({ ...item }));
+    const newListData = listData.filter((item) => item["ID"] !== deleteID);
+
+    // 已無選手資料可以顯示
+    if (newListData.length === 0) {
+      setHavePlayerList(false);
+      return;
+    }
+    setPlayerListData(newListData);
+
+    // 如果刪除了目前所選隊伍最後一筆，要顯示其他隊伍的第一筆選手資料。
+    GetPlayerInfo(firstDisplayDataHandler(newListData))
+      .then((res) => {
+        const { StatusCode, StatusMessage, Result } = res.data;
+        if (StatusCode && StatusMessage.includes("Normal end.")) {
+          setPlayerDetailedInfo(Result);
+        }
+      })
+      .catch((err) => {
+        errorHandler(err);
+      });
+  };
+  // 刪除選手資料處理 End
+
+  const UpdateGameRecordHandler = async (dataInfo) => {
+    //追加ID資料
+    const id = playerDetailedInfo["ID"];
+    dataInfo["ID"] = id;
+    console.log({ dataInfo });
+    // 送要更新的資料
+    if (Object.keys(dataInfo).length <= 3) {
+      showToast("訊息", "無資料待更新", 2);
+      return;
+    }
+    const result = await UpdateGameData(id, dataInfo)
+      .then((res) => {
+        const { StatusCode, StatusMessage, Result } = res.data;
+        return true;
+      })
+      .catch((err) => {
+        errorHandler(err);
+        return false;
+      });
+
+    if (!result) {
+      return false;
+    }
+
+    // 取已更新過的球員比賽數據（和更新的『 ID 』同一筆）
+    GetPlayerInfo(id)
+      .then((res) => {
+        const { StatusCode, StatusMessage, Result } = res.data;
+        if (StatusCode && StatusMessage.includes("Normal end.")) {
+          setPlayerDetailedInfo(Result);
+          showToast("狀態提示", "成功更新比賽數據", 1);
+        }
+      })
+      .catch((err) => {
+        errorHandler(err);
+      });
+  };
 
   return (
-    <div className="w-full h-full flex absolute">
-      <div className={`${classes.bg} flex flex-column w-full `}>
-        <div className="flex justify-content-center align-items-center h-25rem ">
-          <div
-            className={`${
-              photoTransition ? classes.fadeIn : classes.fadeOut
-            } mr-8 w-20rem h-20rem overflow-hidden border-circle shadow-8`}
+    <Fragment>
+      {isLoad ? (
+        <div
+          className="flex justify-content-start align-items-center 
+                     w-full h-full bg-bluegray-200 opacity-70"
+        >
+          <ProgressSpinner />
+        </div>
+      ) : havePlayerList ? (
+        //TODO
+        <BlockFullPage
+          blocked={submitContext.submitStatus}
+          className="w-full h-full flex absolute"
+        >
+          {/*主要資料顯示區塊 */}
+          <div className="flex flex-column align-items-center w-full">
+            {/*個人資訊顯示部分 */}
+            <div className="flex justify-content-center align-items-center w-full h-25rem ">
+              {/*個人資訊背景設定 */}
+
+              {/*個人資訊 */}
+              {
+                <PlayerInfo
+                  playerDetailedInfo={playerDetailedInfo}
+                  onDisabled={disabledHandler}
+                  onLocalUpdate={getPlayerDataHandler}
+                  onDelete={deleteHandler}
+                  Logo={logo}
+                />
+              }
+            </div>
+
+            {/*對戰紀錄表 */}
+            <div className="m-2 w-11 h-25rem">
+              {
+                <GameHistoryDataTable
+                  gameRecord={playerDetailedInfo.GameHistory}
+                  UpdateGameRecord={UpdateGameRecordHandler}
+                />
+              }
+            </div>
+          </div>
+
+          {/*側邊欄（顯示選手清單）*/}
+          <CollapseSideBar
+            className="h-full bg-primary-500 opacity-60  "
+            collapse={isHide}
+            onSetIsHide={hideHandler}
           >
-            <img
-              className="w-full h-full"
-              src={upDatesHandler("photo")}
-              alt="選手照片"
+            <PlayerListDataTable
+              playersData={playerListData}
+              hide={isHide}
+              onClickPlayer={getPlayerDetails}
+              disabled={isDisabled}
+              currentTeam={currentlyDisplayingTeam}
+              onSwitchTeam={getPlayerDataHandler}
             />
-          </div>
-          <div className="flex align-items-center">
-            <div className="text-2xl mr-8">
-              <div>姓名：{upDatesHandler("name")}</div>
-              <div>年齡：{upDatesHandler("age")}</div>
-              <div>身高：{upDatesHandler("height")}</div>
-              <div>體重：{upDatesHandler("weight")}</div>
-              <div>位子：{upDatesHandler("position")}</div>
-              <div>隊伍：{upDatesHandler("team")}</div>
+          </CollapseSideBar>
+        </BlockFullPage>
+      ) : (
+        <div className=" w-full h-full bg-bluegray-200 opacity-70">
+          <CSDialog
+            header="提示"
+            visible={isHide}
+            onHide={() => {
+              setIsHide(false);
+            }}
+          >
+            <div className="flex flex-column">
+              <div className="text-2xl m-3">無球員資料。</div>
+              <Button
+                label="點此切換至『 新增球員頁面 』"
+                onClick={() => {
+                  navigate("/backstageHome/addPlayersInfo");
+                }}
+              />
             </div>
-            <div className="w-10rem h-10rem">
-              <img src={blueWhaleLogo} className="w-full h-full" />
-            </div>
-          </div>
+          </CSDialog>
         </div>
-        <div className="flex flex-column align-items-end  h-25rem">
-          <Dropdown
-            className="m-2 w-full md:w-14rem"
-            value={dataTableType}
-            onChange={(e) => setDataTableType(e.value)}
-            options={dropdownItem}
-          />
-          <ComprehensiveDataTable
-            className="w-full"
-            dataTableValue={dataTableValue}
-          />
-        </div>
-      </div>
-      <CollapseSideBar
-        className="h-full bg-primary-500 opacity-60"
-        collapse={isHide}
-        onSetIsHide={hideHandler}
-      >
-        <PlayerListDataTable
-          playersData={playerList}
-          hide={isHide}
-          onClickPlayer={getClickedNameHandler}
-        />
-      </CollapseSideBar>
-    </div>
+      )}
+    </Fragment>
   );
 };
 export default PlayerList;

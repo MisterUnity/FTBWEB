@@ -1,23 +1,29 @@
 import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
+import { Toast } from "primereact/toast";
 
 const checkLogin = async (authCtx, navigate) => {
   let result = true;
   await CheckLogin()
     .then((res) => {
       const { StatusCode, StatusMessage } = res.data;
-      if (StatusCode && StatusMessage.includes("Normal")) {
+      if (StatusCode && StatusMessage.includes("Normal end.")) {
         authCtx.onSetSignInStatus(true);
         result = true;
-      } else {
-        authCtx.onSetSignInStatus(false);
-        alert("登入逾時，返回至首頁");
-        navigate("/");
-        result = false;
       }
     })
     .catch((err) => {
+      if (err?.data) {
+        if (err.data.ErrorCode === "E0004") {
+          alert("登入逾時，返回至首頁");
+          navigate("/");
+        } else {
+          alert(err.data.ErrorMessage);
+        }
+      } else {
+        alert(err.message);
+      }
+
       authCtx.onSetSignInStatus(false);
-      alert(err);
       result = false;
     });
   return result;

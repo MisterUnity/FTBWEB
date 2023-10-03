@@ -1,6 +1,8 @@
+import React from "react";
+import { useGlobalStore } from "../../../store/GlobalContextProvider";
 import classes from "./userNameBar.module.css";
-// TODO 要抓取到userName
-const UserNameBar = (props) => {
+const UserNameBar = React.memo((props) => {
+  const { userContext } = useGlobalStore();
   return (
     <div className="flex align-items-center">
       <div className={`${classes.userNameBar} mx-3`}>
@@ -10,8 +12,8 @@ const UserNameBar = (props) => {
           alt="userImage"
         />
       </div>
-      <span className="text-xl text-bluegray-50">userName</span>
+      <span className="text-xl text-bluegray-50">{userContext.userName}</span>
     </div>
   );
-};
+});
 export default UserNameBar;

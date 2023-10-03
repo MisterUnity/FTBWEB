@@ -1,25 +1,26 @@
-import { useState, Fragment, useContext } from "react";
+import React, { useState, Fragment } from "react";
 import { Login, Register } from "../../API/Auth/userInfo/userInfo";
 import { useNavigate } from "react-router-dom";
+import { useGlobalStore } from "../../store/GlobalContextProvider";
 import SignInCard from "./SignInCard";
-import EnterErrCard from "./EnterErrorCard";
 import MsgSlice from "@/components/UI/MsgSlice/MsgSlice";
 import backDrop from "../../assets/Background.jpg";
-import AuthContext from "../../store/AuthContext";
 import classes from "./signIn.module.css";
 
-const SignIn = (props) => {
-
-  const [strTitle, setTitle] = useState("Sign In");
-  const [strSignInOrRegis, setTitle2] = useState("Create an account");
-  const [errorMsgIsShown, setErrorMsgIsShown] = useState(false);
-  const [isLoad, setIsLoad] = useState(false);
-  const authCtx = useContext(AuthContext);
+const SignIn = React.memo((props) => {
+  const { userContext, authContext, errorHandler } = useGlobalStore();
   const navigate = useNavigate();
 
+  // 項目狀態 Start
+  const [strTitle, setTitle] = useState("Sign In");
+  const [strSignInOrRegis, setTitle2] = useState("Create an account");
+  const [isLoad, setIsLoad] = useState(false);
+  // 項目狀態 End
+
+  // 切換表單顯示名稱 Start
   const ChangeTitle = () => {
-    setTitle((strOldTitle)=>{
-      if (strOldTitle === "Sign In"){
+    setTitle((strOldTitle) => {
+      if (strOldTitle === "Sign In") {
         setTitle2("Sign In");
         return "Register";
       }
@@ -27,27 +28,23 @@ const SignIn = (props) => {
       return "Sign In";
     });
   };
+  // 切換表單顯示名稱 End
 
+  // 登入處理 Start
   const DoLogin = (userData) => {
     return Login(userData)
-    .then((res) => {
-      if (
-        res.data.StatusCode === 1 &&
-        res.data.StatusMessage === "Normal end."
-      ) {
-        authCtx.onSetSignInStatus(true);
+      .then((res) => {
+        authContext.onSetSignInStatus(true);
+        userContext.onSetUserName(userData.act);
         navigate("/");
-      } else {
-        authCtx.onSetSignInStatus(false);
-        setErrorMsgIsShown(true);
-      }
-      setIsLoad(false);
-    })
-    .catch((err) => {
-      setIsLoad(false);
-      alert(err);
-    });
-  }
+        setIsLoad(false);
+      })
+      .catch((err) => {
+        setIsLoad(false);
+        errorHandler(err);
+      });
+  };
+  // 登入處理 End
 
   const sendUserInfoHandler = (userData) => {
     setIsLoad(true);
@@ -55,32 +52,25 @@ const SignIn = (props) => {
       DoLogin(userData);
     } else {
       Register(userData)
-      .then((res) => {
-        if (
-          res.data.StatusCode === 1 &&
-          res.data.StatusMessage === "Normal end."
-        ) {
-          authCtx.onSetSignInStatus(true);
+        .then((res) => {
+          authContext.onSetSignInStatus(true);
           navigate("/");
           DoLogin(userData);
-        } else {
-          authCtx.onSetSignInStatus(false);
-          setErrorMsgIsShown(true);
-        }
-        setIsLoad(false);
-      })
-      .catch((err) => {
-        setIsLoad(false);
-        alert(err);
-      });
+          setIsLoad(false);
+        })
+        .catch((err) => {
+          setIsLoad(false);
+          errorHandler(err);
+        });
     }
   };
 
-  const hideErrorMsgHandler = () => {
-    setErrorMsgIsShown(false);
-  };
-
-  const showNewToHere = strTitle === 'Sign In' ? <p className="mr-2 text-green-50 opacity-100">New to here ?</p> : <></>;
+  const showNewToHere =
+    strTitle === "Sign In" ? (
+      <p className="mr-2 text-green-50 opacity-100">New to here ?</p>
+    ) : (
+      <></>
+    );
 
   return (
     <Fragment>
@@ -88,16 +78,19 @@ const SignIn = (props) => {
         <img className="w-full h-full" src={backDrop} alt="Backdrop" />
       </div>
       <div className={classes.signIn}>
-        {errorMsgIsShown && (
-          <EnterErrCard onHideErrorMsg={hideErrorMsgHandler} />
-        )}
-        <SignInCard onSendUserInfo={sendUserInfoHandler} isLoad={isLoad} strTitle={strTitle}/>
+        <SignInCard
+          onSendUserInfo={sendUserInfoHandler}
+          isLoad={isLoad}
+          strTitle={strTitle}
+        />
         <MsgSlice className="flex justify-content-center bg-gray-900 opacity-90 mt-3">
           {showNewToHere}
-          <p className="cursor-pointer text-yellow-400" onClick={ChangeTitle}>{strSignInOrRegis}</p>
+          <p className="cursor-pointer text-yellow-400" onClick={ChangeTitle}>
+            {strSignInOrRegis}
+          </p>
         </MsgSlice>
       </div>
     </Fragment>
   );
-};
+});
 export default SignIn;

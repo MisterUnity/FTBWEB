@@ -1,11 +1,12 @@
 import { Provider } from "react-redux";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import AuthContextProvider from "./store/AuthContextProvider";
+import GlobalContextProvider from "./store/GlobalContextProvider";
 import App from "./App";
 import ReduxStore from "./store/ReduxStore/index";
 import "primereact/resources/primereact.min.css";
-import "primereact/resources/themes/nano/theme.css";
+// import "primereact/resources/themes/nano/theme.css";
+import "primereact/resources/themes/bootstrap4-dark-blue/theme.css";
 import "primeflex/primeflex.css";
 import "./styles/scss/main.scss";
 // import "primereact/resources/themes/bootstrap4-light-purple/theme.css";
@@ -14,9 +15,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <React.StrictMode>
   <Provider store={ReduxStore}>
-    <AuthContextProvider>
+    <GlobalContextProvider>
       <App />
-    </AuthContextProvider>
+    </GlobalContextProvider>
   </Provider>
   // </React.StrictMode>
 );

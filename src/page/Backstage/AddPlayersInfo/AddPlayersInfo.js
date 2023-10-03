@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, Fragment, useRef } from "react";
+import { useEffect, useState, Fragment, useRef } from "react";
 import { BlockUI } from "primereact/blockui";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
@@ -10,20 +10,19 @@ import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { v4 as uuidv4 } from "uuid";
 import { PostPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { useNavigate } from "react-router-dom";
-import { CheckLogin } from "../../../API/Auth/userInfo/userInfo";
 import { Tooltip } from "primereact/tooltip";
-import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
-import AuthContext from "../../../store/AuthContext";
-import PhotoCropper from "../../../components/UI/PhotoCropper/PhotoCropper";
+import { useGlobalStore } from "../../../store/GlobalContextProvider";
+import PhotoCropper from "@/components/Functions/PhotoCropper/PhotoCropper";
 import useDropdownItem from "../../../Hook/useDropdownItem/useDropdownItem";
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import "primeicons/primeicons.css";
 
 const AddPlayerInfo = () => {
   const navigate = useNavigate();
-  const authCtx = useContext(AuthContext);
-  // ***** 下拉式表單選項處理 *****
+  const { authContext, submitContext, showToast, errorHandler } =
+    useGlobalStore();
+  // 下拉式表單選項處理 Start
   const genderItem = ["男", "女", "其他"];
   const ageItem = useDropdownItem(1, 41, "歲");
   const heightItem = useDropdownItem(150, 200, "cm");
@@ -43,10 +42,17 @@ const AddPlayerInfo = () => {
     "進攻型中場",
     "守門員",
   ];
-  const teamItem = ["1隊", "2隊"];
-  // ***
+  const teamItem = [
+    "台北熊讚",
+    "新北航源",
+    "台中藍鯨",
+    "高雄陽信",
+    "花蓮",
+    "戰神女足",
+  ];
+  // 下拉式表單選項處理 End
 
-  // ***** 各項狀態 *****
+  // 項目狀態 Start
   const [cropperVisible, setCropperVisible] = useState(false);
   const [playersInfo, setPlayersInfo] = useState([]);
   const [gender] = useState(genderItem);
@@ -57,32 +63,31 @@ const AddPlayerInfo = () => {
   const [position] = useState(positionItem);
   const [rowIndex, setRowIndex] = useState();
   const [rowData, setRowData] = useState();
-  const toast = useRef();
   const [blocked, setBlocked] = useState(false);
-  // ***
+  // 項目狀態 End
 
-  // ***** 登入逾時確認 *****
+  // 登入逾時確認 Start
   useEffect(() => {
-    checkLogin(authCtx, navigate);
+    checkLogin(authContext, navigate);
   }, []);
-  // ***
+  // 登入逾時確認 End
 
-  // ***** scrollBar自動跳轉至底 *****
+  // scrollBar自動跳轉至底 Start
   useEffect(() => {
     const div = document.getElementById("dataTableContainer");
     div.scrollTop = div.scrollHeight;
   }, [playersInfo]);
-  // ***
+  // scrollBar自動跳轉至底 End
 
-  // ***** 裁切器顯示處理器 *****
+  // 裁切器顯示處理器 Start
   const imageCropperHandler = (rowIndex, rowData) => {
     setRowIndex(rowIndex);
     setRowData(rowData);
     setCropperVisible(true);
   };
-  // ***
+  // 裁切器顯示處理器 End
 
-  // *****上傳的圖片做預覽處理*****
+  //上傳的圖片做預覽處理 Start
   const imagePreviewHandler = (imageLocalUrl, imageData) => {
     // ***** 以裁切好的圖片追加至相對應 rowData 裡 *****
     //WEICHE: 因為 API 要傳送的是 Blob File，不是本地創建的地址資源 (URL.createObjectURL)
@@ -95,24 +100,23 @@ const AddPlayerInfo = () => {
       return _playersInfo;
     });
   };
-  // ***
+  // 上傳的圖片做預覽處理 End
 
-  // *****列-刪除處理 *****
+  // 列-刪除處理 Start
   const deleteRowHandler = (context) => {
     setPlayersInfo((prevPlayersInfo) => {
-      let _playersInfo = [...prevPlayersInfo];
+      let _playersInfo = JSON.parse(JSON.stringify(prevPlayersInfo));
       _playersInfo.splice(context.rowIndex, 1);
       return _playersInfo;
     });
   };
-  // ***
+  // 列-刪除處理 End
 
-  // ***** 追加新列處理 *****
+  // 追加新列處理 Start
   const addRowHandler = () => {
     setPlayersInfo((prevPlayersInfo) => {
-      let _playersInfo = [...prevPlayersInfo];
+      let _playersInfo = JSON.parse(JSON.stringify(prevPlayersInfo));
       _playersInfo.push({
-        // id: new Date().toLocaleString(),
         id: uuidv4(),
         name: "ex:陳小明",
         photo: "", //WEICHE:這個用來儲存Blob File
@@ -123,22 +127,15 @@ const AddPlayerInfo = () => {
         weight: "ex:75kg",
         position: "ex:前鋒",
         team: "ex:1隊",
-        // description: "備註",
-        delete: "",
+        // delete: "",
+        // description: "備註" => 目前使用不到
       });
       return _playersInfo;
     });
   };
-  // ***
+  // 追加新列處理 End
 
-  //***** cell-編輯完處理 *****
-  const onCellEditComplete = (e) => {
-    let { rowData, newValue, field, originalEvent: event } = e;
-    rowData[field] = newValue;
-  };
-  // ***
-
-  // ***** Column渲染資料準備 *****
+  // Column渲染資料準備 Start
   const columnsData = [
     {
       id: "column1",
@@ -170,7 +167,10 @@ const AddPlayerInfo = () => {
 
         return (
           <Fragment>
-            <Tooltip target={`.custom-tooltip-btn-${context.rowIndex}`}>
+            <Tooltip
+              target={`.custom-tooltip-btn-${context.rowIndex}`}
+              autoHide={false}
+            >
               {strLocalImageUrl ? (
                 <img
                   alt="logo"
@@ -198,7 +198,10 @@ const AddPlayerInfo = () => {
             <InputText
               type="text"
               value={options.value}
-              onChange={(e) => options.editorCallback(e.target.value)}
+              onChange={(e) => {
+                playersInfo[options.rowIndex][options.field] = e.target.value;
+                return options.editorCallback(e.target.value);
+              }}
             />
           </div>
         );
@@ -212,10 +215,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={gender}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Gender"
           />
         );
@@ -229,10 +234,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={age}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Age"
           />
         );
@@ -246,10 +253,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={height}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Height"
           />
         );
@@ -263,10 +272,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={weight}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Weight"
           />
         );
@@ -280,10 +291,12 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={position}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Position"
           />
         );
@@ -297,16 +310,19 @@ const AddPlayerInfo = () => {
       editorCallBack: (options) => {
         return (
           <Dropdown
-            appendTo={"self"}
             value={options.value}
             options={team}
-            onChange={(e) => options.editorCallback(e.value)}
+            onChange={(e) => {
+              playersInfo[options.rowIndex][options.field] = e.value;
+              return options.editorCallback(e.value);
+            }}
             placeholder="Select a Team"
           />
         );
       },
     },
     // {
+    //   這組目前用不到
     //   id: "column9",
     //   field: "description",
     //   header: "備註事項",
@@ -317,7 +333,10 @@ const AddPlayerInfo = () => {
     //         <InputText
     //           type="text"
     //           value={options.value}
-    //           onChange={(e) => options.editorCallback(e.target.value)}
+    //           onChange={(e) => {
+    //   playersInfo[options.rowIndex][options.field] = e.target.value;
+    //   return options.editorCallback(e.target.value);
+    // }}
     //         />
     //       </div>
     //     );
@@ -341,10 +360,10 @@ const AddPlayerInfo = () => {
       },
     },
   ];
-  // ***
+  // Column渲染資料準備 End
 
-  // ***** 渲染各行處理 *****
-  const column = columnsData.map((data) => {
+  // 渲染各行處理 Start
+  const columnRenderHandler = columnsData.map((data) => {
     return (
       <Column
         key={data.id}
@@ -352,47 +371,91 @@ const AddPlayerInfo = () => {
         header={data.header}
         editor={data.editorCallBack}
         body={data.BodyCallBack}
-        onCellEditComplete={onCellEditComplete}
       />
     );
   });
+  // 渲染各行處理 End
 
-  // ***** 送出表單處理 *****
-  const sendDataHandler = () => {
-    if (authCtx.signInStatus === true) {
-      setBlocked(true);
-      PostPlayersInfo(playersInfo)
-        .then((res) => {
-          setBlocked(false);
-          const { StatusCode, StatusMessage, Result } = res.data;
-          if (StatusCode === 1 && StatusMessage === "Normal end.") {
-            navigate("playerList");
-          } else {
-            Result.forEach((msg) => {
-              toast.current.show({
-                severity: msg.status,
-                summary: `Name: ${msg.name}`,
-                detail: msg.statusMsg,
-                life: 3000,
-              });
-            });
+  // 送出表單處理 Start
+  const sendDataHandler = async () => {
+    if (!submitContext.submitStatus) {
+      if (await checkLogin(authContext, navigate)) {
+        submitContext.onSetSubmitStatus(true);
+        const playersData = playersInfo.map((item) => ({ ...item }));
+
+        // 確認資料不為空
+        if (playersData.length <= 0) {
+          showToast("警告", "資料不可為空", 3);
+          submitContext.onSetSubmitStatus(false);
+          return false;
+        }
+        // 查找空欄位的部分
+        for (const [index, item] of playersData.entries()) {
+          for (const props in item) {
+            if (item.hasOwnProperty.call(item, props)) {
+              console.log(item[props]);
+              if (props === "photo" && item[props] === "") {
+                showToast(
+                  "訊息",
+                  `第${index + 1}行，的『 ${props} 』值不可為空`,
+                  3
+                );
+                submitContext.onSetSubmitStatus(false);
+                return;
+              }
+              // 『 photo 』為blob類型，無法使用『 includes 』方法所以要先判斷類型。
+              else if (
+                typeof item[props] === "string" &&
+                item[props].includes("ex")
+              ) {
+                showToast(
+                  "訊息",
+                  `第${index + 1}行，的『 ${props} 』值不可為空`,
+                  3
+                );
+                submitContext.onSetSubmitStatus(false);
+                return;
+              }
+            }
           }
-        })
-        .catch((err) => {
-          setBlocked(false);
-          alert(`ERROR：${err}`);
-        });
-    } else {
-      alert("登入逾時，將回首頁");
-      navigate("/");
+        }
+        setBlocked(true);
+        PostPlayersInfo(playersInfo)
+          .then((res) => {
+            setBlocked(false);
+            const { StatusCode, StatusMessage, Result } = res.data;
+            if (StatusCode === 1 && StatusMessage === "Normal end.") {
+              showToast(
+                "狀態提示",
+                "資料追加成功，3秒後將切換至選手清單頁面",
+                1
+              );
+              setTimeout(() => {
+                submitContext.onSetSubmitStatus(false);
+                navigate("/backstageHome/playerList");
+              }, 3000);
+            } else {
+              Result.forEach((msg) => {
+                showToast(`Name: ${msg.name}`, msg.statusMsg, msg.status);
+              });
+              submitContext.onSetSubmitStatus(false);
+            }
+          })
+          .catch((err) => {
+            errorHandler(err);
+            setBlocked(false);
+            submitContext.onSetSubmitStatus(false);
+          });
+      }
     }
   };
-  // ***
+  // 送出表單處理 End
+
   return (
     <BlockUI blocked={blocked} containerClassName="h-full">
       <div
         id="dataTableContainer"
-        className="card p-fluid w-full h-full absolute overflow-auto "
+        className="page-add-player card p-fluid w-full h-full absolute overflow-auto "
       >
         <DataTable
           value={playersInfo}
@@ -400,7 +463,7 @@ const AddPlayerInfo = () => {
           dataKey="id"
           tableStyle={{ minWidth: "50rem" }}
         >
-          {column}
+          {columnRenderHandler}
         </DataTable>
         <div className="flex justify-content-end">
           <Button
@@ -411,6 +474,7 @@ const AddPlayerInfo = () => {
           <Button
             className="w-2 ml-2 bg-bluegray-700"
             label="送出表單"
+            disabled={submitContext.submitStatus}
             onClick={sendDataHandler}
           />
         </div>
@@ -421,7 +485,6 @@ const AddPlayerInfo = () => {
           onGetImageBlob={imagePreviewHandler}
           header="請選擇並剪取您的相片"
         />
-        <Toast ref={toast}></Toast>
         {blocked ? (
           <ProgressSpinner
             style={{

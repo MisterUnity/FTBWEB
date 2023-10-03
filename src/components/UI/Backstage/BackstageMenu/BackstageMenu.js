@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,10 +9,9 @@ import {
   faCalendarDays,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import AuthContext from "../../../../store/AuthContext";
 import classes from "./BackstageMenu.module.css";
 
-// 後台選單的顯示項目
+// 後台選單目錄 Start
 const menuItem = [
   {
     id: "P-1",
@@ -46,9 +45,9 @@ const menuItem = [
   },
   {
     id: "P-6",
-    itemName: "Edit Schedule",
+    itemName: "Add Schedule",
     icon: faCalendarDays,
-    path: "editSchedule",
+    path: "addSchedule",
   },
   {
     id: "P-7",
@@ -57,18 +56,19 @@ const menuItem = [
     path: "/",
   },
 ];
-const BackstageMenu = () => {
-  const authCtx = useContext(AuthContext);
+// 後台選單目錄 End
 
-  // 登出處理
+const BackstageMenu = React.memo(() => {
+  // 登出後台處理 Start
   const signOutHandler = () => {
     <Link to="/signIn" />;
   };
+  // 登出後台處理 Start
 
-  // li 項目處理
+  // li 項目處理 Start
   const menuList = menuItem.map((item) => {
     return (
-      <li className="my-6 cursor-pointer" key={item.id}>
+      <li className="my-5 cursor-pointer" key={item.id}>
         <span className="m-4">
           <FontAwesomeIcon
             icon={item.icon}
@@ -77,7 +77,7 @@ const BackstageMenu = () => {
           />
         </span>
         <Link
-          className="text-blue-50 text-2xl no-underline"
+          className="text-blue-50 text-lg no-underline"
           to={item.path}
           onClick={item.itemName === "Sign Out" ? signOutHandler : null}
         >
@@ -86,6 +86,8 @@ const BackstageMenu = () => {
       </li>
     );
   });
+  // li 項目處理 End
+
   return <ul className={classes.BackstageMenu}>{menuList}</ul>;
-};
+});
 export default BackstageMenu;
