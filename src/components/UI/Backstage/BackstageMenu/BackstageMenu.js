@@ -17,7 +17,8 @@ const menuItem = [
     id: "P-1",
     itemName: "Backstage Home",
     icon: faHouse,
-    path: "/backstageHome ",
+    // path: "/backstageHome ",
+    path: "BackstageHome ",
   },
   {
     id: "P-2",

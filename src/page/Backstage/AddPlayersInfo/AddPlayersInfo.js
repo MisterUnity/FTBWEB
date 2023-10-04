@@ -432,7 +432,7 @@ const AddPlayerInfo = () => {
               );
               setTimeout(() => {
                 submitContext.onSetSubmitStatus(false);
-                navigate("/backstageHome/playerList");
+                navigate("/backstage/playerList");
               }, 3000);
             } else {
               Result.forEach((msg) => {

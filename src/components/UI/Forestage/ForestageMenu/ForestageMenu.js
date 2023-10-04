@@ -17,7 +17,7 @@ const ForestageMenu = React.memo(() => {
     {
       label: "Go to Backstage",
       command() {
-        navigate("/backstageHome");
+        navigate("/backstage/BackstageHome");
       },
     },
     {

@@ -1,38 +1,47 @@
-import { Outlet } from "react-router-dom";
-import Header from "../../../components/Layout/Header/Header";
-import Main from "../../../components/Layout/Main/Main";
-import Footer from "../../../components/Layout/Footer/Footer";
-import SideBar from "../../../components/UI/Backstage/SideBar/SideBar";
-import BackstageHeader from "../../../components/Layout/Header/header.module.css";
-import BackstageFooter from "../../../components/Layout/Footer/Footer.module.css";
-import { useGlobalStore } from "../../../store/GlobalContextProvider";
-
-// Main 的『 relative 』是為了給『 TacticalBoad 』組件的元素拖曳限制範圍用
+import "./BackstageHome.scss";
+import img1 from "../../../assets/0402-1.webp";
+import img2 from "../../../assets/木蘭0416mars-3.webp";
+import img3 from "../../../assets/news-mlc.webp";
 const BackstageHome = () => {
-  const {themeContext} = useGlobalStore();
   return (
-    <div data-theme={`${themeContext.currentTheme}`} className="flex flex-column w-screen h-screen ">
-      <Header
-        className={`
-        ${BackstageHeader.BackstageHeader} flex flex-none justify-content-between 
-                                          align-items-center w-full bg-bluegray-900`}
-      >
-        <SideBar />
-        <h1 className="mr-3">Football Tactical Plan</h1>
-      </Header>
-
-      <Main className="flex-grow-1 relative w-full">
-        <Outlet />
-      </Main>
-
-      <Footer
-        className={`${BackstageFooter.BackstageFooter} flex-none w-full bg-bluegray-900`}
-      >
-        <h3 className="text-center">
-          Copyright © 2023 - 2050 . All rights reserved.
-        </h3>
-      </Footer>
+    <div className="Info">
+      <div className="news">
+        <div>
+          <div>
+            <img src={img1} alt="" />
+          </div>
+          <p>{"2022台灣木蘭足球聯賽公告。\n 2023台灣木蘭足球聯賽資格賽。"}</p>
+        </div>
+        <div>
+          <div>
+            <img src={img2} alt="" />
+          </div>
+          <p>2022台灣運彩木蘭聯賽盃延賽公告。</p>
+        </div>
+        <div>
+          <div>
+            <img src={img3} alt="" />
+          </div>
+          <p>台灣運彩木蘭聯賽盃 藍鯨PK大戰險勝奪冠</p>
+        </div>
+      </div>
+      <div className="bulletin-board">
+        <ul>
+          網站更新 _ _ _ _ _ _ _ _ _ _ _ _{" "}
+          <li>2023/10/04 : i18n語言切換製作中 </li>
+          <li>2023/9/04 : 修改球員清單排版</li>
+          <li>2023/9/28 : 戰術板新增陣形，站位</li>
+          <li>2023/9/11 : 戰術板拖移修復</li>
+          <li>2023/8/16 : 修復套件版本問題</li>
+          <li>2023/8/04 : 新增球員API修改</li>
+          <li>2023/8/04 : 修改首頁排版</li>
+          <li>2023/7/29 : 改動新增球員資料</li>
+          <li>2023/7/22 : 隊徽logo修正</li>
+          <li>2023/7/12 : 新增數據排版修正</li>
+        </ul>
+      </div>
     </div>
+    // <div>sda</div>
   );
 };
 export default BackstageHome;

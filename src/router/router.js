@@ -2,11 +2,12 @@ import { createBrowserRouter } from "react-router-dom";
 import SignIn from "../page/SignIn/SignIn";
 import Error from "../page/Error/Error";
 import ForestageHome from "../page/Forestage/ForestageHome/ForestageHome";
-import BackstageHome from "../page/Backstage/BackstageHome/BackstageHome";
+import Backstage from "../page/Backstage/Backstage/Backstage";
 import AddSchedule from "../page/Backstage/AddSchedule/AddSchedule";
 import PlayerList from "../page/Backstage/PlayerList/PlayerList";
 import AddPlayersInfo from "../page/Backstage/AddPlayersInfo/AddPlayersInfo";
 import TacticalBoard from "../page/Backstage/TacticalBoard/TacticalBoard";
+import BackstageHome from "../page/Backstage/BackstageHome/BackstageHome";
 import EditComprehensiveDataTable from "../page/Backstage/EditComprehensiveDataTable/EditComprehensiveDataTable";
 const router = createBrowserRouter([
   { path: "/", element: <ForestageHome />, errorElement: <Error /> },
@@ -15,10 +16,11 @@ const router = createBrowserRouter([
     element: <SignIn />,
   },
   {
-    path: "/backstageHome",
-    element: <BackstageHome />,
+    path: "/backstage",
+    element: <Backstage />,
     children: [
-      { index: true, path: "playerList", element: <PlayerList /> },
+      { index: true, path: "BackstageHome", element: <BackstageHome /> },
+      { path: "playerList", element: <PlayerList /> },
       { path: "addPlayersInfo", element: <AddPlayersInfo /> },
       { path: "tacticalBoard", element: <TacticalBoard /> },
       {

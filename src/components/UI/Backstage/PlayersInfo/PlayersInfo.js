@@ -9,6 +9,7 @@ import {
   faXmark,
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
+import { v4 as uuidv4 } from "uuid";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PutPlayerPersonalInfo } from "../../../../API/playerInfo/playerInfo";
 import { useGlobalStore } from "../../../../store/GlobalContextProvider";
@@ -41,8 +42,8 @@ const PlayersInfo = React.memo(
     const [position, setPosition] = useState("");
     const [team, setTeam] = useState("");
     const [description, setDescription] = useState("");
+    const [sb, setSb] = useState(false);
     // 項目狀態 End
-
     // 下拉式表單選項處理 Start
     const genderItem = ["男", "女", "其他"];
     const ageItem = useDropdownItem(1, 41, "歲");
@@ -188,15 +189,13 @@ const PlayersInfo = React.memo(
       setPhoto({ localUrl: imageLocalUrl, blob: imageData });
     };
     // 取得剪裁好的圖像檔 End
-
     // 更新來源資料 Start
     useEffect(() => {
       setPlayerInfo(playerDetailedInfo);
     }, [playerDetailedInfo]);
     // 更新來源資料 End
-
     // 『進入編輯模式』or『刪除球員資料』處理器  Start
-    const standardModeHandler = async (standardStatus) => {
+    const standardModeHandler = (standardStatus) => {
       if (standardStatus === "enterEdit") {
         onDisabled();
         setEditModel(true);
@@ -282,8 +281,6 @@ const PlayersInfo = React.memo(
           formData.append("weight", strEmptyCheck(weight, "Weight"));
           formData.append("position", strEmptyCheck(position, "Position"));
           // formData.append("photo", blob);
-          //TODO  photo這邊如果是空會報錯
-          //TODO  更改名字或者年齡後API會丟error：查無資料
           //TODO 隊伍更改右側清單還是原隊伍
           console.log("photo.blob", photo.blob);
           console.log({ sendName });
@@ -298,7 +295,6 @@ const PlayersInfo = React.memo(
             strEmptyCheck(description, "Description")
           );
 
-          //TODO 資料送出後，會報錯：查無資料。送出的ID直接去DB裡查詢是可以找得到的。
           const putResult = await PutPlayerPersonalInfo(ID, formData)
             .then((res) => {
               const { StatusCode, StatusMessage, Result } = res.data;
@@ -308,7 +304,6 @@ const PlayersInfo = React.memo(
               }
             })
             .catch((err) => {
-              console.log("ss");
               errorHandler(err);
               submitContext.onSetSubmitStatus(false);
               return false;
@@ -319,7 +314,7 @@ const PlayersInfo = React.memo(
             return false;
           }
           console.log(playerInfo);
-          onLocalUpdate(ID, strEmptyCheck(team, "Team")); //TODO 隊伍名目前為空，待處理。
+          onLocalUpdate(ID, strEmptyCheck(team, "Team"));
           onDisabled();
           dataRest();
           setEditModel(false);
@@ -421,10 +416,10 @@ const PlayersInfo = React.memo(
     const renderHandler = () => {
       return renderData.map((arr) => {
         return (
-          <div className="info-block2-playerInfo">
+          <div key={uuidv4()} className="info-block2-playerInfo">
             {arr.map((obj) => {
               return (
-                <div className="container">
+                <div key={uuidv4()} className="container">
                   <div
                     className={
                       editModel ? "text-yellow-500" : "text-yellow-500 m-2"

@@ -13,7 +13,6 @@ import PlayerInfo from "../../../components/UI/Backstage/PlayersInfo/PlayersInfo
 import checkLogin from "../../../components/Functions/CheckLoginStatus/CheckLoginStatus";
 import PlayerListDataTable from "../../../components/UI/Backstage/PlayerListDataTable/PlayerListDataTable";
 import CollapseSideBar from "../../../components/UI/Backstage/CollapseSideBar/CollapseSideBar";
-import classes from "./PlayerList.module.css";
 import Taipei from "../../../assets/台北熊讚.png";
 import newTaipei from "../../../assets/新北航源.png";
 import Taoyuan from "../../../assets/桃園戰神.png";
