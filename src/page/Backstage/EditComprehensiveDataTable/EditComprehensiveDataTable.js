@@ -315,20 +315,31 @@ const EditComprehensiveDataTable = () => {
         place: playingField,
         date: formattedDate,
       };
-      const finalData = gameData.map((item) => ({ ...item, ...appendedData }));
-      for (const index in finalData) {
-        const playerName = finalData[index]["name"];
-        if (playerName === "Select a Player") {
-          // 刪除無效的資料
-          delete finalData[index];
-        } else {
-          //  把渲染時需要的 key (id)，換成能夠對應後端資料庫相對應的球員 ID
-          const playerNameInfo = allPlayerList.find(
-            (item) => item["Name"] === playerName
-          );
-          finalData[index]["id"] = playerNameInfo["ID"];
-        }
-      }
+      // const finalData = gameData.map((item) => ({ ...item, ...appendedData }));
+      // for (const index in finalData) {
+      //   const playerName = finalData[index]["name"];
+      //   if (playerName === "Select a Player") {
+      //     // 刪除無效的資料
+      //     delete finalData[index];
+      //   } else {
+      //     //  把渲染時需要的 key (id)，換成能夠對應後端資料庫相對應的球員 ID
+      //     const playerNameInfo = allPlayerList.find(
+      //       (item) => item["Name"] === playerName
+      //     );
+      //     finalData[index]["id"] = playerNameInfo["ID"];
+      //   }
+      // }'
+
+      // 清空
+      let finalData = gameData.map((item) => ({ ...item, ...appendedData })).filter((playerInfo)=>!(playerInfo.name==="Select a Player"));
+      // 重設ID
+      finalData = finalData.map(playerInfo=>{
+        const playerNameInfo = allPlayerList.find(
+          (item) => item["Name"] === playerInfo.name
+        );
+        playerInfo.id = playerNameInfo.ID;
+        return playerInfo;
+      })
 
       await AddGameRecord(finalData)
         .then((res) => {
