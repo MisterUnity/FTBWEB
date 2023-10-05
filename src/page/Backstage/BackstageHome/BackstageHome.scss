@@ -1,10 +1,23 @@
 .Info {
   display: flex;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #e20a0a; /* 可以设置为任何颜色值 */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #d80404; /* 可以设置为任何颜色值 */
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #cb0808; /* 可以设置为任何颜色值 */
+  }
   .news {
     position: relative;
-    height: 100%;
     left: 20%;
+    margin: 2rem;
     transform: translateX(-20%);
+    overflow: auto;
     & > div {
       display: flex;
       align-items: center;
@@ -37,12 +50,14 @@
     position: relative;
     left: 20%;
     margin: 2rem;
-    width: 100%;
+    width: 40%;
+    overflow: auto;
     & > ul {
       font-size: 2rem;
       color: rgb(202, 168, 55);
       position: relative;
-      width: 50%;
+      width: 100%;
+
       & > li {
         list-style: none;
         margin: 1rem;

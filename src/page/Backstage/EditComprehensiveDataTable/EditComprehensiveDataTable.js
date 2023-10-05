@@ -331,15 +331,17 @@ const EditComprehensiveDataTable = () => {
       // }'
 
       // 清空
-      let finalData = gameData.map((item) => ({ ...item, ...appendedData })).filter((playerInfo)=>!(playerInfo.name==="Select a Player"));
+      let finalData = gameData
+        .map((item) => ({ ...item, ...appendedData }))
+        .filter((playerInfo) => !(playerInfo.name === "Select a Player"));
       // 重設ID
-      finalData = finalData.map(playerInfo=>{
+      finalData = finalData.map((playerInfo) => {
         const playerNameInfo = allPlayerList.find(
           (item) => item["Name"] === playerInfo.name
         );
         playerInfo.id = playerNameInfo.ID;
         return playerInfo;
-      })
+      });
 
       await AddGameRecord(finalData)
         .then((res) => {

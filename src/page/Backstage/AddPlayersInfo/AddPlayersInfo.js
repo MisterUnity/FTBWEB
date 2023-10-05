@@ -397,7 +397,7 @@ const AddPlayerInfo = () => {
               if (props === "photo" && item[props] === "") {
                 showToast(
                   "訊息",
-                  `第${index + 1}行，的『 ${props} 』值不可為空`,
+                  `第${index + 1}列，的『 ${props} 』值不可為空`,
                   3
                 );
                 submitContext.onSetSubmitStatus(false);
@@ -410,7 +410,7 @@ const AddPlayerInfo = () => {
               ) {
                 showToast(
                   "訊息",
-                  `第${index + 1}行，的『 ${props} 』值不可為空`,
+                  `第${index + 1}列，的『 ${props} 』值不可為空`,
                   3
                 );
                 submitContext.onSetSubmitStatus(false);
