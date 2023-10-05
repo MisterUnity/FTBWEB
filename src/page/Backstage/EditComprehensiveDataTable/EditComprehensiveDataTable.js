@@ -329,7 +329,6 @@ const EditComprehensiveDataTable = () => {
           finalData[index]["id"] = playerNameInfo["ID"];
         }
       }
-
       await AddGameRecord(finalData)
         .then((res) => {
           const { StatusCode, StatusMessage } = res.data;

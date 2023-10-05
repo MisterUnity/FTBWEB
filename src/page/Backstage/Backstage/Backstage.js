@@ -17,7 +17,7 @@ const BackstageHome = () => {
     >
       <Header
         className={`
-        ${BackstageHeader.BackstageHeader} flex flex-none justify-content-between 
+        ${BackstageHeader.BackstageHeader} BackstageHeader flex flex-none justify-content-between 
                                           align-items-center w-full bg-bluegray-900`}
       >
         <SideBar />
@@ -29,7 +29,7 @@ const BackstageHome = () => {
       </Main>
 
       <Footer
-        className={`${BackstageFooter.BackstageFooter} flex-none w-full bg-bluegray-900`}
+        className={`${BackstageFooter.BackstageFooter} BackstageFooter flex-none w-full bg-bluegray-900`}
       >
         <h3 className="text-center">
           Copyright © 2023 - 2050 . All rights reserved.

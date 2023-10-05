@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, Fragment } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  Fragment,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { GetPlayersInfo } from "../../../API/playerInfo/playerInfo";
 import { GetPlayerInfo } from "../../../API/playerInfo/playerInfo";
@@ -42,6 +48,9 @@ const PlayerList = () => {
   const [isLoad, setIsLoad] = useState(true);
   const [havePlayerList, setHavePlayerList] = useState(false);
   const [logo, setLogo] = useState("");
+  const [DataTableHeight, setDataTableHeight] = useState("");
+  const infoBarRef = useRef(null);
+
   // 項目狀態 End
 
   // 初始數據處理 Start
@@ -65,6 +74,35 @@ const PlayerList = () => {
       if (!listData) return false;
       // 設置球員清單資料
       setPlayerListData(listData);
+
+      const header = document.querySelector(".BackstageHeader");
+      const footer = document.querySelector(".BackstageFooter");
+      console.log(infoBarRef.current);
+      const getInfoBarElement = () => {
+        return new Promise((res, rej) => {
+          setTimeout(() => {
+            const infoBar = document.querySelector(".infoBar");
+            res(infoBar);
+          }, 1000);
+        });
+      };
+      getInfoBarElement().then((infoBar) => {
+        if (!infoBar) {
+          setDataTableHeight("351px");
+          return false;
+        } // 抓取不到元素的話跳出。
+        const headerInfo = header.getBoundingClientRect();
+        const footerInfo = footer.getBoundingClientRect();
+        const infoBarInfo = infoBar.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        setDataTableHeight(
+          windowHeight -
+            headerInfo.height -
+            footerInfo.height -
+            infoBarInfo.height +
+            "px"
+        );
+      });
 
       // 獲取優先顯示隊伍的，第一筆選手資料
       GetPlayerInfo(firstDisplayDataHandler(listData))
@@ -267,7 +305,10 @@ const PlayerList = () => {
           {/*主要資料顯示區塊 */}
           <div className="flex flex-column align-items-center w-full">
             {/*個人資訊顯示部分 */}
-            <div className="flex justify-content-center align-items-center w-full h-25rem ">
+            <div
+              ref={infoBarRef}
+              className="infoBar flex justify-content-center align-items-center w-full h-25rem "
+            >
               {/*個人資訊背景設定 */}
 
               {/*個人資訊 */}
@@ -283,13 +324,16 @@ const PlayerList = () => {
             </div>
 
             {/*對戰紀錄表 */}
-            <div className="m-2 w-11 h-25rem">
-              {
+            <div className="m-2 w-11 ">
+              {DataTableHeight === "" ? (
+                <></>
+              ) : (
                 <GameHistoryDataTable
                   gameRecord={playerDetailedInfo.GameHistory}
                   UpdateGameRecord={UpdateGameRecordHandler}
+                  DataTableHeight={DataTableHeight}
                 />
-              }
+              )}
             </div>
           </div>
 
