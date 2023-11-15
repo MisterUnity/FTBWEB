@@ -74,21 +74,21 @@ const SignIn = React.memo((props) => {
 
   return (
     <Fragment>
-      <div className="top-0 left-0 w-screen h-screen z-0">
+      <div className="w-screen h-screen z-0 ft-bg">
         <img className="w-full h-full" src={backDrop} alt="Backdrop" />
-      </div>
-      <div className={classes.signIn}>
-        <SignInCard
-          onSendUserInfo={sendUserInfoHandler}
-          isLoad={isLoad}
-          strTitle={strTitle}
-        />
-        <MsgSlice className="flex justify-content-center bg-gray-900 opacity-90 mt-3">
-          {showNewToHere}
-          <p className="cursor-pointer text-yellow-400" onClick={ChangeTitle}>
-            {strSignInOrRegis}
-          </p>
-        </MsgSlice>
+        <div className={classes.signIn}>
+          <SignInCard
+            onSendUserInfo={sendUserInfoHandler}
+            isLoad={isLoad}
+            strTitle={strTitle}
+          />
+          <MsgSlice className="flex justify-content-center bg-gray-900 opacity-90 mt-3">
+            {showNewToHere}
+            <p className="cursor-pointer text-yellow-400" onClick={ChangeTitle}>
+              {strSignInOrRegis}
+            </p>
+          </MsgSlice>
+        </div>
       </div>
     </Fragment>
   );
